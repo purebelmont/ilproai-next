@@ -3,13 +3,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import HomePanel from "@/components/HomePanel";
 import QuotesPanel from "@/components/QuotesPanel";
 import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
 
-type Tab = "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report";
+type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report";
 
 const TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: "home", icon: "🏠", label: "대시보드" },
   { id: "contacts", icon: "👤", label: "연락처" },
   { id: "calendar", icon: "📅", label: "캘린더" },
   { id: "reservations", icon: "📋", label: "예약" },
@@ -25,8 +27,9 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [tab, setTab] = useState<Tab>("contacts");
+  const [tab, setTab] = useState<Tab>("home");
   const [loading, setLoading] = useState(true);
+  const [dark, setDark] = useState(false);
   const router = useRouter();
 
   // Modal state
@@ -34,6 +37,19 @@ export default function Dashboard() {
   const [modalStyle, setModalStyle] = useState<"fullscreen" | "bottom" | "side" | "inline">("fullscreen");
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
+
+  // Dark mode
+  useEffect(() => {
+    const saved = localStorage.getItem("ilpro_dark");
+    if (saved === "true") { setDark(true); document.documentElement.classList.add("dark"); }
+  }, []);
+
+  const toggleDark = () => {
+    const next = !dark;
+    setDark(next);
+    localStorage.setItem("ilpro_dark", String(next));
+    document.documentElement.classList.toggle("dark", next);
+  };
 
   const checkSampleFn = async (uid: string) => {
     const { data } = await supabase.from("profiles").select("has_sample_data").eq("id", uid).single();
@@ -200,11 +216,11 @@ export default function Dashboard() {
   const dateLabel = `${today.getMonth() + 1}월 ${today.getDate()}일 (${dayNames[today.getDay()]})`;
 
   return (
-    <div className="min-h-screen flex">
+    <div className={`min-h-screen flex ${dark ? "dark" : ""}`}>
       {/* Sidebar - always visible */}
-      <div className="hidden md:flex flex-col w-[220px] bg-white border-r border-[var(--gray-200)] fixed top-0 left-0 bottom-0 z-40">
-        <div className="px-5 py-4 border-b border-[var(--gray-100)]">
-          <div className="text-lg font-extrabold">일프로<span className="text-[var(--primary)]">AI</span></div>
+      <div className="hidden md:flex flex-col w-[220px] bg-white dark:bg-gray-900 border-r border-[var(--gray-200)] dark:border-gray-700 fixed top-0 left-0 bottom-0 z-40">
+        <div className="px-5 py-4 border-b border-[var(--gray-100)] dark:border-gray-700">
+          <div className="text-lg font-extrabold dark:text-white">일프로<span className="text-[var(--primary)]">AI</span></div>
           <div className="text-xs text-[var(--gray-500)] mt-0.5">{bizName}</div>
         </div>
         <div className="flex-1 overflow-y-auto py-2 px-2">
@@ -217,16 +233,19 @@ export default function Dashboard() {
             </button>
           ))}
         </div>
-        <div className="p-3 border-t border-[var(--gray-100)] space-y-1">
+        <div className="p-3 border-t border-[var(--gray-100)] dark:border-gray-700 space-y-1">
+          <button onClick={toggleDark} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block px-2 w-full text-left">
+            {dark ? "☀️ 라이트 모드" : "🌙 다크 모드"}
+          </button>
           {hasSample ? (
             <button onClick={clearSample} disabled={sampleLoading}
               className="text-xs text-[var(--gray-500)] hover:text-[var(--danger)] block px-2 w-full text-left">
-              {sampleLoading ? "처리 중..." : "📦 샘플 데이터 삭제"}
+              {sampleLoading ? "처리 중..." : "📦 샘플 삭제"}
             </button>
           ) : (
             <button onClick={generateSample} disabled={sampleLoading}
-              className="text-xs text-[var(--primary)] hover:text-[var(--primary-dark)] block px-2 w-full text-left">
-              {sampleLoading ? "생성 중..." : "📦 샘플 데이터 추가"}
+              className="text-xs text-[var(--primary)] block px-2 w-full text-left">
+              {sampleLoading ? "생성 중..." : "📦 샘플 추가"}
             </button>
           )}
           <button onClick={() => router.push("/")} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block px-2">홈으로</button>
@@ -247,18 +266,19 @@ export default function Dashboard() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 md:ml-[220px]">
+      <div className="flex-1 md:ml-[220px] bg-[var(--gray-50)] dark:bg-[#1C1C1E] min-h-screen">
         {/* Mobile header */}
-        <div className="md:hidden sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+        <div className="md:hidden sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-[var(--gray-200)] dark:border-gray-700 px-5 py-3 flex items-center justify-between">
           <div>
             <div className="text-base font-bold">{bizName}</div>
             <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
           </div>
           <div className="flex gap-2 items-center">
+            <button onClick={toggleDark} className="text-sm">{dark ? "☀️" : "🌙"}</button>
             {hasSample ? (
-              <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--gray-400)]">{sampleLoading ? "..." : "📦삭제"}</button>
+              <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--gray-400)]">{sampleLoading ? "..." : "📦"}</button>
             ) : (
-              <button onClick={generateSample} disabled={sampleLoading} className="text-xs text-[var(--primary)]">{sampleLoading ? "..." : "📦추가"}</button>
+              <button onClick={generateSample} disabled={sampleLoading} className="text-xs text-[var(--primary)]">{sampleLoading ? "..." : "📦"}</button>
             )}
             <button onClick={() => router.push("/")} className="text-sm text-[var(--primary)]">홈</button>
             <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
@@ -266,6 +286,7 @@ export default function Dashboard() {
         </div>
 
         <div className="pb-[var(--tab-h)] md:pb-0">
+          {tab === "home" && <HomePanel userId={user.id} profile={profile} setTab={setTab} />}
           {tab === "contacts" && <ContactsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "calendar" && <CalendarPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "notes" && <NotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}

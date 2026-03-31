@@ -38,3 +38,11 @@ body {
 }
 .ios-field textarea { min-height: 60px; resize: none; }
 .ios-danger { color: var(--danger); text-align: center; padding: 16px; cursor: pointer; font-size: 15px; font-weight: 500; background: white; border-radius: 12px; margin-top: 12px; }
+
+/* Dark mode */
+.dark body { background: #1C1C1E; color: #F2F2F7; }
+.dark .ios-fields { background: #2C2C2E; }
+.dark .ios-field { border-color: #3A3A3C; }
+.dark .ios-field label { color: #8E8E93; }
+.dark .ios-field input, .dark .ios-field textarea, .dark .ios-field select { color: #F2F2F7; }
+.dark .ios-danger { background: #2C2C2E; }

@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import QuotesPanel from "@/components/QuotesPanel";
+import PayrollPanel from "@/components/PayrollPanel";
+import ReportPanel from "@/components/ReportPanel";
 
 type Tab = "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report";
 
@@ -129,9 +132,9 @@ export default function Dashboard() {
           {tab === "files" && <div className="p-5"><h4 className="text-lg font-bold mb-3">문서함</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
           {tab === "ledger" && <LedgerPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "reservations" && <ReservationsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
-          {tab === "quotes" && <div className="p-5"><h4 className="text-lg font-bold mb-3">견적서</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
-          {tab === "payroll" && <div className="p-5"><h4 className="text-lg font-bold mb-3">급여관리</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
-          {tab === "report" && <div className="p-5"><h4 className="text-lg font-bold mb-3">리포트</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+          {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "report" && <ReportPanel userId={user.id} />}
         </div>
       </div>
 

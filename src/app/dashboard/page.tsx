@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import HomePanel from "@/components/HomePanel";
+import FilesPanel from "@/components/FilesPanel";
 import QuotesPanel from "@/components/QuotesPanel";
 import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
@@ -291,7 +292,7 @@ export default function Dashboard() {
           {tab === "calendar" && <CalendarPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "notes" && <NotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "todos" && <TodosPanel userId={user.id} />}
-          {tab === "files" && <div className="p-5"><h4 className="text-lg font-bold mb-3">문서함</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+          {tab === "files" && <FilesPanel userId={user.id} />}
           {tab === "ledger" && <LedgerPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "reservations" && <ReservationsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
@@ -388,17 +389,80 @@ function ContactsPanel({ userId, openModal, closeModal }: { userId: string; open
 
   const [inlineOpen, setInlineOpen] = useState(false);
   const [inlineData, setInlineData] = useState({ name: "", phone: "", company: "" });
+  const [importing, setImporting] = useState(false);
+  const importRef = useRef<HTMLInputElement>(null);
 
   function openForm(c?: any, style: "fullscreen"|"bottom"|"side"|"inline" = "fullscreen") {
     if (style === "inline") { setInlineOpen(true); setInlineData({ name: "", phone: "", company: "" }); return; }
     openModal(c ? "연락처 수정" : "새 연락처", <ContactForm contact={c} onSave={save} onDelete={c ? () => del(c.id) : undefined} />, style);
   }
 
+  async function handleImport(file: File) {
+    setImporting(true);
+    const text = await file.text();
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) { alert("데이터가 없습니다."); setImporting(false); return; }
+
+    // Parse header
+    const sep = lines[0].includes("\t") ? "\t" : ",";
+    const headers = lines[0].split(sep).map(h => h.trim().replace(/"/g, "").toLowerCase());
+
+    // Map columns
+    const nameIdx = headers.findIndex(h => /이름|name|성명/.test(h));
+    const companyIdx = headers.findIndex(h => /회사|company|상호|업체/.test(h));
+    const positionIdx = headers.findIndex(h => /직위|position|직급|직책/.test(h));
+    const phoneIdx = headers.findIndex(h => /전화|phone|연락처|핸드폰|휴대폰/.test(h));
+    const emailIdx = headers.findIndex(h => /이메일|email|메일/.test(h));
+    const groupIdx = headers.findIndex(h => /그룹|group|분류|구분/.test(h));
+
+    if (nameIdx === -1 && companyIdx === -1) {
+      alert("이름 또는 회사 컬럼을 찾을 수 없습니다.\n첫 행에 '이름', '회사', '전화', '이메일' 등의 헤더가 필요합니다.");
+      setImporting(false);
+      return;
+    }
+
+    const rows: any[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(sep).map(c => c.trim().replace(/"/g, ""));
+      const name = nameIdx >= 0 ? cols[nameIdx] : "";
+      const company = companyIdx >= 0 ? cols[companyIdx] : "";
+      if (!name && !company) continue;
+
+      rows.push({
+        user_id: userId,
+        name: name || company,
+        company: nameIdx >= 0 ? (company || "") : "",
+        position: positionIdx >= 0 ? (cols[positionIdx] || "") : "",
+        phone: phoneIdx >= 0 ? (cols[phoneIdx] || "") : "",
+        email: emailIdx >= 0 ? (cols[emailIdx] || "") : "",
+        group_name: groupIdx >= 0 ? (cols[groupIdx] || "") : "",
+        favorite: false,
+      });
+    }
+
+    if (rows.length === 0) { alert("가져올 연락처가 없습니다."); setImporting(false); return; }
+
+    // Batch insert
+    const { error } = await supabase.from("contacts").insert(rows);
+    if (error) { alert("오류: " + error.message); }
+    else { alert(`${rows.length}명의 연락처를 가져왔습니다.`); }
+
+    setImporting(false);
+    if (importRef.current) importRef.current.value = "";
+    load();
+  }
+
   return (
     <div className="p-5">
+      <input ref={importRef} type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden"
+        onChange={(e) => { if (e.target.files?.[0]) handleImport(e.target.files[0]); }} />
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-lg font-bold">연락처</h4>
+        <h4 className="text-lg font-bold dark:text-white">연락처</h4>
         <div className="flex gap-1.5">
+          <button onClick={() => importRef.current?.click()} disabled={importing}
+            className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] dark:bg-gray-700 text-[var(--gray-700)] dark:text-gray-300">
+            {importing ? "..." : "📥 Import"}
+          </button>
           <button onClick={() => openForm(undefined, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
           <button onClick={() => openForm(undefined, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
           <button onClick={() => openForm(undefined, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>

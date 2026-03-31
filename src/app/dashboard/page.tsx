@@ -1,0 +1,638 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+
+type Tab = "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report";
+
+const TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: "contacts", icon: "👤", label: "연락처" },
+  { id: "calendar", icon: "📅", label: "캘린더" },
+  { id: "reservations", icon: "📋", label: "예약" },
+  { id: "notes", icon: "📝", label: "메모" },
+  { id: "todos", icon: "✅", label: "할일" },
+  { id: "files", icon: "📎", label: "문서함" },
+  { id: "ledger", icon: "💰", label: "매출" },
+  { id: "quotes", icon: "💼", label: "견적" },
+  { id: "payroll", icon: "👥", label: "급여" },
+  { id: "report", icon: "📊", label: "리포트" },
+];
+
+export default function Dashboard() {
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [tab, setTab] = useState<Tab>("contacts");
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalContent, setModalContent] = useState<React.ReactNode>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) { router.push("/auth"); return; }
+      setUser(data.user);
+      supabase.from("profiles").select("*").eq("id", data.user.id).single().then(({ data: p }) => {
+        setProfile(p);
+        setLoading(false);
+      });
+    });
+  }, [router]);
+
+  const openModal = useCallback((title: string, content: React.ReactNode) => {
+    setModalTitle(title);
+    setModalContent(content);
+    setModalOpen(true);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModalOpen(false);
+    setModalContent(null);
+  }, []);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" /></div>;
+  if (!user) return null;
+
+  const bizName = profile?.business_name || profile?.name || user.email?.split("@")[0] || "일프로AI";
+  const today = new Date();
+  const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+  const dateLabel = `${today.getMonth() + 1}월 ${today.getDate()}일 (${dayNames[today.getDay()]})`;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+        <div>
+          <div className="text-base font-bold">{bizName}</div>
+          <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <button onClick={() => router.push("/")} className="text-sm text-[var(--primary)]">홈</button>
+          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto pb-[var(--tab-h)]">
+        {tab === "contacts" && <ContactsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+        {tab === "calendar" && <CalendarPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+        {tab === "notes" && <NotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+        {tab === "todos" && <TodosPanel userId={user.id} />}
+        {tab === "files" && <div className="p-5"><h4 className="text-lg font-bold mb-3">문서함</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+        {tab === "ledger" && <LedgerPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+        {tab === "reservations" && <ReservationsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+        {tab === "quotes" && <div className="p-5"><h4 className="text-lg font-bold mb-3">견적서</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+        {tab === "payroll" && <div className="p-5"><h4 className="text-lg font-bold mb-3">급여관리</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+        {tab === "report" && <div className="p-5"><h4 className="text-lg font-bold mb-3">리포트</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+      </div>
+
+      {/* Tab bar */}
+      <div className="fixed bottom-0 left-0 right-0 h-[var(--tab-h)] bg-white/95 backdrop-blur-xl border-t border-[var(--gray-200)] flex overflow-x-auto z-50"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
+        {TABS.map((t) => (
+          <button key={t.id} onClick={() => setTab(t.id)}
+            className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] flex-1 ${tab === t.id ? "text-[var(--primary)]" : "text-[var(--gray-500)]"}`}>
+            <span className="text-xl leading-none">{t.icon}</span>
+            <span className="text-[10px] font-medium">{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* iOS Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-[200] bg-[var(--gray-50)] overflow-y-auto animate-[slideUp_0.3s_ease]">
+          <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+            <button onClick={closeModal} className="text-[var(--primary)] text-sm font-medium">취소</button>
+            <div className="text-base font-bold">{modalTitle}</div>
+            <div className="w-10" />
+          </div>
+          <div className="p-5">{modalContent}</div>
+        </div>
+      )}
+
+      <style jsx>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// CONTACTS
+// ══════════════════════════════
+function ContactsPanel({ userId, openModal, closeModal }: { userId: string; openModal: any; closeModal: any }) {
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const colors = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500"];
+
+  const load = useCallback(async () => {
+    let q = supabase.from("contacts").select("*").eq("user_id", userId).order("favorite", { ascending: false }).order("name");
+    if (search) q = q.or(`name.ilike.%${search}%,company.ilike.%${search}%,phone.ilike.%${search}%`);
+    const { data } = await q;
+    setContacts(data || []);
+  }, [userId, search]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function save(formData: any) {
+    if (formData.id) {
+      await supabase.from("contacts").update(formData).eq("id", formData.id);
+    } else {
+      await supabase.from("contacts").insert({ ...formData, user_id: userId });
+    }
+    closeModal();
+    load();
+  }
+
+  async function del(id: number) {
+    if (!confirm("삭제?")) return;
+    await supabase.from("contacts").delete().eq("id", id);
+    closeModal();
+    load();
+  }
+
+  function openForm(c?: any) {
+    openModal(c ? "연락처 수정" : "새 연락처", <ContactForm contact={c} onSave={save} onDelete={c ? () => del(c.id) : undefined} />);
+  }
+
+  return (
+    <div className="p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-lg font-bold">연락처</h4>
+        <button onClick={() => openForm()} className="text-[var(--primary)] text-sm font-medium">+ 추가</button>
+      </div>
+      <div className="flex items-center gap-2 bg-[var(--gray-100)] rounded-xl px-4 py-2.5 mb-4">
+        <span className="text-[var(--gray-400)]">🔍</span>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="이름, 회사, 전화번호 검색"
+          className="flex-1 bg-transparent text-sm outline-none" />
+      </div>
+      {contacts.length === 0 ? (
+        <div className="text-center py-16 text-[var(--gray-400)]">
+          <div className="text-4xl mb-3">👤</div>연락처를 추가해보세요
+        </div>
+      ) : (
+        contacts.map((c) => (
+          <div key={c.id} onClick={() => openForm(c)}
+            className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2 cursor-pointer active:bg-[var(--gray-50)]">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+              style={{ background: colors[c.name.charCodeAt(0) % colors.length] }}>{c.name[0]}</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm">{c.name}</div>
+              <div className="text-xs text-[var(--gray-500)] truncate">{[c.company, c.position, c.phone].filter(Boolean).join(" · ")}</div>
+            </div>
+            {c.favorite && <span>⭐</span>}
+            {c.phone && <a href={`tel:${c.phone}`} onClick={(e) => e.stopPropagation()} className="text-base">📞</a>}
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function ContactForm({ contact, onSave, onDelete }: { contact?: any; onSave: (d: any) => void; onDelete?: () => void }) {
+  const [f, setF] = useState(contact || { name: "", company: "", position: "", phone: "", email: "", group_name: "", notes: "" });
+  const set = (k: string, v: string) => setF((p: any) => ({ ...p, [k]: v }));
+
+  return (
+    <div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>이름</label><input value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="홍길동" /></div>
+        <div className="ios-field"><label>회사</label><input value={f.company} onChange={(e) => set("company", e.target.value)} placeholder="(주)한국제조" /></div>
+        <div className="ios-field"><label>직위</label><input value={f.position} onChange={(e) => set("position", e.target.value)} placeholder="과장" /></div>
+        <div className="ios-field"><label>그룹</label><input value={f.group_name} onChange={(e) => set("group_name", e.target.value)} placeholder="거래처, 단골" /></div>
+      </div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>전화</label><input value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="010-1234-5678" /></div>
+        <div className="ios-field"><label>이메일</label><input value={f.email} onChange={(e) => set("email", e.target.value)} placeholder="email@example.com" /></div>
+      </div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>메모</label><textarea value={f.notes} onChange={(e) => set("notes", e.target.value)} placeholder="메모" /></div>
+      </div>
+      <button onClick={() => onSave(f)} className="w-full p-3 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm mt-2">저장</button>
+      {onDelete && <div className="ios-danger" onClick={onDelete}>연락처 삭제</div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// CALENDAR
+// ══════════════════════════════
+function CalendarPanel({ userId, openModal, closeModal }: { userId: string; openModal: any; closeModal: any }) {
+  const [calDate, setCalDate] = useState(new Date());
+  const [selected, setSelected] = useState(new Date().toISOString().split("T")[0]);
+  const [events, setEvents] = useState<any[]>([]);
+  const monthNames = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+  const load = useCallback(async () => {
+    const y = calDate.getFullYear(), m = calDate.getMonth() + 1;
+    const ms = `${y}-${String(m).padStart(2, "0")}`;
+    const start = `${ms}-01`;
+    const end = `${y}-${String(m).padStart(2, "0")}-${new Date(y, m, 0).getDate()}`;
+    const { data } = await supabase.from("schedules").select("*").eq("user_id", userId).gte("start_date", start).lte("start_date", end).order("start_time");
+    setEvents(data || []);
+  }, [userId, calDate]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const today = new Date().toISOString().split("T")[0];
+  const eventDates = new Set(events.map((e) => e.start_date));
+  const dayEvents = events.filter((e) => e.start_date === selected);
+
+  async function saveEvent(f: any) {
+    if (f.id) {
+      await supabase.from("schedules").update(f).eq("id", f.id);
+    } else {
+      await supabase.from("schedules").insert({ ...f, user_id: userId });
+    }
+    closeModal();
+    load();
+  }
+
+  async function delEvent(id: number) {
+    if (!confirm("삭제?")) return;
+    await supabase.from("schedules").delete().eq("id", id);
+    closeModal();
+    load();
+  }
+
+  return (
+    <div>
+      <div className="bg-white border-b border-[var(--gray-200)] px-5 pb-3 sticky top-[52px] z-10">
+        <div className="flex items-center justify-between py-3">
+          <h3 className="text-xl font-extrabold text-[var(--danger)]">{monthNames[m]} {y}</h3>
+          <div className="flex gap-2 items-center">
+            <button onClick={() => { setCalDate(new Date()); setSelected(today); }} className="text-sm text-[var(--primary)] font-semibold">오늘</button>
+            <button onClick={() => setCalDate(new Date(y, m - 1))} className="text-lg text-[var(--primary)]">‹</button>
+            <button onClick={() => setCalDate(new Date(y, m + 1))} className="text-lg text-[var(--primary)]">›</button>
+          </div>
+        </div>
+        <div className="grid grid-cols-7 text-center text-xs font-semibold text-[var(--gray-500)]">
+          {["일","월","화","수","목","금","토"].map((d, i) => <div key={d} className={i === 0 ? "text-[var(--danger)]" : ""}>{d}</div>)}
+        </div>
+        <div className="grid grid-cols-7 text-center">
+          {Array.from({ length: firstDay }).map((_, i) => <div key={`p${i}`} className="py-2 text-sm opacity-25">{new Date(y, m, 0).getDate() - firstDay + i + 1}</div>)}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const d = i + 1;
+            const ds = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+            const isToday = ds === today;
+            const isSel = ds === selected;
+            return (
+              <div key={d} onClick={() => setSelected(ds)} className="py-1 cursor-pointer">
+                <div className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center text-sm transition-all
+                  ${isToday ? "bg-[var(--danger)] text-white font-bold" : isSel ? "bg-[var(--primary)] text-white" : ""}`}>
+                  {d}
+                </div>
+                <div className="flex gap-0.5 justify-center mt-0.5 min-h-[6px]">
+                  {eventDates.has(ds) && <div className={`w-1.5 h-1.5 rounded-full ${isToday || isSel ? "bg-white" : "bg-[var(--primary)]"}`} />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-xs font-semibold text-[var(--gray-500)] uppercase">
+            {new Date(selected + "T00:00:00").getMonth() + 1}월 {new Date(selected + "T00:00:00").getDate()}일 {["일","월","화","수","목","금","토"][new Date(selected + "T00:00:00").getDay()]}요일
+          </div>
+        </div>
+
+        {dayEvents.length === 0 ? (
+          <div className="text-center py-10">
+            <div className="text-3xl mb-3 opacity-30">📅</div>
+            <p className="text-[var(--gray-400)] mb-4">이 날에 일정이 없습니다</p>
+            <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />)} className="text-[var(--primary)] font-medium">+ 새 일정 만들기</button>
+          </div>
+        ) : (
+          <>
+            {dayEvents.map((e) => (
+              <div key={e.id} onClick={() => openModal("일정 수정", <EventForm event={e} onSave={saveEvent} onDelete={() => delEvent(e.id)} />)}
+                className="flex items-start gap-3 py-3 border-b border-[var(--gray-100)] cursor-pointer">
+                <div className="w-[3px] rounded min-h-[36px]" style={{ background: e.color || "var(--primary)" }} />
+                <div className="text-xs text-[var(--gray-500)] min-w-[42px] pt-0.5">{e.start_time?.substring(0, 5) || "종일"}</div>
+                <div className="flex-1">
+                  <div className="text-sm font-medium">{e.title}</div>
+                  {e.description && <div className="text-xs text-[var(--gray-500)] mt-0.5">{e.description}</div>}
+                </div>
+              </div>
+            ))}
+            <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />)}
+              className="text-[var(--primary)] text-sm font-medium mt-3 block">+ 일정 추가</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EventForm({ event, onSave, onDelete }: { event?: any; onSave: (d: any) => void; onDelete?: () => void }) {
+  const [f, setF] = useState(event || { title: "", start_date: "", start_time: "", end_time: "", description: "" });
+  const set = (k: string, v: string) => setF((p: any) => ({ ...p, [k]: v }));
+
+  return (
+    <div>
+      <div className="ios-fields"><div className="ios-field"><label>제목</label><input value={f.title} onChange={(e) => set("title", e.target.value)} placeholder="미팅, 납품 등" /></div></div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>날짜</label><input type="date" value={f.start_date} onChange={(e) => set("start_date", e.target.value)} /></div>
+        <div className="ios-field"><label>시작</label><input type="time" value={f.start_time || ""} onChange={(e) => set("start_time", e.target.value)} /></div>
+        <div className="ios-field"><label>종료</label><input type="time" value={f.end_time || ""} onChange={(e) => set("end_time", e.target.value)} /></div>
+      </div>
+      <div className="ios-fields"><div className="ios-field"><label>메모</label><textarea value={f.description || ""} onChange={(e) => set("description", e.target.value)} placeholder="메모" /></div></div>
+      <button onClick={() => onSave(f)} className="w-full p-3 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm mt-2">저장</button>
+      {onDelete && <div className="ios-danger" onClick={onDelete}>일정 삭제</div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// NOTES
+// ══════════════════════════════
+function NotesPanel({ userId, openModal, closeModal }: { userId: string; openModal: any; closeModal: any }) {
+  const [notes, setNotes] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+
+  const load = useCallback(async () => {
+    let q = supabase.from("notes").select("*").eq("user_id", userId).order("pinned", { ascending: false }).order("updated_at", { ascending: false });
+    if (search) q = q.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+    const { data } = await q;
+    setNotes(data || []);
+  }, [userId, search]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function save(f: any) {
+    if (f.id) { await supabase.from("notes").update({ ...f, updated_at: new Date().toISOString() }).eq("id", f.id); }
+    else { await supabase.from("notes").insert({ ...f, user_id: userId }); }
+    closeModal(); load();
+  }
+
+  async function del(id: number) {
+    if (!confirm("삭제?")) return;
+    await supabase.from("notes").delete().eq("id", id);
+    closeModal(); load();
+  }
+
+  return (
+    <div className="p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-lg font-bold">메모</h4>
+        <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />)} className="text-[var(--primary)] text-sm font-medium">+ 새 메모</button>
+      </div>
+      <div className="flex items-center gap-2 bg-[var(--gray-100)] rounded-xl px-4 py-2.5 mb-4">
+        <span className="text-[var(--gray-400)]">🔍</span>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="메모 검색" className="flex-1 bg-transparent text-sm outline-none" />
+      </div>
+      {notes.length === 0 ? (
+        <div className="text-center py-16 text-[var(--gray-400)]"><div className="text-4xl mb-3">📝</div>메모를 추가해보세요</div>
+      ) : (
+        <div className="columns-2 gap-3">
+          {notes.map((n) => (
+            <div key={n.id} onClick={() => openModal("메모 수정", <NoteForm note={n} onSave={save} onDelete={() => del(n.id)} />)}
+              className="break-inside-avoid rounded-xl p-4 border border-[var(--gray-200)] mb-3 cursor-pointer hover:shadow-sm"
+              style={{ background: n.color || "white" }}>
+              {n.title && <div className="font-semibold text-sm mb-1">{n.pinned ? "📌 " : ""}{n.title}</div>}
+              <div className="text-xs text-[var(--gray-500)] line-clamp-3">{n.content}</div>
+              <div className="text-[10px] text-[var(--gray-400)] mt-2">{n.updated_at?.split("T")[0]}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NoteForm({ note, onSave, onDelete }: { note?: any; onSave: (d: any) => void; onDelete?: () => void }) {
+  const [f, setF] = useState(note || { title: "", content: "", color: "#FFFFFF" });
+  const COLORS = ["#FFFFFF", "#FFF3E0", "#E8F5E9", "#E3F2FD", "#FCE4EC"];
+
+  return (
+    <div>
+      <div className="ios-fields"><div className="ios-field"><label>제목</label><input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="제목 (선택)" /></div></div>
+      <div className="ios-fields"><div className="ios-field" style={{ alignItems: "flex-start" }}><label style={{ paddingTop: 8 }}>내용</label><textarea value={f.content} onChange={(e) => setF({ ...f, content: e.target.value })} placeholder="메모 내용" style={{ minHeight: 150 }} /></div></div>
+      <div className="flex gap-2 py-3">
+        {COLORS.map((c) => (
+          <div key={c} onClick={() => setF({ ...f, color: c })}
+            className="w-7 h-7 rounded-full cursor-pointer border-2" style={{ background: c, borderColor: f.color === c ? "var(--primary)" : "transparent" }} />
+        ))}
+      </div>
+      <button onClick={() => onSave(f)} className="w-full p-3 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm mt-2">저장</button>
+      {onDelete && <div className="ios-danger" onClick={onDelete}>메모 삭제</div>}
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// TODOS
+// ══════════════════════════════
+function TodosPanel({ userId }: { userId: string }) {
+  const [todos, setTodos] = useState<any[]>([]);
+  const [input, setInput] = useState("");
+
+  const load = useCallback(async () => {
+    const { data } = await supabase.from("todos").select("*").eq("user_id", userId).order("completed").order("priority", { ascending: false }).order("created_at", { ascending: false });
+    setTodos(data || []);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function add() {
+    if (!input.trim()) return;
+    await supabase.from("todos").insert({ user_id: userId, title: input.trim() });
+    setInput(""); load();
+  }
+
+  async function toggle(id: number, done: boolean) {
+    await supabase.from("todos").update({ completed: !done }).eq("id", id);
+    load();
+  }
+
+  async function del(id: number) {
+    await supabase.from("todos").delete().eq("id", id);
+    load();
+  }
+
+  const pending = todos.filter((t) => !t.completed);
+  const done = todos.filter((t) => t.completed);
+
+  return (
+    <div className="p-5">
+      <h4 className="text-lg font-bold mb-3">할일</h4>
+      <div className="flex gap-2 mb-4">
+        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()}
+          placeholder="할 일 입력 후 Enter" className="flex-1 p-3 bg-white border border-[var(--gray-200)] rounded-xl text-sm outline-none focus:border-[var(--primary)]" />
+        <button onClick={add} className="px-4 py-2 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold">추가</button>
+      </div>
+      {pending.length === 0 && done.length === 0 && (
+        <div className="text-center py-16 text-[var(--gray-400)]"><div className="text-4xl mb-3">✅</div>할 일을 입력해보세요</div>
+      )}
+      {pending.map((t) => (
+        <div key={t.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+          <div onClick={() => toggle(t.id, t.completed)} className="w-5 h-5 rounded-full border-2 border-[var(--gray-300)] cursor-pointer shrink-0" />
+          <div className="flex-1 text-sm">{t.title}</div>
+          <button onClick={() => del(t.id)} className="text-[var(--gray-400)] text-xs">✕</button>
+        </div>
+      ))}
+      {done.length > 0 && (
+        <>
+          <div className="text-xs text-[var(--gray-400)] mt-6 mb-2">완료 ({done.length})</div>
+          {done.map((t) => (
+            <div key={t.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2 opacity-50">
+              <div onClick={() => toggle(t.id, t.completed)}
+                className="w-5 h-5 rounded-full bg-[var(--primary)] border-2 border-[var(--primary)] text-white flex items-center justify-center cursor-pointer text-[10px] shrink-0">✓</div>
+              <div className="flex-1 text-sm line-through text-[var(--gray-500)]">{t.title}</div>
+              <button onClick={() => del(t.id)} className="text-[var(--gray-400)] text-xs">✕</button>
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// LEDGER
+// ══════════════════════════════
+function LedgerPanel({ userId, openModal, closeModal }: { userId: string; openModal: any; closeModal: any }) {
+  const [entries, setEntries] = useState<any[]>([]);
+  const [income, setIncome] = useState(0);
+  const [expense, setExpense] = useState(0);
+
+  const load = useCallback(async () => {
+    const month = new Date().toISOString().substring(0, 7);
+    const { data } = await supabase.from("ledger").select("*").eq("user_id", userId).gte("entry_date", month + "-01").order("entry_date", { ascending: false }).order("id", { ascending: false });
+    const list = data || [];
+    setEntries(list);
+    setIncome(list.filter((e: any) => e.entry_type === "income").reduce((s: number, e: any) => s + Number(e.amount), 0));
+    setExpense(list.filter((e: any) => e.entry_type === "expense").reduce((s: number, e: any) => s + Number(e.amount), 0));
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function save(f: any) {
+    await supabase.from("ledger").insert({ ...f, user_id: userId });
+    closeModal(); load();
+  }
+
+  async function del(id: number) {
+    await supabase.from("ledger").delete().eq("id", id);
+    load();
+  }
+
+  const fmt = (n: number) => "₩" + n.toLocaleString();
+
+  return (
+    <div className="p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-lg font-bold">매출장부</h4>
+        <div className="flex gap-2">
+          <button onClick={() => openModal("매출 입력", <LedgerForm type="income" onSave={save} />)} className="text-[var(--primary)] text-sm font-medium">+ 매출</button>
+          <button onClick={() => openModal("지출 입력", <LedgerForm type="expense" onSave={save} />)} className="text-[var(--danger)] text-sm font-medium">+ 지출</button>
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">매출</div><div className="font-extrabold text-[var(--primary)]">{fmt(income)}</div></div>
+        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">지출</div><div className="font-extrabold text-[var(--danger)]">{fmt(expense)}</div></div>
+        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">순이익</div><div className="font-extrabold text-[var(--success)]">{fmt(income - expense)}</div></div>
+      </div>
+      {entries.length === 0 ? (
+        <div className="text-center py-12 text-[var(--gray-400)]"><div className="text-4xl mb-3">💰</div>매출이나 지출을 입력해보세요</div>
+      ) : (
+        entries.map((e) => (
+          <div key={e.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+            <div className="flex-1"><div className="font-semibold text-sm">{e.description || "기타"}</div><div className="text-[11px] text-[var(--gray-500)]">{e.entry_date}{e.payment_method ? ` · ${e.payment_method}` : ""}</div></div>
+            <div className={`font-bold ${e.entry_type === "income" ? "text-[var(--primary)]" : "text-[var(--danger)]"}`}>{e.entry_type === "income" ? "+" : "-"}{fmt(Number(e.amount))}</div>
+            <button onClick={() => del(e.id)} className="text-[var(--gray-400)] text-xs">✕</button>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
+
+function LedgerForm({ type, onSave }: { type: string; onSave: (d: any) => void }) {
+  const [f, setF] = useState({ entry_type: type, amount: "", description: "", entry_date: new Date().toISOString().split("T")[0], payment_method: "" });
+
+  return (
+    <div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>금액</label><input type="number" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} placeholder="0" style={{ fontSize: 20, fontWeight: 700 }} /></div>
+        <div className="ios-field"><label>내용</label><input value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder={type === "income" ? "점심 영업" : "식자재"} /></div>
+        <div className="ios-field"><label>날짜</label><input type="date" value={f.entry_date} onChange={(e) => setF({ ...f, entry_date: e.target.value })} /></div>
+        <div className="ios-field"><label>결제</label><select value={f.payment_method} onChange={(e) => setF({ ...f, payment_method: e.target.value })}>
+          <option value="">선택</option><option value="현금">현금</option><option value="카드">카드</option><option value="계좌이체">계좌이체</option></select></div>
+      </div>
+      <button onClick={() => { if (!f.amount) return; onSave(f); }} className="w-full p-3 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm mt-2">저장</button>
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// RESERVATIONS
+// ══════════════════════════════
+function ReservationsPanel({ userId, openModal, closeModal }: { userId: string; openModal: any; closeModal: any }) {
+  const [list, setList] = useState<any[]>([]);
+
+  const load = useCallback(async () => {
+    const today = new Date().toISOString().split("T")[0];
+    const { data } = await supabase.from("reservations").select("*").eq("user_id", userId).eq("reservation_date", today).order("reservation_time");
+    setList(data || []);
+  }, [userId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function save(f: any) {
+    await supabase.from("reservations").insert({ ...f, user_id: userId });
+    closeModal(); load();
+  }
+
+  const total = list.reduce((s, r) => s + r.party_size, 0);
+  const stl: Record<string, string> = { confirmed: "확인", completed: "완료", cancelled: "취소", noshow: "노쇼" };
+
+  return (
+    <div className="p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-lg font-bold">오늘 예약</h4>
+        <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />)} className="text-[var(--primary)] text-sm font-medium">+ 추가</button>
+      </div>
+      {list.length === 0 ? (
+        <div className="text-center py-12 text-[var(--gray-400)]"><div className="text-4xl mb-3">📋</div>오늘 예약이 없습니다</div>
+      ) : (
+        <>
+          {list.map((r) => (
+            <div key={r.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+              <div className="min-w-[45px] text-center font-bold text-[var(--primary)] text-sm">{r.reservation_time?.substring(0, 5)}</div>
+              <div className="flex-1"><div className="font-semibold text-sm">{r.customer_name} · {r.party_size}명</div><div className="text-[11px] text-[var(--gray-500)]">{[r.service, r.notes].filter(Boolean).join(" · ")}</div></div>
+              <span className="text-xs text-[var(--primary)]">{stl[r.status] || r.status}</span>
+            </div>
+          ))}
+          <div className="text-center text-xs text-[var(--gray-500)] mt-3">{list.length}건 · {total}명</div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function ReservationForm({ onSave }: { onSave: (d: any) => void }) {
+  const [f, setF] = useState({ customer_name: "", customer_phone: "", party_size: 2, reservation_date: new Date().toISOString().split("T")[0], reservation_time: "", service: "", notes: "" });
+
+  return (
+    <div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>고객명</label><input value={f.customer_name} onChange={(e) => setF({ ...f, customer_name: e.target.value })} placeholder="홍길동" /></div>
+        <div className="ios-field"><label>전화</label><input value={f.customer_phone} onChange={(e) => setF({ ...f, customer_phone: e.target.value })} placeholder="010-1234-5678" /></div>
+        <div className="ios-field"><label>인원</label><input type="number" value={f.party_size} onChange={(e) => setF({ ...f, party_size: parseInt(e.target.value) || 1 })} /></div>
+      </div>
+      <div className="ios-fields">
+        <div className="ios-field"><label>날짜</label><input type="date" value={f.reservation_date} onChange={(e) => setF({ ...f, reservation_date: e.target.value })} /></div>
+        <div className="ios-field"><label>시간</label><input type="time" value={f.reservation_time} onChange={(e) => setF({ ...f, reservation_time: e.target.value })} /></div>
+        <div className="ios-field"><label>메뉴</label><input value={f.service} onChange={(e) => setF({ ...f, service: e.target.value })} placeholder="갈비탕 코스" /></div>
+      </div>
+      <button onClick={() => { if (!f.customer_name) return; onSave(f); }} className="w-full p-3 bg-[var(--primary)] text-white rounded-xl font-semibold text-sm mt-2">저장</button>
+    </div>
+  );
+}

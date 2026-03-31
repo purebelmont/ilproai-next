@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: #0071E3;
+  --primary-dark: #0058B0;
+  --primary-light: #E8F2FE;
+  --danger: #FF3B30;
+  --success: #30D158;
+  --warning: #FF9500;
+  --gray-50: #F9F9FB;
+  --gray-100: #F2F2F7;
+  --gray-200: #E5E5EA;
+  --gray-300: #C7C7CC;
+  --gray-400: #AEAEB2;
+  --gray-500: #86868B;
+  --gray-700: #56565A;
+  --gray-900: #1D1D1F;
+  --tab-h: 56px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { -webkit-tap-highlight-color: transparent; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  -webkit-font-smoothing: antialiased;
 }
+
+/* iOS-style input fields */
+.ios-fields { background: white; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+.ios-field { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--gray-100); }
+.ios-field:last-child { border-bottom: none; }
+.ios-field label { font-size: 14px; color: var(--gray-500); min-width: 60px; flex-shrink: 0; }
+.ios-field input, .ios-field textarea, .ios-field select {
+  border: none; background: none; flex: 1; font-size: 15px;
+  font-family: inherit; outline: none; padding: 2px 0; color: var(--gray-900);
+}
+.ios-field textarea { min-height: 60px; resize: none; }
+.ios-danger { color: var(--danger); text-align: center; padding: 16px; cursor: pointer; font-size: 15px; font-weight: 500; background: white; border-radius: 12px; margin-top: 12px; }

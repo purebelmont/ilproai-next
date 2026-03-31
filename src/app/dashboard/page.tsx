@@ -217,24 +217,24 @@ export default function Dashboard() {
   const dateLabel = `${today.getMonth() + 1}월 ${today.getDate()}일 (${dayNames[today.getDay()]})`;
 
   return (
-    <div className={`min-h-screen flex ${dark ? "dark" : ""}`}>
-      {/* Sidebar - always visible */}
-      <div className="hidden md:flex flex-col w-[220px] bg-white dark:bg-gray-900 border-r border-[var(--gray-200)] dark:border-gray-700 fixed top-0 left-0 bottom-0 z-40">
-        <div className="px-5 py-4 border-b border-[var(--gray-100)] dark:border-gray-700">
-          <div className="text-lg font-extrabold dark:text-white">일프로<span className="text-[var(--primary)]">AI</span></div>
+    <div className="min-h-screen flex">
+      {/* Sidebar */}
+      <div className="hidden md:flex flex-col w-[220px] fixed top-0 left-0 bottom-0 z-40" style={{ background: "var(--bg-card)", borderRight: "1px solid var(--border)" }}>
+        <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border-light)" }}>
+          <div className="text-lg font-extrabold" style={{ color: "var(--text)" }}>일프로<span className="text-[var(--primary)]">AI</span></div>
           <div className="text-xs text-[var(--gray-500)] mt-0.5">{bizName}</div>
         </div>
         <div className="flex-1 overflow-y-auto py-2 px-2">
           {TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5
-                ${tab === t.id ? "bg-[var(--primary-light)] text-[var(--primary)] font-semibold" : "text-[var(--gray-700)] hover:bg-[var(--gray-100)]"}`}>
+              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5"
+              style={{ background: tab === t.id ? "var(--primary-light)" : "transparent", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", fontWeight: tab === t.id ? 600 : 400 }}>
               <span className="text-lg">{t.icon}</span>
               <span>{t.label}</span>
             </button>
           ))}
         </div>
-        <div className="p-3 border-t border-[var(--gray-100)] dark:border-gray-700 space-y-1">
+        <div className="p-3 space-y-1" style={{ borderTop: "1px solid var(--border)" }}>
           <button onClick={toggleDark} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block px-2 w-full text-left">
             {dark ? "☀️ 라이트 모드" : "🌙 다크 모드"}
           </button>
@@ -255,11 +255,12 @@ export default function Dashboard() {
       </div>
 
       {/* Mobile bottom tab bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-[var(--tab-h)] bg-white/95 backdrop-blur-xl border-t border-[var(--gray-200)] flex overflow-x-auto z-50"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-[var(--tab-h)] backdrop-blur-xl flex overflow-x-auto z-50"
+        style={{ background: dark ? "rgba(28,28,30,0.95)" : "rgba(255,255,255,0.95)", borderTop: "1px solid var(--border)", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] flex-1 ${tab === t.id ? "text-[var(--primary)]" : "text-[var(--gray-500)]"}`}>
+            className="flex flex-col items-center justify-center gap-0.5 min-w-[56px] flex-1"
+            style={{ color: tab === t.id ? "var(--primary)" : "var(--text-muted)" }}>
             <span className="text-xl leading-none">{t.icon}</span>
             <span className="text-[10px] font-medium">{t.label}</span>
           </button>
@@ -267,9 +268,10 @@ export default function Dashboard() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 md:ml-[220px] bg-[var(--gray-50)] dark:bg-[#1C1C1E] min-h-screen">
+      <div className="flex-1 md:ml-[220px] min-h-screen" style={{ background: "var(--bg)" }}>
         {/* Mobile header */}
-        <div className="md:hidden sticky top-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-[var(--gray-200)] dark:border-gray-700 px-5 py-3 flex items-center justify-between">
+        <div className="md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between"
+          style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
           <div>
             <div className="text-base font-bold">{bizName}</div>
             <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
@@ -303,8 +305,8 @@ export default function Dashboard() {
 
       {/* Style 1: Fullscreen */}
       {modalOpen && modalStyle === "fullscreen" && (
-        <div className="fixed inset-0 z-[200] bg-[var(--gray-50)] overflow-y-auto animate-[slideUp_0.3s_ease]">
-          <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+        <div className="fixed inset-0 z-[200] overflow-y-auto animate-[slideUp_0.3s_ease]" style={{ background: "var(--bg)" }}>
+          <div className="sticky top-0 z-10 backdrop-blur-xl px-5 py-3 flex items-center justify-between" style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
             <button onClick={closeModal} className="text-[var(--primary)] text-sm font-medium">취소</button>
             <div className="text-base font-bold">{modalTitle}</div>
             <div className="w-10" />
@@ -317,9 +319,9 @@ export default function Dashboard() {
       {modalOpen && modalStyle === "bottom" && (
         <>
           <div className="fixed inset-0 bg-black/30 z-[199] animate-[fadeIn_0.2s_ease]" onClick={closeModal} />
-          <div className="fixed bottom-0 left-0 right-0 z-[200] bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease] md:max-w-lg md:mx-auto">
-            <div className="w-9 h-1 bg-[var(--gray-300)] rounded-full mx-auto mt-2 mb-1" />
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--gray-100)]">
+          <div className="fixed bottom-0 left-0 right-0 z-[200] rounded-t-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease] md:max-w-lg md:mx-auto" style={{ background: "var(--bg-card)" }}>
+            <div className="w-9 h-1 rounded-full mx-auto mt-2 mb-1" style={{ background: "var(--text-ghost)" }} />
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid var(--border-light)" }}>
               <button onClick={closeModal} className="text-[var(--primary)] text-sm">취소</button>
               <div className="text-sm font-bold">{modalTitle}</div>
               <div className="w-10" />
@@ -333,8 +335,8 @@ export default function Dashboard() {
       {modalOpen && modalStyle === "side" && (
         <>
           <div className="fixed inset-0 bg-black/30 z-[199] animate-[fadeIn_0.2s_ease]" onClick={closeModal} />
-          <div className="fixed top-0 right-0 bottom-0 z-[200] w-full max-w-md bg-white overflow-y-auto animate-[slideRight_0.3s_ease] shadow-2xl">
-            <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+          <div className="fixed top-0 right-0 bottom-0 z-[200] w-full max-w-md overflow-y-auto animate-[slideRight_0.3s_ease] shadow-2xl" style={{ background: "var(--bg)" }}>
+            <div className="sticky top-0 z-10 backdrop-blur-xl px-5 py-3 flex items-center justify-between" style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
               <button onClick={closeModal} className="text-[var(--primary)] text-sm font-medium">← 닫기</button>
               <div className="text-sm font-bold">{modalTitle}</div>
               <div className="w-10" />

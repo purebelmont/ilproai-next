@@ -32,13 +32,21 @@ export default function Dashboard() {
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push("/auth"); return; }
       setUser(data.user);
-      supabase.from("profiles").select("*").eq("id", data.user.id).single().then(({ data: p }) => {
+      // Get or create profile
+      const { data: p } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+      if (p) {
         setProfile(p);
-        setLoading(false);
-      });
+      } else {
+        // Auto-create profile
+        const name = data.user.user_metadata?.name || data.user.email?.split("@")[0] || "";
+        await supabase.from("profiles").insert({ id: data.user.id, name });
+        const { data: p2 } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+        setProfile(p2);
+      }
+      setLoading(false);
     });
   }, [router]);
 

@@ -40,14 +40,14 @@ export default function Home() {
         </p>
 
         {/* CTA buttons */}
-        <div className="flex gap-3 justify-center mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6 w-full max-w-sm mx-auto sm:max-w-none">
           <Link href="/auth"
-            className="px-8 py-3.5 rounded-full font-semibold text-sm text-white transition-all hover:scale-105 active:scale-95"
+            className="px-8 py-4 rounded-full font-semibold text-base text-white transition-all hover:scale-105 active:scale-95 text-center"
             style={{ background: "linear-gradient(135deg, #0071E3 0%, #5856D6 100%)", boxShadow: "0 0 30px rgba(0,113,227,0.4)" }}>
             무료로 시작하기
           </Link>
           <Link href="/auth"
-            className="px-8 py-3.5 rounded-full font-semibold text-sm text-white/80 border border-white/20 hover:border-white/40 transition-all hover:scale-105 active:scale-95"
+            className="px-8 py-4 rounded-full font-semibold text-base text-white/80 border border-white/20 hover:border-white/40 transition-all hover:scale-105 active:scale-95 text-center"
             style={{ background: "rgba(255,255,255,0.05)", backdropFilter: "blur(10px)" }}>
             데모 체험
           </Link>

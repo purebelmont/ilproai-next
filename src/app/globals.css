@@ -38,7 +38,17 @@
   --primary-light: #1C3A5E;
 }
 
-* { -webkit-tap-highlight-color: transparent; }
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+
+/* Mobile touch optimization */
+button, a, [role="button"] { min-height: 44px; }
+input, textarea, select { font-size: 16px !important; } /* Prevent iOS zoom on focus */
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+/* Pull-to-refresh prevention */
+body { overscroll-behavior-y: contain; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Pretendard Variable', 'Noto Sans KR', sans-serif;

@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("home");
   const [loading, setLoading] = useState(true);
   const [dark, setDark] = useState(false);
+  const [mobileMore, setMobileMore] = useState(false);
   const router = useRouter();
 
   // Modal state
@@ -254,17 +255,39 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Mobile bottom tab bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-[var(--tab-h)] backdrop-blur-xl flex overflow-x-auto z-50"
+      {/* Mobile bottom tab bar — 5 tabs + more */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-xl z-50"
         style={{ background: dark ? "rgba(28,28,30,0.95)" : "rgba(255,255,255,0.95)", borderTop: "1px solid var(--border)", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
-        {TABS.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className="flex flex-col items-center justify-center gap-0.5 min-w-[56px] flex-1"
-            style={{ color: tab === t.id ? "var(--primary)" : "var(--text-muted)" }}>
-            <span className="text-xl leading-none">{t.icon}</span>
-            <span className="text-[10px] font-medium">{t.label}</span>
+        <div className="flex h-[var(--tab-h)]">
+          {TABS.slice(0, 4).map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px]"
+              style={{ color: tab === t.id ? "var(--primary)" : "var(--text-muted)" }}>
+              <span className="text-[22px] leading-none">{t.icon}</span>
+              <span className="text-[10px] font-medium">{t.label}</span>
+            </button>
+          ))}
+          <button onClick={() => setMobileMore(!mobileMore)}
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px]"
+            style={{ color: mobileMore ? "var(--primary)" : "var(--text-muted)" }}>
+            <span className="text-[22px] leading-none">⋯</span>
+            <span className="text-[10px] font-medium">더보기</span>
           </button>
-        ))}
+        </div>
+
+        {/* More menu */}
+        {mobileMore && (
+          <div className="border-t px-3 py-3 grid grid-cols-4 gap-2 animate-[slideUp_0.2s_ease]" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            {TABS.slice(4).map((t) => (
+              <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
+                className="flex flex-col items-center gap-1 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
+                style={{ background: tab === t.id ? "var(--primary-light)" : "var(--bg-hover)", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)" }}>
+                <span className="text-2xl">{t.icon}</span>
+                <span className="text-[11px] font-medium">{t.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Main content */}

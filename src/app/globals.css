@@ -61,12 +61,24 @@ body {
 .ios-field textarea { min-height: 60px; resize: none; }
 .ios-danger { color: var(--danger); text-align: center; padding: 16px; cursor: pointer; font-size: 15px; font-weight: 500; background: var(--bg-card); border-radius: 12px; margin-top: 12px; }
 
-/* Common card/item styles */
-.card-item {
+/* Auto-apply dark colors to common patterns */
+.rounded-xl.border, .rounded-lg.border, .rounded-xl.border-\[var\(--gray-200\)\] {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 8px;
-  transition: background 0.2s, border-color 0.2s;
+  border-color: var(--border) !important;
+  color: var(--text);
 }
+
+/* Search bar */
+.bg-\[var\(--gray-100\)\] { background: var(--bg-hover) !important; }
+
+/* Override all bg-white in dark mode */
+.dark .bg-white { background: var(--bg-card) !important; }
+.dark .border-\[var\(--gray-200\)\] { border-color: var(--border) !important; }
+.dark .border-\[var\(--gray-100\)\] { border-color: var(--border-light) !important; }
+.dark .text-\[var\(--gray-900\)\] { color: var(--text) !important; }
+.dark .text-\[var\(--gray-700\)\] { color: var(--text-secondary) !important; }
+.dark .text-\[var\(--gray-500\)\] { color: var(--text-muted) !important; }
+.dark .text-\[var\(--gray-400\)\] { color: var(--text-faint) !important; }
+.dark .bg-\[var\(--gray-50\)\] { background: var(--bg-hover) !important; }
+.dark .bg-\[var\(--gray-100\)\] { background: var(--bg-input) !important; }
+.dark .active\:bg-\[var\(--gray-50\)\]:active { background: var(--bg-hover) !important; }

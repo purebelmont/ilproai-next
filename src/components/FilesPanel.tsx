@@ -68,11 +68,11 @@ export default function FilesPanel({ userId }: { userId: string }) {
 
   return (
     <div className="p-5">
-      <h4 className="text-lg font-bold mb-3 dark:text-white">문서함</h4>
+      <h4 className="text-lg font-bold mb-3">문서함</h4>
 
       {/* Drop zone */}
       <div
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all mb-4 ${dragOver ? "border-[var(--primary)] bg-[var(--primary-light)]" : "border-[var(--gray-300)] dark:border-gray-600"}`}
+        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all mb-4 ${dragOver ? "border-[var(--primary)] bg-[var(--primary-light)]" : "border-[var(--gray-300)]"}`}
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -98,12 +98,12 @@ export default function FilesPanel({ userId }: { userId: string }) {
           const ext = f.file_type || "file";
           const color = TYPE_COLORS[ext] || "#757575";
           return (
-            <div key={f.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-[var(--gray-200)] dark:border-gray-700 mb-2">
+            <div key={f.id} className="flex items-center gap-3 p-3 bg-[var(--bg-card)] rounded-xl border border-[var(--gray-200)] mb-2">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0" style={{ background: color }}>
                 {ext.toUpperCase().substring(0, 4)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold truncate dark:text-white">{f.original_name}</div>
+                <div className="text-sm font-semibold truncate">{f.original_name}</div>
                 <div className="text-[11px] text-[var(--gray-500)]">{fmtSize(f.file_size)} · {f.created_at?.split("T")[0]}</div>
               </div>
               <button onClick={() => downloadFile(f.storage_path, f.original_name)} className="text-xs text-[var(--primary)] font-medium shrink-0">다운로드</button>

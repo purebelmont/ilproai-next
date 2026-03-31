@@ -77,22 +77,22 @@ export default function ReportPanel({ userId }: { userId: string }) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-2 mb-6">
-        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-3 text-center border border-[var(--gray-200)]">
           <div className="text-[10px] text-[var(--gray-500)]">연간 매출</div>
           <div className="text-sm font-extrabold text-[var(--primary)]">{fmt(totalIncome)}</div>
         </div>
-        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-3 text-center border border-[var(--gray-200)]">
           <div className="text-[10px] text-[var(--gray-500)]">연간 지출</div>
           <div className="text-sm font-extrabold text-[var(--danger)]">{fmt(totalExpense)}</div>
         </div>
-        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-3 text-center border border-[var(--gray-200)]">
           <div className="text-[10px] text-[var(--gray-500)]">순이익</div>
           <div className="text-sm font-extrabold text-[var(--success)]">{fmt(totalIncome - totalExpense)}</div>
         </div>
       </div>
 
       {/* Monthly chart */}
-      <div className="bg-white rounded-xl p-4 border border-[var(--gray-200)] mb-6">
+      <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--gray-200)] mb-6">
         <div className="text-xs font-semibold text-[var(--gray-500)] mb-4">월별 매출/지출</div>
         {!hasData ? (
           <div className="text-center py-8 text-[var(--gray-400)] text-sm">매출 데이터가 없습니다</div>
@@ -128,7 +128,7 @@ export default function ReportPanel({ userId }: { userId: string }) {
       {/* Other stats */}
       <div className="grid grid-cols-2 gap-3">
         {/* Reservations */}
-        <div className="bg-white rounded-xl p-4 border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--gray-200)]">
           <div className="text-xs font-semibold text-[var(--gray-500)] mb-3">📋 이번달 예약</div>
           {reservationStats ? (
             <div className="space-y-1 text-xs">
@@ -141,7 +141,7 @@ export default function ReportPanel({ userId }: { userId: string }) {
         </div>
 
         {/* Contacts */}
-        <div className="bg-white rounded-xl p-4 border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--gray-200)]">
           <div className="text-xs font-semibold text-[var(--gray-500)] mb-3">👤 연락처</div>
           {contactStats ? (
             <div className="space-y-1 text-xs">
@@ -152,7 +152,7 @@ export default function ReportPanel({ userId }: { userId: string }) {
         </div>
 
         {/* Todos */}
-        <div className="bg-white rounded-xl p-4 border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--gray-200)]">
           <div className="text-xs font-semibold text-[var(--gray-500)] mb-3">✅ 할일</div>
           {todoStats ? (
             <div className="space-y-1 text-xs">
@@ -169,7 +169,7 @@ export default function ReportPanel({ userId }: { userId: string }) {
         </div>
 
         {/* Quick summary */}
-        <div className="bg-white rounded-xl p-4 border border-[var(--gray-200)]">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--gray-200)]">
           <div className="text-xs font-semibold text-[var(--gray-500)] mb-3">📊 요약</div>
           <div className="space-y-1 text-xs">
             <div className="flex justify-between"><span className="text-[var(--gray-500)]">매출 데이터</span><span className="font-semibold">{monthlyData.filter(m => m.income > 0).length}개월</span></div>

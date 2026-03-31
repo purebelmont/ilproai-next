@@ -31,7 +31,7 @@ export default function QuotesPanel({ userId, openModal, closeModal }: { userId:
         <div className="text-center py-16 text-[var(--gray-400)]"><div className="text-4xl mb-3">💼</div>견적서를 작성해보세요</div>
       ) : quotes.map((q) => (
         <div key={q.id} onClick={() => loadQuoteDetail(q.id)}
-          className="p-4 bg-white rounded-xl border border-[var(--gray-200)] mb-2 cursor-pointer active:bg-[var(--gray-50)]">
+          className="p-4 rounded-xl border mb-2 cursor-pointer active:bg-[var(--gray-50)]">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">{DOC_TYPES[q.doc_type] || "견적서"} {q.quote_number}</div>
             <span className="text-xs font-semibold" style={{ color: STATUS_COLORS[q.status] || "gray" }}>{STATUS_LABELS[q.status] || q.status}</span>
@@ -123,7 +123,7 @@ function QuoteEditor({ data, userId, onClose }: { data: any; userId: string; onC
         <button onClick={() => setPreview(false)} className="text-[var(--primary)] text-sm">← 돌아가기</button>
         <button onClick={() => { navigator.clipboard.writeText(document.getElementById("previewContent")?.innerText || ""); alert("복사됨"); }} className="text-[var(--primary)] text-sm">복사</button>
       </div>
-      <div id="previewContent" className="bg-white rounded-xl p-6 border border-[var(--gray-200)] max-w-xl mx-auto">
+      <div id="previewContent" className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--gray-200)] max-w-xl mx-auto">
         <h2 className="text-center text-xl font-bold mb-6 tracking-[8px]">{DOC_TYPES[docType]}</h2>
         <div className="flex justify-between text-sm mb-4">
           <div><strong>수신:</strong> {clientName} {contactName && `${contactName}님`}</div>
@@ -175,7 +175,7 @@ function QuoteEditor({ data, userId, onClose }: { data: any; userId: string; onC
       <div className="flex gap-1.5 mb-5">
         {(["quote", "order", "invoice"] as const).map((t) => (
           <button key={t} onClick={() => setDocType(t)}
-            className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${docType === t ? "bg-[var(--primary)] text-white border-[var(--primary)]" : "bg-white border-[var(--gray-200)] text-[var(--gray-700)]"}`}>
+            className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all ${docType === t ? "bg-[var(--primary)] text-white border-[var(--primary)]" : "bg-[var(--bg-card)] border-[var(--gray-200)] text-[var(--gray-700)]"}`}>
             {DOC_TYPES[t]}
           </button>
         ))}
@@ -186,7 +186,7 @@ function QuoteEditor({ data, userId, onClose }: { data: any; userId: string; onC
         <div className="flex gap-1.5 mb-5">
           {(["draft", "sent", "confirmed", "cancelled"] as const).map((s) => (
             <button key={s} onClick={() => setStatus(s)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-medium border transition-all ${status === s ? "bg-[var(--gray-900)] text-white border-[var(--gray-900)]" : "bg-white border-[var(--gray-200)] text-[var(--gray-500)]"}`}>
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-medium border transition-all ${status === s ? "bg-[var(--gray-900)] text-white border-[var(--gray-900)]" : "bg-[var(--bg-card)] border-[var(--gray-200)] text-[var(--gray-500)]"}`}>
               {STATUS_LABELS[s]}
             </button>
           ))}
@@ -207,7 +207,7 @@ function QuoteEditor({ data, userId, onClose }: { data: any; userId: string; onC
         <button onClick={addItem} className="text-[var(--primary)] text-xs font-medium">+ 품목 추가</button>
       </div>
       {items.map((it, i) => (
-        <div key={i} className="bg-white border border-[var(--gray-200)] rounded-xl p-3 mb-2 relative">
+        <div key={i} className="bg-[var(--bg-card)] border border-[var(--gray-200)] rounded-xl p-3 mb-2 relative">
           {items.length > 1 && <button onClick={() => removeItem(i)} className="absolute top-2 right-2 text-[var(--gray-400)] text-xs">✕</button>}
           <div className="grid grid-cols-2 gap-2">
             <div><div className="text-[10px] text-[var(--gray-400)]">품명</div><input value={it.item_name} onChange={(e) => updateItem(i, "item_name", e.target.value)} placeholder="STS304 파이프" className="w-full text-sm outline-none border-none" /></div>

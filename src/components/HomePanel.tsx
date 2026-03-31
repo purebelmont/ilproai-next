@@ -72,33 +72,33 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
     <div className="p-5">
       {/* Greeting */}
       <div className="mb-6">
-        <h2 className="text-2xl font-extrabold dark:text-white">{greeting} 👋</h2>
+        <h2 className="text-2xl font-extrabold ">{greeting} 👋</h2>
         {bizName && <p className="text-sm text-[var(--gray-500)] mt-1">{bizName}</p>}
         <p className="text-xs text-[var(--gray-400)] mt-0.5">{d.getFullYear()}년 {d.getMonth()+1}월 {d.getDate()}일 ({dayNames[d.getDay()]})</p>
       </div>
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <button onClick={() => setTab("reservations")} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700 text-left active:scale-[0.98] transition-transform">
+        <button onClick={() => setTab("reservations")} className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)]  text-left active:scale-[0.98] transition-transform">
           <div className="text-2xl font-extrabold text-[var(--primary)]">{stats.todayReservations}</div>
           <div className="text-xs text-[var(--gray-500)]">오늘 예약 · {stats.todayGuests}명</div>
         </button>
-        <button onClick={() => setTab("calendar")} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700 text-left active:scale-[0.98] transition-transform">
+        <button onClick={() => setTab("calendar")} className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)]  text-left active:scale-[0.98] transition-transform">
           <div className="text-2xl font-extrabold text-[#FF9500]">{stats.todaySchedules}</div>
           <div className="text-xs text-[var(--gray-500)]">오늘 일정</div>
         </button>
-        <button onClick={() => setTab("todos")} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700 text-left active:scale-[0.98] transition-transform">
+        <button onClick={() => setTab("todos")} className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)]  text-left active:scale-[0.98] transition-transform">
           <div className="text-2xl font-extrabold text-[var(--danger)]">{stats.pendingTodos}</div>
           <div className="text-xs text-[var(--gray-500)]">미완료 할일</div>
         </button>
-        <button onClick={() => setTab("ledger")} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700 text-left active:scale-[0.98] transition-transform">
+        <button onClick={() => setTab("ledger")} className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)]  text-left active:scale-[0.98] transition-transform">
           <div className="text-xl font-extrabold text-[var(--success)]">{fmt(recentLedger.income - recentLedger.expense)}</div>
           <div className="text-xs text-[var(--gray-500)]">이번달 순이익</div>
         </button>
       </div>
 
       {/* Monthly summary */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700 mb-6">
+      <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)]  mb-6">
         <div className="text-xs font-semibold text-[var(--gray-500)] mb-3">이번달 매출 요약</div>
         <div className="grid grid-cols-3 gap-3 text-center">
           <div><div className="text-sm font-extrabold text-[var(--primary)]">{fmt(recentLedger.income)}</div><div className="text-[10px] text-[var(--gray-400)]">매출</div></div>
@@ -109,7 +109,7 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* Today reservations */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)] ">
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-semibold text-[var(--gray-500)]">📋 오늘 예약</div>
             <button onClick={() => setTab("reservations")} className="text-[10px] text-[var(--primary)]">전체보기</button>
@@ -117,16 +117,16 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
           {todayReservations.length === 0 ? (
             <div className="text-center py-4 text-xs text-[var(--gray-400)]">예약이 없습니다</div>
           ) : todayReservations.map((r) => (
-            <div key={r.id} className="flex items-center gap-2 py-2 border-b border-[var(--gray-100)] dark:border-gray-700 last:border-0">
+            <div key={r.id} className="flex items-center gap-2 py-2 border-b border-[var(--border-light)]  last:border-0">
               <div className="text-xs font-bold text-[var(--primary)] min-w-[40px]">{r.reservation_time?.substring(0, 5)}</div>
-              <div className="flex-1 text-xs dark:text-gray-300">{r.customer_name} · {r.party_size}명</div>
+              <div className="flex-1 text-xs ">{r.customer_name} · {r.party_size}명</div>
               <div className="text-[10px] text-[var(--gray-400)]">{r.service}</div>
             </div>
           ))}
         </div>
 
         {/* Today events */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)] ">
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-semibold text-[var(--gray-500)]">📅 오늘 일정</div>
             <button onClick={() => setTab("calendar")} className="text-[10px] text-[var(--primary)]">전체보기</button>
@@ -134,16 +134,16 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
           {todayEvents.length === 0 ? (
             <div className="text-center py-4 text-xs text-[var(--gray-400)]">일정이 없습니다</div>
           ) : todayEvents.map((e) => (
-            <div key={e.id} className="flex items-center gap-2 py-2 border-b border-[var(--gray-100)] dark:border-gray-700 last:border-0">
+            <div key={e.id} className="flex items-center gap-2 py-2 border-b border-[var(--border-light)]  last:border-0">
               <div className="w-[3px] h-6 rounded" style={{ background: e.color || "var(--primary)" }} />
               <div className="text-xs text-[var(--gray-500)] min-w-[40px]">{e.start_time?.substring(0, 5) || "종일"}</div>
-              <div className="flex-1 text-xs dark:text-gray-300">{e.title}</div>
+              <div className="flex-1 text-xs ">{e.title}</div>
             </div>
           ))}
         </div>
 
         {/* Pending todos */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)] ">
           <div className="flex items-center justify-between mb-3">
             <div className="text-xs font-semibold text-[var(--gray-500)]">✅ 할일</div>
             <button onClick={() => setTab("todos")} className="text-[10px] text-[var(--primary)]">전체보기</button>
@@ -151,32 +151,32 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
           {pendingTodos.length === 0 ? (
             <div className="text-center py-4 text-xs text-[var(--gray-400)]">할일이 없습니다</div>
           ) : pendingTodos.map((t) => (
-            <div key={t.id} className="flex items-center gap-2 py-2 border-b border-[var(--gray-100)] dark:border-gray-700 last:border-0">
+            <div key={t.id} className="flex items-center gap-2 py-2 border-b border-[var(--border-light)]  last:border-0">
               <div className="w-4 h-4 rounded-full border-2 border-[var(--gray-300)] shrink-0" />
-              <div className="flex-1 text-xs dark:text-gray-300">{t.title}</div>
+              <div className="flex-1 text-xs ">{t.title}</div>
               {t.priority > 0 && <div className="text-[9px] text-[var(--danger)] font-bold">중요</div>}
             </div>
           ))}
         </div>
 
         {/* Quick links */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-[var(--gray-200)] dark:border-gray-700">
+        <div className="bg-[var(--bg-card)] rounded-xl p-4 border border-[var(--border)] ">
           <div className="text-xs font-semibold text-[var(--gray-500)] mb-3">📊 현황</div>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setTab("contacts")} className="text-left py-2">
-              <div className="text-lg font-bold dark:text-white">{stats.contacts}</div>
+              <div className="text-lg font-bold ">{stats.contacts}</div>
               <div className="text-[10px] text-[var(--gray-400)]">연락처</div>
             </button>
             <button onClick={() => setTab("quotes")} className="text-left py-2">
-              <div className="text-lg font-bold dark:text-white">{stats.quotes}</div>
+              <div className="text-lg font-bold ">{stats.quotes}</div>
               <div className="text-[10px] text-[var(--gray-400)]">견적서</div>
             </button>
             <button onClick={() => setTab("payroll")} className="text-left py-2">
-              <div className="text-lg font-bold dark:text-white">{stats.employees}</div>
+              <div className="text-lg font-bold ">{stats.employees}</div>
               <div className="text-[10px] text-[var(--gray-400)]">직원</div>
             </button>
             <button onClick={() => setTab("notes")} className="text-left py-2">
-              <div className="text-lg font-bold dark:text-white">{stats.notes}</div>
+              <div className="text-lg font-bold ">{stats.notes}</div>
               <div className="text-[10px] text-[var(--gray-400)]">메모</div>
             </button>
           </div>

@@ -75,7 +75,7 @@ export default function PayrollPanel({ userId, openModal, closeModal }: { userId
         {employees.length === 0 ? (
           <div className="text-center py-8 text-[var(--gray-400)]"><div className="text-3xl mb-2">👥</div>직원을 등록하세요</div>
         ) : employees.map((e) => (
-          <div key={e.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+          <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl border mb-2">
             <div className="w-9 h-9 rounded-full bg-[#5856D6] text-white flex items-center justify-center text-sm font-bold shrink-0">{e.name[0]}</div>
             <div className="flex-1">
               <div className="text-sm font-semibold">{e.name} <span className="text-[var(--gray-500)] font-normal">{e.position}</span></div>
@@ -117,7 +117,7 @@ export default function PayrollPanel({ userId, openModal, closeModal }: { userId
       ) : (
         <>
           {payrolls.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+            <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl border mb-2">
               <div className="flex-1">
                 <div className="text-sm font-semibold">{p.employees?.name || "?"} <span className="text-[var(--gray-500)] font-normal">{p.employees?.position}</span></div>
                 <div className="text-xs text-[var(--gray-500)]">총지급 {fmt(Number(p.total_pay))} → 실수령 <strong className="text-[var(--primary)]">{fmt(Number(p.net_pay))}</strong></div>

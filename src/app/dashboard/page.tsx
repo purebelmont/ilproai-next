@@ -459,10 +459,10 @@ function ContactsPanel({ userId, openModal, closeModal }: { userId: string; open
       <input ref={importRef} type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden"
         onChange={(e) => { if (e.target.files?.[0]) handleImport(e.target.files[0]); }} />
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-lg font-bold dark:text-white">연락처</h4>
+        <h4 className="text-lg font-bold">연락처</h4>
         <div className="flex gap-1.5">
           <button onClick={() => importRef.current?.click()} disabled={importing}
-            className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] dark:bg-gray-700 text-[var(--gray-700)] dark:text-gray-300">
+            className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] dark:bg-gray-700 text-[var(--gray-700)]">
             {importing ? "..." : "📥 Import"}
           </button>
           <button onClick={() => openForm(undefined, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
@@ -473,7 +473,7 @@ function ContactsPanel({ userId, openModal, closeModal }: { userId: string; open
       </div>
       {/* Inline form */}
       {inlineOpen && (
-        <div className="bg-white rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
           <input value={inlineData.name} onChange={(e) => setInlineData({...inlineData, name: e.target.value})} placeholder="이름" autoFocus className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
           <input value={inlineData.phone} onChange={(e) => setInlineData({...inlineData, phone: e.target.value})} placeholder="전화번호" className="w-full text-sm outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
           <input value={inlineData.company} onChange={(e) => setInlineData({...inlineData, company: e.target.value})} placeholder="회사 (선택)" className="w-full text-xs text-[var(--gray-500)] outline-none mb-3" />
@@ -495,7 +495,7 @@ function ContactsPanel({ userId, openModal, closeModal }: { userId: string; open
       ) : (
         contacts.map((c) => (
           <div key={c.id} onClick={() => openForm(c)}
-            className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2 cursor-pointer active:bg-[var(--gray-50)]">
+            className="flex items-center gap-3 p-3 rounded-xl border mb-2 cursor-pointer active:bg-[var(--gray-50)]">
             <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
               style={{ background: colors[c.name.charCodeAt(0) % colors.length] }}>{c.name[0]}</div>
             <div className="flex-1 min-w-0">
@@ -584,7 +584,7 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
 
   return (
     <div>
-      <div className="bg-white border-b border-[var(--gray-200)] px-5 pb-3 sticky top-[52px] z-10">
+      <div className="bg-[var(--bg-card)] border-b border-[var(--gray-200)] px-5 pb-3 sticky top-[52px] z-10">
         <div className="flex items-center justify-between py-3">
           <h3 className="text-xl font-extrabold text-[var(--danger)]">{monthNames[m]} {y}</h3>
           <div className="flex gap-2 items-center">
@@ -610,7 +610,7 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
                   {d}
                 </div>
                 <div className="flex gap-0.5 justify-center mt-0.5 min-h-[6px]">
-                  {eventDates.has(ds) && <div className={`w-1.5 h-1.5 rounded-full ${isToday || isSel ? "bg-white" : "bg-[var(--primary)]"}`} />}
+                  {eventDates.has(ds) && <div className={`w-1.5 h-1.5 rounded-full ${isToday || isSel ? "bg-[var(--bg-card)]" : "bg-[var(--primary)]"}`} />}
                 </div>
               </div>
             );
@@ -660,7 +660,7 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
 
         {/* Style D: Inline form */}
         {inlineForm && (
-          <div className="mt-4 bg-white rounded-xl border border-[var(--primary)] p-4 animate-[fadeIn_0.2s_ease]">
+          <div className="mt-4 bg-[var(--bg-card)] rounded-xl border border-[var(--primary)] p-4 animate-[fadeIn_0.2s_ease]">
             <input value={inlineData.title} onChange={(e) => setInlineData({...inlineData, title: e.target.value})}
               placeholder="일정 제목" autoFocus
               className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
@@ -748,7 +748,7 @@ function NotesPanel({ userId, openModal, closeModal }: { userId: string; openMod
       </div>
       {/* Inline form */}
       {inlineOpen && (
-        <div className="bg-white rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
           <input value={inlineData.title} onChange={(e) => setInlineData({...inlineData, title: e.target.value})} placeholder="제목 (선택)" autoFocus className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
           <textarea value={inlineData.content} onChange={(e) => setInlineData({...inlineData, content: e.target.value})} placeholder="메모 내용" className="w-full text-sm outline-none mb-3 min-h-[80px] resize-none" />
           <div className="flex gap-2">
@@ -838,14 +838,14 @@ function TodosPanel({ userId }: { userId: string }) {
       <h4 className="text-lg font-bold mb-3">할일</h4>
       <div className="flex gap-2 mb-4">
         <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()}
-          placeholder="할 일 입력 후 Enter" className="flex-1 p-3 bg-white border border-[var(--gray-200)] rounded-xl text-sm outline-none focus:border-[var(--primary)]" />
+          placeholder="할 일 입력 후 Enter" className="flex-1 p-3 bg-[var(--bg-card)] border border-[var(--gray-200)] rounded-xl text-sm outline-none focus:border-[var(--primary)]" />
         <button onClick={add} className="px-4 py-2 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold">추가</button>
       </div>
       {pending.length === 0 && done.length === 0 && (
         <div className="text-center py-16 text-[var(--gray-400)]"><div className="text-4xl mb-3">✅</div>할 일을 입력해보세요</div>
       )}
       {pending.map((t) => (
-        <div key={t.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+        <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl border mb-2">
           <div onClick={() => toggle(t.id, t.completed)} className="w-5 h-5 rounded-full border-2 border-[var(--gray-300)] cursor-pointer shrink-0" />
           <div className="flex-1 text-sm">{t.title}</div>
           <button onClick={() => del(t.id)} className="text-[var(--gray-400)] text-xs">✕</button>
@@ -855,7 +855,7 @@ function TodosPanel({ userId }: { userId: string }) {
         <>
           <div className="text-xs text-[var(--gray-400)] mt-6 mb-2">완료 ({done.length})</div>
           {done.map((t) => (
-            <div key={t.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2 opacity-50">
+            <div key={t.id} className="flex items-center gap-3 p-3 rounded-xl border mb-2 opacity-50">
               <div onClick={() => toggle(t.id, t.completed)}
                 className="w-5 h-5 rounded-full bg-[var(--primary)] border-2 border-[var(--primary)] text-white flex items-center justify-center cursor-pointer text-[10px] shrink-0">✓</div>
               <div className="flex-1 text-sm line-through text-[var(--gray-500)]">{t.title}</div>
@@ -909,15 +909,15 @@ function LedgerPanel({ userId, openModal, closeModal }: { userId: string; openMo
         </div>
       </div>
       <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">매출</div><div className="font-extrabold text-[var(--primary)]">{fmt(income)}</div></div>
-        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">지출</div><div className="font-extrabold text-[var(--danger)]">{fmt(expense)}</div></div>
-        <div className="bg-white rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">순이익</div><div className="font-extrabold text-[var(--success)]">{fmt(income - expense)}</div></div>
+        <div className="bg-[var(--bg-card)] rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">매출</div><div className="font-extrabold text-[var(--primary)]">{fmt(income)}</div></div>
+        <div className="bg-[var(--bg-card)] rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">지출</div><div className="font-extrabold text-[var(--danger)]">{fmt(expense)}</div></div>
+        <div className="bg-[var(--bg-card)] rounded-xl p-3 text-center border border-[var(--gray-200)]"><div className="text-[10px] text-[var(--gray-500)]">순이익</div><div className="font-extrabold text-[var(--success)]">{fmt(income - expense)}</div></div>
       </div>
       {entries.length === 0 ? (
         <div className="text-center py-12 text-[var(--gray-400)]"><div className="text-4xl mb-3">💰</div>매출이나 지출을 입력해보세요</div>
       ) : (
         entries.map((e) => (
-          <div key={e.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+          <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl border mb-2">
             <div className="flex-1"><div className="font-semibold text-sm">{e.description || "기타"}</div><div className="text-[11px] text-[var(--gray-500)]">{e.entry_date}{e.payment_method ? ` · ${e.payment_method}` : ""}</div></div>
             <div className={`font-bold ${e.entry_type === "income" ? "text-[var(--primary)]" : "text-[var(--danger)]"}`}>{e.entry_type === "income" ? "+" : "-"}{fmt(Number(e.amount))}</div>
             <button onClick={() => del(e.id)} className="text-[var(--gray-400)] text-xs">✕</button>
@@ -983,7 +983,7 @@ function ReservationsPanel({ userId, openModal, closeModal }: { userId: string; 
       </div>
       {/* Inline form */}
       {inlineOpen && (
-        <div className="bg-white rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
           <input value={inlineData.customer_name} onChange={(e) => setInlineData({...inlineData, customer_name: e.target.value})} placeholder="고객명" autoFocus className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
           <div className="flex gap-2 mb-2">
             <input value={inlineData.customer_phone} onChange={(e) => setInlineData({...inlineData, customer_phone: e.target.value})} placeholder="전화번호" className="flex-1 text-sm outline-none pb-2 border-b border-[var(--gray-100)]" />
@@ -1006,7 +1006,7 @@ function ReservationsPanel({ userId, openModal, closeModal }: { userId: string; 
       ) : (
         <>
           {list.map((r) => (
-            <div key={r.id} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-[var(--gray-200)] mb-2">
+            <div key={r.id} className="flex items-center gap-3 p-3 rounded-xl border mb-2">
               <div className="min-w-[45px] text-center font-bold text-[var(--primary)] text-sm">{r.reservation_time?.substring(0, 5)}</div>
               <div className="flex-1"><div className="font-semibold text-sm">{r.customer_name} · {r.party_size}명</div><div className="text-[11px] text-[var(--gray-500)]">{[r.service, r.notes].filter(Boolean).join(" · ")}</div></div>
               <span className="text-xs text-[var(--primary)]">{stl[r.status] || r.status}</span>

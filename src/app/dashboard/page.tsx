@@ -551,7 +551,7 @@ function NotesPanel({ userId, openModal, closeModal }: { userId: string; openMod
 
 function NoteForm({ note, onSave, onDelete }: { note?: any; onSave: (d: any) => void; onDelete?: () => void }) {
   const [f, setF] = useState(note || { title: "", content: "", color: "#FFFFFF" });
-  const COLORS = ["#FFFFFF", "#FFF3E0", "#E8F5E9", "#E3F2FD", "#FCE4EC"];
+  const COLORS = ["#FFFFFF", "#FFB74D", "#66BB6A", "#42A5F5", "#EF5350", "#AB47BC"];
 
   return (
     <div>

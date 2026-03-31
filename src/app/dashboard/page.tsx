@@ -70,35 +70,31 @@ export default function Dashboard() {
   const dateLabel = `${today.getMonth() + 1}월 ${today.getDate()}일 (${dayNames[today.getDay()]})`;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
-        <div>
-          <div className="text-base font-bold">{bizName}</div>
-          <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
+    <div className="min-h-screen flex">
+      {/* Sidebar - always visible */}
+      <div className="hidden md:flex flex-col w-[220px] bg-white border-r border-[var(--gray-200)] fixed top-0 left-0 bottom-0 z-40">
+        <div className="px-5 py-4 border-b border-[var(--gray-100)]">
+          <div className="text-lg font-extrabold">일프로<span className="text-[var(--primary)]">AI</span></div>
+          <div className="text-xs text-[var(--gray-500)] mt-0.5">{bizName}</div>
         </div>
-        <div className="flex gap-2 items-center">
-          <button onClick={() => router.push("/")} className="text-sm text-[var(--primary)]">홈</button>
-          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
+        <div className="flex-1 overflow-y-auto py-2 px-2">
+          {TABS.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5
+                ${tab === t.id ? "bg-[var(--primary-light)] text-[var(--primary)] font-semibold" : "text-[var(--gray-700)] hover:bg-[var(--gray-100)]"}`}>
+              <span className="text-lg">{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="p-3 border-t border-[var(--gray-100)]">
+          <button onClick={() => router.push("/")} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block mb-1 px-2">홈으로</button>
+          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-xs text-[var(--gray-500)] hover:text-[var(--danger)] block px-2">로그아웃</button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto pb-[var(--tab-h)]">
-        {tab === "contacts" && <ContactsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
-        {tab === "calendar" && <CalendarPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
-        {tab === "notes" && <NotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
-        {tab === "todos" && <TodosPanel userId={user.id} />}
-        {tab === "files" && <div className="p-5"><h4 className="text-lg font-bold mb-3">문서함</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
-        {tab === "ledger" && <LedgerPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
-        {tab === "reservations" && <ReservationsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
-        {tab === "quotes" && <div className="p-5"><h4 className="text-lg font-bold mb-3">견적서</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
-        {tab === "payroll" && <div className="p-5"><h4 className="text-lg font-bold mb-3">급여관리</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
-        {tab === "report" && <div className="p-5"><h4 className="text-lg font-bold mb-3">리포트</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
-      </div>
-
-      {/* Tab bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-[var(--tab-h)] bg-white/95 backdrop-blur-xl border-t border-[var(--gray-200)] flex overflow-x-auto z-50"
+      {/* Mobile bottom tab bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-[var(--tab-h)] bg-white/95 backdrop-blur-xl border-t border-[var(--gray-200)] flex overflow-x-auto z-50"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
@@ -107,6 +103,34 @@ export default function Dashboard() {
             <span className="text-[10px] font-medium">{t.label}</span>
           </button>
         ))}
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 md:ml-[220px]">
+        {/* Mobile header */}
+        <div className="md:hidden sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+          <div>
+            <div className="text-base font-bold">{bizName}</div>
+            <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
+          </div>
+          <div className="flex gap-2 items-center">
+            <button onClick={() => router.push("/")} className="text-sm text-[var(--primary)]">홈</button>
+            <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
+          </div>
+        </div>
+
+        <div className="pb-[var(--tab-h)] md:pb-0">
+          {tab === "contacts" && <ContactsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "calendar" && <CalendarPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "notes" && <NotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "todos" && <TodosPanel userId={user.id} />}
+          {tab === "files" && <div className="p-5"><h4 className="text-lg font-bold mb-3">문서함</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+          {tab === "ledger" && <LedgerPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "reservations" && <ReservationsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
+          {tab === "quotes" && <div className="p-5"><h4 className="text-lg font-bold mb-3">견적서</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+          {tab === "payroll" && <div className="p-5"><h4 className="text-lg font-bold mb-3">급여관리</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+          {tab === "report" && <div className="p-5"><h4 className="text-lg font-bold mb-3">리포트</h4><p className="text-sm text-[var(--gray-500)]">준비 중</p></div>}
+        </div>
       </div>
 
       {/* iOS Modal */}

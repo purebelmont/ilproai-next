@@ -221,16 +221,37 @@ function ContactsPanel({ userId, openModal, closeModal }: { userId: string; open
     load();
   }
 
-  function openForm(c?: any) {
-    openModal(c ? "연락처 수정" : "새 연락처", <ContactForm contact={c} onSave={save} onDelete={c ? () => del(c.id) : undefined} />);
+  const [inlineOpen, setInlineOpen] = useState(false);
+  const [inlineData, setInlineData] = useState({ name: "", phone: "", company: "" });
+
+  function openForm(c?: any, style: "fullscreen"|"bottom"|"side"|"inline" = "fullscreen") {
+    if (style === "inline") { setInlineOpen(true); setInlineData({ name: "", phone: "", company: "" }); return; }
+    openModal(c ? "연락처 수정" : "새 연락처", <ContactForm contact={c} onSave={save} onDelete={c ? () => del(c.id) : undefined} />, style);
   }
 
   return (
     <div className="p-5">
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold">연락처</h4>
-        <button onClick={() => openForm()} className="text-[var(--primary)] text-sm font-medium">+ 추가</button>
+        <div className="flex gap-1.5">
+          <button onClick={() => openForm(undefined, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
+          <button onClick={() => openForm(undefined, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
+          <button onClick={() => openForm(undefined, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>
+          <button onClick={() => openForm(undefined, "inline")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white">D</button>
+        </div>
       </div>
+      {/* Inline form */}
+      {inlineOpen && (
+        <div className="bg-white rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
+          <input value={inlineData.name} onChange={(e) => setInlineData({...inlineData, name: e.target.value})} placeholder="이름" autoFocus className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
+          <input value={inlineData.phone} onChange={(e) => setInlineData({...inlineData, phone: e.target.value})} placeholder="전화번호" className="w-full text-sm outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
+          <input value={inlineData.company} onChange={(e) => setInlineData({...inlineData, company: e.target.value})} placeholder="회사 (선택)" className="w-full text-xs text-[var(--gray-500)] outline-none mb-3" />
+          <div className="flex gap-2">
+            <button onClick={async () => { if (!inlineData.name) return; await save(inlineData); setInlineOpen(false); }} className="px-4 py-1.5 bg-[var(--primary)] text-white text-xs rounded-lg font-medium">저장</button>
+            <button onClick={() => setInlineOpen(false)} className="px-4 py-1.5 text-xs text-[var(--gray-500)]">취소</button>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-2 bg-[var(--gray-100)] rounded-xl px-4 py-2.5 mb-4">
         <span className="text-[var(--gray-400)]">🔍</span>
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="이름, 회사, 전화번호 검색"
@@ -480,12 +501,31 @@ function NotesPanel({ userId, openModal, closeModal }: { userId: string; openMod
     closeModal(); load();
   }
 
+  const [inlineOpen, setInlineOpen] = useState(false);
+  const [inlineData, setInlineData] = useState({ title: "", content: "" });
+
   return (
     <div className="p-5">
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold">메모</h4>
-        <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />)} className="text-[var(--primary)] text-sm font-medium">+ 새 메모</button>
+        <div className="flex gap-1.5">
+          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
+          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
+          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>
+          <button onClick={() => { setInlineOpen(true); setInlineData({ title: "", content: "" }); }} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white">D</button>
+        </div>
       </div>
+      {/* Inline form */}
+      {inlineOpen && (
+        <div className="bg-white rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
+          <input value={inlineData.title} onChange={(e) => setInlineData({...inlineData, title: e.target.value})} placeholder="제목 (선택)" autoFocus className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
+          <textarea value={inlineData.content} onChange={(e) => setInlineData({...inlineData, content: e.target.value})} placeholder="메모 내용" className="w-full text-sm outline-none mb-3 min-h-[80px] resize-none" />
+          <div className="flex gap-2">
+            <button onClick={async () => { if (!inlineData.content) return; await save(inlineData); setInlineOpen(false); }} className="px-4 py-1.5 bg-[var(--primary)] text-white text-xs rounded-lg font-medium">저장</button>
+            <button onClick={() => setInlineOpen(false)} className="px-4 py-1.5 text-xs text-[var(--gray-500)]">취소</button>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-2 bg-[var(--gray-100)] rounded-xl px-4 py-2.5 mb-4">
         <span className="text-[var(--gray-400)]">🔍</span>
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="메모 검색" className="flex-1 bg-transparent text-sm outline-none" />
@@ -693,6 +733,9 @@ function ReservationsPanel({ userId, openModal, closeModal }: { userId: string; 
     closeModal(); load();
   }
 
+  const [inlineOpen, setInlineOpen] = useState(false);
+  const [inlineData, setInlineData] = useState({ customer_name: "", customer_phone: "", party_size: 2, reservation_time: "" });
+
   const total = list.reduce((s, r) => s + r.party_size, 0);
   const stl: Record<string, string> = { confirmed: "확인", completed: "완료", cancelled: "취소", noshow: "노쇼" };
 
@@ -700,8 +743,33 @@ function ReservationsPanel({ userId, openModal, closeModal }: { userId: string; 
     <div className="p-5">
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold">오늘 예약</h4>
-        <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />)} className="text-[var(--primary)] text-sm font-medium">+ 추가</button>
+        <div className="flex gap-1.5">
+          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
+          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
+          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>
+          <button onClick={() => { setInlineOpen(true); setInlineData({ customer_name: "", customer_phone: "", party_size: 2, reservation_time: "" }); }} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white">D</button>
+        </div>
       </div>
+      {/* Inline form */}
+      {inlineOpen && (
+        <div className="bg-white rounded-xl border border-[var(--primary)] p-4 mb-4 animate-[fadeIn_0.2s_ease]">
+          <input value={inlineData.customer_name} onChange={(e) => setInlineData({...inlineData, customer_name: e.target.value})} placeholder="고객명" autoFocus className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
+          <div className="flex gap-2 mb-2">
+            <input value={inlineData.customer_phone} onChange={(e) => setInlineData({...inlineData, customer_phone: e.target.value})} placeholder="전화번호" className="flex-1 text-sm outline-none pb-2 border-b border-[var(--gray-100)]" />
+            <input type="number" value={inlineData.party_size} onChange={(e) => setInlineData({...inlineData, party_size: parseInt(e.target.value)||1})} className="w-16 text-sm text-right outline-none pb-2 border-b border-[var(--gray-100)]" />
+            <span className="text-xs text-[var(--gray-500)] self-end pb-2">명</span>
+          </div>
+          <input type="time" value={inlineData.reservation_time} onChange={(e) => setInlineData({...inlineData, reservation_time: e.target.value})} className="text-sm outline-none mb-3" />
+          <div className="flex gap-2">
+            <button onClick={async () => {
+              if (!inlineData.customer_name) return;
+              await save({...inlineData, reservation_date: new Date().toISOString().split("T")[0]});
+              setInlineOpen(false);
+            }} className="px-4 py-1.5 bg-[var(--primary)] text-white text-xs rounded-lg font-medium">저장</button>
+            <button onClick={() => setInlineOpen(false)} className="px-4 py-1.5 text-xs text-[var(--gray-500)]">취소</button>
+          </div>
+        </div>
+      )}
       {list.length === 0 ? (
         <div className="text-center py-12 text-[var(--gray-400)]"><div className="text-4xl mb-3">📋</div>오늘 예약이 없습니다</div>
       ) : (

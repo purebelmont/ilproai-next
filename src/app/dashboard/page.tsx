@@ -35,6 +35,11 @@ export default function Dashboard() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
+  const checkSampleFn = async (uid: string) => {
+    const { data } = await supabase.from("profiles").select("has_sample_data").eq("id", uid).single();
+    setHasSample(data?.has_sample_data || false);
+  };
+
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push("/auth"); return; }
@@ -50,8 +55,10 @@ export default function Dashboard() {
         const { data: p2 } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
         setProfile(p2);
       }
+      checkSampleFn(data.user.id);
       setLoading(false);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const openModal = useCallback((title: string, content: React.ReactNode, style: "fullscreen" | "bottom" | "side" | "inline" = "fullscreen") => {
@@ -65,6 +72,124 @@ export default function Dashboard() {
     setModalOpen(false);
     setModalContent(null);
   }, []);
+
+  const [hasSample, setHasSample] = useState(false);
+  const [sampleLoading, setSampleLoading] = useState(false);
+
+  const generateSample = useCallback(async () => {
+    if (!user) return;
+    setSampleLoading(true);
+    const uid = user.id;
+    const today = new Date().toISOString().split("T")[0];
+    const d = (n: number) => { const dt = new Date(); dt.setDate(dt.getDate() + n); return dt.toISOString().split("T")[0]; };
+
+    // Contacts
+    const contacts = [
+      { user_id: uid, name: "김민수", company: "(주)한국제조", position: "과장", phone: "010-1234-5678", group_name: "거래처", notes: "주력 거래처", favorite: true },
+      { user_id: uid, name: "박진수", company: "울산정밀(주)", position: "대리", phone: "010-9876-5432", group_name: "거래처", favorite: true },
+      { user_id: uid, name: "최영호", company: "(주)부산스틸", position: "부장", phone: "010-5555-1234", group_name: "거래처", favorite: false },
+      { user_id: uid, name: "김철수", company: "", position: "", phone: "010-1111-0001", group_name: "단골", notes: "매주 목요일 갈비탕", favorite: true },
+      { user_id: uid, name: "박서연", company: "신선식자재", position: "영업", phone: "010-2222-0001", group_name: "거래처", notes: "채소 매주 월요일", favorite: true },
+      { user_id: uid, name: "문상훈", company: "", position: "주방장", phone: "010-3333-0001", group_name: "직원", favorite: false },
+      { user_id: uid, name: "나은비", company: "", position: "서빙", phone: "010-3333-0002", group_name: "직원", favorite: false },
+      { user_id: uid, name: "김세무", company: "세무법인", position: "세무사", phone: "010-4444-0001", group_name: "파트너", favorite: true },
+    ];
+    await supabase.from("contacts").insert(contacts);
+
+    // Schedules
+    const schedules = [
+      { user_id: uid, title: "한국제조 미팅", start_date: today, start_time: "14:00", description: "견적서 협의", color: "#0071E3" },
+      { user_id: uid, title: "단체 예약 6명", start_date: today, start_time: "18:00", description: "2층 단체석", color: "#FF6B35" },
+      { user_id: uid, title: "식자재 발주", start_date: d(1), start_time: "10:00", description: "신선식자재", color: "#FF3B30" },
+      { user_id: uid, title: "알바 면접", start_date: d(1), start_time: "15:00", description: "서빙 2명", color: "#5856D6" },
+      { user_id: uid, title: "세무사 미팅", start_date: d(3), start_time: "14:00", description: "부가세 신고", color: "#30D158" },
+      { user_id: uid, title: "메뉴 촬영", start_date: d(5), start_time: "11:00", description: "신메뉴 3종", color: "#FF2D55" },
+    ];
+    await supabase.from("schedules").insert(schedules);
+
+    // Notes
+    const notes = [
+      { user_id: uid, title: "이번주 식자재", content: "당근 10kg, 양파 15kg, 대파 5단, 마늘 3kg, 소고기 20kg", color: "#FFB74D", pinned: true },
+      { user_id: uid, title: "신메뉴 아이디어", content: "1. 매운 갈비찜 2. 된장 파스타 3. 수제 만두", color: "#66BB6A", pinned: false },
+      { user_id: uid, title: "직원 미팅 메모", content: "서빙 속도 개선, 주말 인원 추가, 유니폼 교체", color: "#EF5350", pinned: false },
+      { user_id: uid, title: "거래처 단가", content: "한국축산 48,000원, 울산축산 52,000원, 부산스틸 45,000원", color: "#42A5F5", pinned: false },
+    ];
+    await supabase.from("notes").insert(notes);
+
+    // Todos
+    const todos = [
+      { user_id: uid, title: "한국제조 견적서 발송", completed: false, priority: 1 },
+      { user_id: uid, title: "네이버 리뷰 답글 3건", completed: false, priority: 1 },
+      { user_id: uid, title: "식자재 발주서 작성", completed: false, priority: 0 },
+      { user_id: uid, title: "알바 면접 준비", completed: false, priority: 0 },
+      { user_id: uid, title: "메뉴판 사진 촬영", completed: false, priority: 0 },
+      { user_id: uid, title: "3월 급여 이체", completed: true, priority: 0 },
+      { user_id: uid, title: "3월 매출 정리", completed: true, priority: 0 },
+    ];
+    await supabase.from("todos").insert(todos);
+
+    // Ledger
+    const ledger = [
+      { user_id: uid, entry_date: today, entry_type: "income", description: "점심 영업", amount: 1250000, payment_method: "카드" },
+      { user_id: uid, entry_date: today, entry_type: "income", description: "저녁 영업", amount: 1850000, payment_method: "카드+현금" },
+      { user_id: uid, entry_date: today, entry_type: "expense", description: "식자재 납품", amount: 320000, payment_method: "계좌이체" },
+      { user_id: uid, entry_date: d(-1), entry_type: "income", description: "점심+저녁", amount: 2630000, payment_method: "카드" },
+      { user_id: uid, entry_date: d(-1), entry_type: "expense", description: "한우 납품", amount: 580000, payment_method: "계좌이체" },
+      { user_id: uid, entry_date: d(-2), entry_type: "income", description: "점심+저녁", amount: 2300000, payment_method: "카드+현금" },
+      { user_id: uid, entry_date: d(-2), entry_type: "expense", description: "음료+주류", amount: 450000, payment_method: "카드" },
+      { user_id: uid, entry_date: d(-3), entry_type: "income", description: "점심+저녁", amount: 1900000, payment_method: "카드" },
+      { user_id: uid, entry_date: d(-3), entry_type: "expense", description: "임대료", amount: 2500000, payment_method: "계좌이체" },
+    ];
+    await supabase.from("ledger").insert(ledger);
+
+    // Reservations
+    const reservations = [
+      { user_id: uid, customer_name: "김철수", customer_phone: "010-1234-5678", party_size: 4, reservation_date: today, reservation_time: "12:00", service: "갈비탕", status: "confirmed", notes: "단골", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "이미영", customer_phone: "010-9876-5432", party_size: 2, reservation_date: today, reservation_time: "12:30", service: "점심특선", status: "confirmed", notes: "", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "박지현", customer_phone: "010-5555-1234", party_size: 6, reservation_date: today, reservation_time: "18:00", service: "회식", status: "confirmed", notes: "2층 단체석", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "정동현", customer_phone: "010-4444-8888", party_size: 8, reservation_date: d(1), reservation_time: "12:00", service: "회사점심", status: "confirmed", notes: "주차3대", source: "direct", reminder_sent: false },
+    ];
+    await supabase.from("reservations").insert(reservations);
+
+    // Employees
+    const employees = [
+      { user_id: uid, name: "문상훈", position: "주방장", emp_type: "fulltime", base_salary: 2800000, hourly_rate: 0, phone: "010-3333-0001", active: true },
+      { user_id: uid, name: "서민지", position: "홀매니저", emp_type: "fulltime", base_salary: 2400000, hourly_rate: 0, phone: "010-3333-0002", active: true },
+      { user_id: uid, name: "장현우", position: "주방보조", emp_type: "parttime", base_salary: 0, hourly_rate: 10400, phone: "010-3333-0003", active: true },
+      { user_id: uid, name: "나은비", position: "서빙", emp_type: "parttime", base_salary: 0, hourly_rate: 10400, phone: "010-3333-0004", active: true },
+    ];
+    await supabase.from("employees").insert(employees);
+
+    await supabase.from("profiles").update({ has_sample_data: true }).eq("id", uid);
+    setHasSample(true);
+    setSampleLoading(false);
+    window.location.reload();
+  }, [user]);
+
+  const clearSample = useCallback(async () => {
+    if (!user || !confirm("샘플 데이터를 모두 삭제하시겠습니까?\n연락처, 일정, 메모, 할일, 매출, 예약, 직원이 전부 삭제됩니다.")) return;
+    setSampleLoading(true);
+    const uid = user.id;
+    await supabase.from("contacts").delete().eq("user_id", uid);
+    await supabase.from("schedules").delete().eq("user_id", uid);
+    await supabase.from("notes").delete().eq("user_id", uid);
+    await supabase.from("todos").delete().eq("user_id", uid);
+    await supabase.from("ledger").delete().eq("user_id", uid);
+    await supabase.from("reservations").delete().eq("user_id", uid);
+    // Delete payroll first (FK), then employees
+    const { data: empIds } = await supabase.from("employees").select("id").eq("user_id", uid);
+    if (empIds) { for (const e of empIds) { await supabase.from("payroll").delete().eq("employee_id", e.id); } }
+    await supabase.from("employees").delete().eq("user_id", uid);
+    // Delete quote_items first (FK), then quotes
+    const { data: qIds } = await supabase.from("quotes").select("id").eq("user_id", uid);
+    if (qIds) { for (const q of qIds) { await supabase.from("quote_items").delete().eq("quote_id", q.id); } }
+    await supabase.from("quotes").delete().eq("user_id", uid);
+
+    await supabase.from("profiles").update({ has_sample_data: false }).eq("id", uid);
+    setHasSample(false);
+    setSampleLoading(false);
+    window.location.reload();
+  }, [user]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" /></div>;
   if (!user) return null;
@@ -92,8 +217,19 @@ export default function Dashboard() {
             </button>
           ))}
         </div>
-        <div className="p-3 border-t border-[var(--gray-100)]">
-          <button onClick={() => router.push("/")} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block mb-1 px-2">홈으로</button>
+        <div className="p-3 border-t border-[var(--gray-100)] space-y-1">
+          {hasSample ? (
+            <button onClick={clearSample} disabled={sampleLoading}
+              className="text-xs text-[var(--gray-500)] hover:text-[var(--danger)] block px-2 w-full text-left">
+              {sampleLoading ? "처리 중..." : "📦 샘플 데이터 삭제"}
+            </button>
+          ) : (
+            <button onClick={generateSample} disabled={sampleLoading}
+              className="text-xs text-[var(--primary)] hover:text-[var(--primary-dark)] block px-2 w-full text-left">
+              {sampleLoading ? "생성 중..." : "📦 샘플 데이터 추가"}
+            </button>
+          )}
+          <button onClick={() => router.push("/")} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block px-2">홈으로</button>
           <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-xs text-[var(--gray-500)] hover:text-[var(--danger)] block px-2">로그아웃</button>
         </div>
       </div>
@@ -119,6 +255,11 @@ export default function Dashboard() {
             <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
           </div>
           <div className="flex gap-2 items-center">
+            {hasSample ? (
+              <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--gray-400)]">{sampleLoading ? "..." : "📦삭제"}</button>
+            ) : (
+              <button onClick={generateSample} disabled={sampleLoading} className="text-xs text-[var(--primary)]">{sampleLoading ? "..." : "📦추가"}</button>
+            )}
             <button onClick={() => router.push("/")} className="text-sm text-[var(--primary)]">홈</button>
             <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
           </div>

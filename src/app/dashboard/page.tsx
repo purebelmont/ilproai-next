@@ -28,6 +28,7 @@ export default function Dashboard() {
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalStyle, setModalStyle] = useState<"fullscreen" | "bottom" | "side" | "inline">("fullscreen");
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
@@ -50,9 +51,10 @@ export default function Dashboard() {
     });
   }, [router]);
 
-  const openModal = useCallback((title: string, content: React.ReactNode) => {
+  const openModal = useCallback((title: string, content: React.ReactNode, style: "fullscreen" | "bottom" | "side" | "inline" = "fullscreen") => {
     setModalTitle(title);
     setModalContent(content);
+    setModalStyle(style);
     setModalOpen(true);
   }, []);
 
@@ -133,19 +135,54 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* iOS Modal */}
-      {modalOpen && (
+      {/* Style 1: Fullscreen */}
+      {modalOpen && modalStyle === "fullscreen" && (
         <div className="fixed inset-0 z-[200] bg-[var(--gray-50)] overflow-y-auto animate-[slideUp_0.3s_ease]">
           <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
             <button onClick={closeModal} className="text-[var(--primary)] text-sm font-medium">취소</button>
             <div className="text-base font-bold">{modalTitle}</div>
             <div className="w-10" />
           </div>
-          <div className="p-5">{modalContent}</div>
+          <div className="p-5 max-w-lg mx-auto">{modalContent}</div>
         </div>
       )}
 
-      <style jsx>{`@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+      {/* Style 2: Bottom Sheet */}
+      {modalOpen && modalStyle === "bottom" && (
+        <>
+          <div className="fixed inset-0 bg-black/30 z-[199] animate-[fadeIn_0.2s_ease]" onClick={closeModal} />
+          <div className="fixed bottom-0 left-0 right-0 z-[200] bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto animate-[slideUp_0.3s_ease] md:max-w-lg md:mx-auto">
+            <div className="w-9 h-1 bg-[var(--gray-300)] rounded-full mx-auto mt-2 mb-1" />
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--gray-100)]">
+              <button onClick={closeModal} className="text-[var(--primary)] text-sm">취소</button>
+              <div className="text-sm font-bold">{modalTitle}</div>
+              <div className="w-10" />
+            </div>
+            <div className="p-5">{modalContent}</div>
+          </div>
+        </>
+      )}
+
+      {/* Style 3: Side Panel */}
+      {modalOpen && modalStyle === "side" && (
+        <>
+          <div className="fixed inset-0 bg-black/30 z-[199] animate-[fadeIn_0.2s_ease]" onClick={closeModal} />
+          <div className="fixed top-0 right-0 bottom-0 z-[200] w-full max-w-md bg-white overflow-y-auto animate-[slideRight_0.3s_ease] shadow-2xl">
+            <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-xl border-b border-[var(--gray-200)] px-5 py-3 flex items-center justify-between">
+              <button onClick={closeModal} className="text-[var(--primary)] text-sm font-medium">← 닫기</button>
+              <div className="text-sm font-bold">{modalTitle}</div>
+              <div className="w-10" />
+            </div>
+            <div className="p-5">{modalContent}</div>
+          </div>
+        </>
+      )}
+
+      <style jsx>{`
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes slideRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
     </div>
   );
 }
@@ -254,6 +291,8 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
   const [calDate, setCalDate] = useState(new Date());
   const [selected, setSelected] = useState(new Date().toISOString().split("T")[0]);
   const [events, setEvents] = useState<any[]>([]);
+  const [inlineForm, setInlineForm] = useState(false);
+  const [inlineData, setInlineData] = useState({ title: "", start_time: "", description: "" });
   const monthNames = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
   const load = useCallback(async () => {
@@ -338,12 +377,17 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
           <div className="text-center py-10">
             <div className="text-3xl mb-3 opacity-30">📅</div>
             <p className="text-[var(--gray-400)] mb-4">이 날에 일정이 없습니다</p>
-            <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />)} className="text-[var(--primary)] font-medium">+ 새 일정 만들기</button>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "fullscreen")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">A. 풀스크린</button>
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "bottom")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">B. 바텀시트</button>
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "side")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">C. 사이드</button>
+              <button onClick={() => { setInlineForm(true); setInlineData({ title: "", start_time: "", description: "" }); }} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white">D. 인라인</button>
+            </div>
           </div>
         ) : (
           <>
             {dayEvents.map((e) => (
-              <div key={e.id} onClick={() => openModal("일정 수정", <EventForm event={e} onSave={saveEvent} onDelete={() => delEvent(e.id)} />)}
+              <div key={e.id} onClick={() => openModal("일정 수정", <EventForm event={e} onSave={saveEvent} onDelete={() => delEvent(e.id)} />, "bottom")}
                 className="flex items-start gap-3 py-3 border-b border-[var(--gray-100)] cursor-pointer">
                 <div className="w-[3px] rounded min-h-[36px]" style={{ background: e.color || "var(--primary)" }} />
                 <div className="text-xs text-[var(--gray-500)] min-w-[42px] pt-0.5">{e.start_time?.substring(0, 5) || "종일"}</div>
@@ -353,9 +397,36 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
                 </div>
               </div>
             ))}
-            <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />)}
-              className="text-[var(--primary)] text-sm font-medium mt-3 block">+ 일정 추가</button>
+            <div className="flex flex-wrap gap-2 mt-3">
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "fullscreen")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">A. 풀스크린</button>
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "bottom")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">B. 바텀시트</button>
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "side")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">C. 사이드</button>
+              <button onClick={() => { setInlineForm(true); setInlineData({ title: "", start_time: "", description: "" }); }} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white">D. 인라인</button>
+            </div>
           </>
+        )}
+
+        {/* Style D: Inline form */}
+        {inlineForm && (
+          <div className="mt-4 bg-white rounded-xl border border-[var(--primary)] p-4 animate-[fadeIn_0.2s_ease]">
+            <input value={inlineData.title} onChange={(e) => setInlineData({...inlineData, title: e.target.value})}
+              placeholder="일정 제목" autoFocus
+              className="w-full text-sm font-medium outline-none mb-2 pb-2 border-b border-[var(--gray-100)]" />
+            <div className="flex gap-2 mb-2">
+              <input type="time" value={inlineData.start_time} onChange={(e) => setInlineData({...inlineData, start_time: e.target.value})}
+                className="text-sm outline-none text-[var(--gray-500)] flex-1" />
+            </div>
+            <input value={inlineData.description} onChange={(e) => setInlineData({...inlineData, description: e.target.value})}
+              placeholder="메모 (선택)" className="w-full text-xs text-[var(--gray-500)] outline-none mb-3" />
+            <div className="flex gap-2">
+              <button onClick={async () => {
+                if (!inlineData.title) return;
+                await saveEvent({ title: inlineData.title, start_date: selected, start_time: inlineData.start_time, description: inlineData.description });
+                setInlineForm(false);
+              }} className="px-4 py-1.5 bg-[var(--primary)] text-white text-xs rounded-lg font-medium">저장</button>
+              <button onClick={() => setInlineForm(false)} className="px-4 py-1.5 text-xs text-[var(--gray-500)]">취소</button>
+            </div>
+          </div>
         )}
       </div>
     </div>

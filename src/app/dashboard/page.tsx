@@ -323,7 +323,7 @@ export default function Dashboard() {
       </div>
 
       {/* ═══ MOBILE — bottom tab bar ═══ */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 ${tab === "website" ? "hidden" : ""}`}
         style={{ background: "#0D0D12", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         <div className="flex h-[var(--tab-h)]">
           {MOBILE_TABS.map((t) => (
@@ -349,7 +349,7 @@ export default function Dashboard() {
       {/* ═══ MAIN CONTENT ═══ */}
       <div className="flex-1 md:ml-[120px] min-h-screen" style={{ background: "var(--bg)" }}>
         {/* Mobile header */}
-        <div className="md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between"
+        <div className={`md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between ${tab === "website" ? "hidden" : ""}`}
           style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"

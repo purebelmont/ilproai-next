@@ -309,46 +309,45 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       <div className="flex flex-1 min-h-0">
         {/* LEFT — Chat (narrow panel) */}
         <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[380px] lg:w-[420px] shrink-0`}
-          style={{ background: "#0D0D12" }}>
+          style={{ background: "var(--bg-card)" }}>
           {/* Chat header */}
-          <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#7D2AE7" }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
               </div>
-              <span className="text-[12px] font-semibold text-white/80">AI 홈페이지</span>
-              {site && <span className="text-[10px] text-white/30">{slug}.ilpro.ai</span>}
+              <span className="text-[12px] font-semibold" style={{ color: "var(--text)" }}>AI 홈페이지</span>
+              {site && <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{slug}.ilpro.ai</span>}
             </div>
             <div className="flex items-center gap-1.5">
-              {/* Mobile toggle */}
               <button onClick={() => setMobileView(mobileView === "chat" ? "preview" : "chat")}
-                className="md:hidden text-[10px] px-2 py-1 rounded-md text-white/50" style={{ background: "rgba(255,255,255,0.06)" }}>
+                className="md:hidden text-[10px] px-2 py-1 rounded-md" style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>
                 {mobileView === "chat" ? "미리보기" : "채팅"}
               </button>
               {site && (
                 <>
                   {status === "published" ? (
-                    <button onClick={() => save(false)} className="text-[10px] px-2 py-1 rounded-md text-white/50" style={{ background: "rgba(255,255,255,0.06)" }}>비공개</button>
+                    <button onClick={() => save(false)} className="text-[10px] px-2 py-1 rounded-md" style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>비공개</button>
                   ) : isPro ? (
                     <button onClick={() => save(true)} className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#30D158" }}>게시</button>
                   ) : (
                     <button className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#7D2AE7" }}
                       onClick={() => alert("PRO 플랜으로 업그레이드하면 사이트를 게시할 수 있습니다.\n₩29,900/월")}>PRO</button>
                   )}
-                  <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md text-white/70" style={{ background: "rgba(255,255,255,0.08)" }}>
+                  <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md" style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>
                     {saving ? "..." : "저장"}
                   </button>
                 </>
               )}
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-2.5" style={{ scrollbarWidth: "none" }}>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5" style={{ scrollbarWidth: "none", background: "var(--bg)" }}>
             {messages.map((msg, i) => (
               <div key={i}>
                 {msg.role === "system" ? (
                   <div>
                     <div className="inline-block max-w-[95%] rounded-2xl rounded-tl-md px-3 py-2 text-[12px] leading-relaxed"
-                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)" }}>
+                      style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }}>
                       <div className="whitespace-pre-wrap">{msg.text}</div>
                     </div>
                     {/* Template picker */}
@@ -357,7 +356,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                         {TEMPLATES.map(t => (
                           <button key={t.id} onClick={() => pickTemplate(t.id)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-medium active:scale-[0.97] transition-all"
-                            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)" }}>
+                            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }}>
                             <span className="text-xl">{t.icon}</span> {t.name}
                           </button>
                         ))}
@@ -369,7 +368,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                         {sections.map(s => (
                           <button key={s.id} onClick={() => handleSectionClick(s.id)}
                             className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-medium active:scale-[0.97] transition-all"
-                            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>
+                            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
                             <span>{s.icon}</span> {s.label}
                           </button>
                         ))}
@@ -385,7 +384,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                             setActiveSection(null);
                           }}
                             className="w-7 h-7 rounded-full border-2 transition-all active:scale-90"
-                            style={{ background: color, borderColor: c.theme.color === color ? "white" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
+                            style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
                         ))}
                       </div>
                     )}
@@ -403,14 +402,14 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           </div>
 
           {/* Input */}
-          <div className="shrink-0 p-2.5" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="shrink-0 p-2.5" style={{ borderTop: "1px solid var(--border)", background: "var(--bg-card)" }}>
             {activeSection && (
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(125,42,231,0.15)", color: "#A78BFA" }}>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
                   {sections.find(s => s.id === activeSection)?.icon} {sections.find(s => s.id === activeSection)?.label}
                 </span>
                 <button onClick={() => { setActiveSection(null); setMessages(prev => [...prev, { role: "system", text: "취소했어요.", action: "sections" }]); }}
-                  className="text-[10px] text-white/30">취소</button>
+                  className="text-[10px]" style={{ color: "var(--text-muted)" }}>취소</button>
               </div>
             )}
             {(step !== "template") && (
@@ -418,13 +417,13 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                 <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                   placeholder={step === "name" ? "가게 이름" : step === "slug" ? "확인 또는 주소 입력" : activeSection ? "내용 입력..." : "항목을 선택하세요"}
-                  className="flex-1 resize-none rounded-lg px-3 py-2 text-[12px] outline-none min-h-[38px] max-h-[100px] text-white/80 placeholder-white/20"
-                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+                  className="flex-1 resize-none rounded-lg px-3 py-2 text-[12px] outline-none min-h-[38px] max-h-[100px]"
+                  style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
                   rows={1} />
                 <button onClick={handleSend}
                   className="shrink-0 w-[38px] h-[38px] rounded-lg flex items-center justify-center text-white active:scale-95"
-                  style={{ background: input.trim() ? "#7D2AE7" : "rgba(255,255,255,0.06)" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                  style={{ background: input.trim() ? "#7D2AE7" : "var(--bg-hover)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={input.trim() ? "white" : "var(--text-muted)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
                 </button>
               </div>
             )}
@@ -432,15 +431,15 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
 
           {/* Actions */}
           {site && (
-            <div className="shrink-0 px-3 py-2 flex justify-center gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div className="shrink-0 px-3 py-2 flex justify-center gap-3" style={{ borderTop: "1px solid var(--border)" }}>
               <button onClick={() => {
                 if (!confirm("모든 내용을 초기화하시겠습니까?")) return;
                 const fresh = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: SUBTITLES[template] || "" } };
                 setC(fresh);
                 setMessages(prev => [...prev, { role: "system", text: "초기화했어요!", action: "sections" }]);
                 setActiveSection(null);
-              }} className="text-[10px] text-white/25 hover:text-white/50 transition-colors">초기화</button>
-              <button onClick={deleteSite} className="text-[10px] text-[#FF453A]/60 hover:text-[#FF453A] transition-colors">삭제</button>
+              }} className="text-[10px]" style={{ color: "var(--text-muted)" }}>초기화</button>
+              <button onClick={deleteSite} className="text-[10px] text-[var(--danger)]">삭제</button>
             </div>
           )}
         </div>
@@ -451,58 +450,31 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           return (
             <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
               {!hasContent ? (
-                /* ═══ OCEAN SCENE — inspirational empty state ═══ */
-                <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
-                  style={{ background: "linear-gradient(180deg, #0A1628 0%, #0E2A47 30%, #1A5276 55%, #2E86AB 75%, #48B1BF 90%, #A8E6CF 100%)" }}>
-                  {/* Stars */}
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(30)].map((_, i) => (
-                      <div key={i} className="absolute rounded-full bg-white" style={{
-                        width: Math.random() * 2 + 1, height: Math.random() * 2 + 1,
-                        top: `${Math.random() * 40}%`, left: `${Math.random() * 100}%`,
-                        opacity: Math.random() * 0.6 + 0.2,
-                      }} />
-                    ))}
-                  </div>
-                  {/* Moon glow */}
-                  <div className="absolute top-[12%] right-[20%] w-16 h-16 rounded-full"
-                    style={{ background: "radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)" }} />
-                  <div className="absolute top-[14%] right-[22%] w-8 h-8 rounded-full"
-                    style={{ background: "rgba(255,255,255,0.08)" }} />
-                  {/* Waves */}
-                  <div className="absolute bottom-0 left-0 right-0" style={{ height: "45%" }}>
-                    <svg viewBox="0 0 1440 320" className="absolute bottom-[120px] left-0 w-[200%] opacity-20"
-                      style={{ animation: "waveMove 8s ease-in-out infinite" }}>
-                      <path fill="#48B1BF" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,208C960,192,1056,160,1152,165.3C1248,171,1344,213,1392,234.7L1440,256L1440,320L0,320Z" />
-                    </svg>
-                    <svg viewBox="0 0 1440 320" className="absolute bottom-[80px] left-0 w-[200%] opacity-30"
-                      style={{ animation: "waveMove 6s ease-in-out infinite reverse" }}>
-                      <path fill="#2E86AB" d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,261.3C960,256,1056,224,1152,208C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z" />
-                    </svg>
-                    <svg viewBox="0 0 1440 320" className="absolute bottom-[30px] left-0 w-[200%] opacity-40"
-                      style={{ animation: "waveMove 7s ease-in-out infinite" }}>
-                      <path fill="#1A5276" d="M0,288L48,272C96,256,192,224,288,218.7C384,213,480,235,576,250.7C672,267,768,277,864,266.7C960,256,1056,224,1152,213.3C1248,203,1344,213,1392,218.7L1440,224L1440,320L0,320Z" />
-                    </svg>
-                    <div className="absolute bottom-0 left-0 right-0 h-[40px]" style={{ background: "#0E2236" }} />
-                  </div>
+                /* ═══ INSPIRATIONAL PHOTO — empty state ═══ */
+                <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
+                  {/* Background photo */}
+                  <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format"
+                    alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  {/* Dark overlay */}
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%)" }} />
                   {/* Text */}
-                  <div className="relative z-10 text-center px-8 -mt-16">
-                    <div className="text-[32px] font-extrabold text-white leading-tight tracking-tight mb-4"
-                      style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}>
+                  <div className="relative z-10 text-center px-8">
+                    <div className="text-[38px] font-extrabold text-white leading-tight tracking-tight mb-5"
+                      style={{ textShadow: "0 2px 40px rgba(0,0,0,0.5)" }}>
                       당신의 상상력을<br/>펼쳐 보세요
                     </div>
-                    <div className="text-[14px] text-white/40 leading-relaxed">
+                    <div className="text-[15px] text-white/70 leading-relaxed"
+                      style={{ textShadow: "0 1px 20px rgba(0,0,0,0.5)" }}>
                       왼쪽에서 업종을 선택하고<br/>대화를 시작하면 사이트가 만들어집니다
                     </div>
-                    <div className="mt-8 flex justify-center gap-1">
+                    <div className="mt-10 flex justify-center gap-1.5">
                       {[0,1,2].map(i => (
-                        <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.3)", animation: `waveDot 1.5s ease-in-out ${i * 0.3}s infinite` }} />
+                        <div key={i} className="w-2 h-2 rounded-full bg-white/40" style={{ animation: `pulse 2s ease-in-out ${i * 0.4}s infinite` }} />
                       ))}
                     </div>
                   </div>
                   <style>{`
-                    @keyframes waveMove { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-25%); } }
-                    @keyframes waveDot { 0%,100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+                    @keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
                   `}</style>
                 </div>
               ) : (

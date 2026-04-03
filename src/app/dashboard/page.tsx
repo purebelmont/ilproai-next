@@ -227,7 +227,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex">
       {/* ═══ SIDEBAR — Canva-style dark nav ═══ */}
-      <div className="hidden md:flex flex-col w-[72px] hover:w-[220px] group/sidebar fixed top-0 left-0 bottom-0 z-40 transition-all duration-300 overflow-hidden"
+      <div className="hidden md:flex flex-col w-[72px] hover:w-[240px] group/sidebar fixed top-0 left-0 bottom-0 z-40 transition-all duration-300 overflow-hidden hover:shadow-[8px_0_30px_rgba(0,0,0,0.4)]"
         style={{ background: "#0D0D12" }}>
         {/* Logo */}
         <div className="px-4 py-5 flex items-center gap-3 shrink-0">

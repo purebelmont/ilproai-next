@@ -166,7 +166,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     setMessages(prev => [
       ...prev,
       { role: "user", text: name },
-      { role: "system", text: `사이트 주소를 정해주세요.\n자동 생성: ${autoSlug}.ilpro.ai\n\n이대로 괜찮으면 "확인"을, 변경하려면 원하는 주소를 입력하세요.`, action: "slug-input" },
+      { role: "system", text: `사이트 주소를 정해주세요. (영문 주소)\n자동 생성: ${autoSlug}.ilpro.ai\n\n이대로 괜찮으면 "확인"을, 변경하려면 원하는 영문 주소를 입력하세요.`, action: "slug-input" },
     ]);
     setInput("");
     setStep("slug");

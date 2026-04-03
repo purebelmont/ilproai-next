@@ -189,6 +189,22 @@ CREATE TABLE payroll (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Websites (홈페이지 빌더)
+CREATE TABLE websites (
+    id BIGSERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    slug TEXT NOT NULL UNIQUE,
+    business_name TEXT NOT NULL,
+    template TEXT DEFAULT 'restaurant',
+    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+    content JSONB DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_websites_slug ON websites(slug);
+CREATE INDEX idx_websites_user_id ON websites(user_id);
+
 -- ═══ Row Level Security (RLS) ═══
 -- Users can only see their own data
 
@@ -204,6 +220,7 @@ ALTER TABLE quotes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quote_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payroll ENABLE ROW LEVEL SECURITY;
+ALTER TABLE websites ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: users can read/update their own
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
@@ -215,7 +232,7 @@ DO $$
 DECLARE
     tbl TEXT;
 BEGIN
-    FOR tbl IN SELECT unnest(ARRAY['contacts','schedules','notes','todos','files','ledger','reservations','quotes','employees','payroll'])
+    FOR tbl IN SELECT unnest(ARRAY['contacts','schedules','notes','todos','files','ledger','reservations','quotes','employees','payroll','websites'])
     LOOP
         EXECUTE format('CREATE POLICY "Users can view own %I" ON %I FOR SELECT USING (auth.uid() = user_id)', tbl, tbl);
         EXECUTE format('CREATE POLICY "Users can insert own %I" ON %I FOR INSERT WITH CHECK (auth.uid() = user_id)', tbl, tbl);
@@ -223,6 +240,10 @@ BEGIN
         EXECUTE format('CREATE POLICY "Users can delete own %I" ON %I FOR DELETE USING (auth.uid() = user_id)', tbl, tbl);
     END LOOP;
 END $$;
+
+-- Websites: published sites are publicly readable
+CREATE POLICY "Anyone can view published websites" ON websites FOR SELECT
+    USING (status = 'published' OR auth.uid() = user_id);
 
 -- Quote items: accessible if user owns the quote
 CREATE POLICY "Users can view own quote_items" ON quote_items FOR SELECT

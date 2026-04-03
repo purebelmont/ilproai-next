@@ -8,10 +8,11 @@ import FilesPanel from "@/components/FilesPanel";
 import QuotesPanel from "@/components/QuotesPanel";
 import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
+import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
 
-type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report";
+type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website";
 
-const TABS: { id: Tab; icon: string; label: string }[] = [
+const TIER1_TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "home", icon: "🏠", label: "대시보드" },
   { id: "contacts", icon: "👤", label: "연락처" },
   { id: "calendar", icon: "📅", label: "캘린더" },
@@ -24,6 +25,12 @@ const TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "payroll", icon: "👥", label: "급여" },
   { id: "report", icon: "📊", label: "리포트" },
 ];
+
+const TIER2_TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: "website", icon: "🌐", label: "홈페이지" },
+];
+
+const TABS = [...TIER1_TABS, ...TIER2_TABS];
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -226,7 +233,22 @@ export default function Dashboard() {
           <div className="text-xs text-[var(--gray-500)] mt-0.5">{bizName}</div>
         </div>
         <div className="flex-1 overflow-y-auto py-2 px-2">
-          {TABS.map((t) => (
+          {TIER1_TABS.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5"
+              style={{ background: tab === t.id ? "var(--primary-light)" : "transparent", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", fontWeight: tab === t.id ? 600 : 400 }}>
+              <span className="text-lg">{t.icon}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
+          {/* Tier 2 separator */}
+          <div className="mx-3 mt-3 mb-2 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+            <div className="flex items-center gap-1.5 px-1 mb-1">
+              <span className="text-[10px] font-bold tracking-wider text-[var(--text-muted)]">PRO</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)", color: "white" }}>Tier 2</span>
+            </div>
+          </div>
+          {TIER2_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5"
               style={{ background: tab === t.id ? "var(--primary-light)" : "transparent", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", fontWeight: tab === t.id ? 600 : 400 }}>
@@ -259,7 +281,7 @@ export default function Dashboard() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-xl z-50"
         style={{ background: dark ? "rgba(28,28,30,0.95)" : "rgba(255,255,255,0.95)", borderTop: "1px solid var(--border)", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         <div className="flex h-[var(--tab-h)]">
-          {TABS.slice(0, 4).map((t) => (
+          {TIER1_TABS.slice(0, 4).map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px]"
               style={{ color: tab === t.id ? "var(--primary)" : "var(--text-muted)" }}>
@@ -277,15 +299,34 @@ export default function Dashboard() {
 
         {/* More menu */}
         {mobileMore && (
-          <div className="border-t px-3 py-3 grid grid-cols-4 gap-2 animate-[slideUp_0.2s_ease]" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
-            {TABS.slice(4).map((t) => (
-              <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
-                className="flex flex-col items-center gap-1 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
-                style={{ background: tab === t.id ? "var(--primary-light)" : "var(--bg-hover)", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)" }}>
-                <span className="text-2xl">{t.icon}</span>
-                <span className="text-[11px] font-medium">{t.label}</span>
-              </button>
-            ))}
+          <div className="border-t px-3 py-3 animate-[slideUp_0.2s_ease]" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
+            {/* Tier 1 remaining tabs */}
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {TIER1_TABS.slice(4).map((t) => (
+                <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
+                  className="flex flex-col items-center gap-1 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
+                  style={{ background: tab === t.id ? "var(--primary-light)" : "var(--bg-hover)", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)" }}>
+                  <span className="text-2xl">{t.icon}</span>
+                  <span className="text-[11px] font-medium">{t.label}</span>
+                </button>
+              ))}
+            </div>
+            {/* Tier 2 section */}
+            <div className="flex items-center gap-1.5 mb-2 mt-1">
+              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+              <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)", color: "white" }}>PRO</span>
+              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {TIER2_TABS.map((t) => (
+                <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
+                  className="flex flex-col items-center gap-1 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform relative"
+                  style={{ background: tab === t.id ? "var(--primary-light)" : "var(--bg-hover)", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", border: "1px solid", borderColor: tab === t.id ? "var(--primary)" : "transparent" }}>
+                  <span className="text-2xl">{t.icon}</span>
+                  <span className="text-[11px] font-medium">{t.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -323,6 +364,7 @@ export default function Dashboard() {
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
+          {tab === "website" && <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} openModal={openModal} closeModal={closeModal} />}
         </div>
       </div>
 

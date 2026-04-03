@@ -4,15 +4,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface Website {
-  id: number;
-  user_id: string;
-  slug: string;
-  business_name: string;
-  template: string;
-  status: string;
-  content: WebsiteContent;
-  created_at: string;
-  updated_at: string;
+  id: number; user_id: string; slug: string; business_name: string;
+  template: string; status: string; content: WebsiteContent;
+  created_at: string; updated_at: string;
 }
 
 interface WebsiteContent {
@@ -25,11 +19,7 @@ interface WebsiteContent {
   theme: { color: string; font: string };
 }
 
-interface ChatMessage {
-  role: "system" | "user";
-  text: string;
-  action?: string;
-}
+interface ChatMessage { role: "system" | "user"; text: string; action?: string }
 
 const EMPTY_CONTENT: WebsiteContent = {
   hero: { title: "", subtitle: "", image: "" },
@@ -60,34 +50,12 @@ const TEMPLATES = [
   { id: "freelance", name: "프리랜서", icon: "💻" },
 ];
 
-const COLORS = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500", "#000000", "#E53935"];
+const COLORS = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500", "#000000", "#E53935", "#7D2AE7", "#00B4D8", "#2D6A4F", "#E85D04"];
 
-const SUBTITLES: Record<string, string> = {
-  restaurant: "맛있는 음식과 따뜻한 분위기",
-  service: "최고의 서비스를 제공합니다",
-  retail: "좋은 상품을 합리적인 가격에",
-  office: "신뢰할 수 있는 비즈니스 파트너",
-  medical: "건강한 삶을 위한 전문 의료 서비스",
-  education: "미래를 여는 교육의 시작",
-  fitness: "더 강하고 건강한 나를 만드는 곳",
-  lodging: "편안한 휴식, 특별한 추억",
-  repair: "빠르고 정확한 전문 수리 서비스",
-  legal: "든든한 법률·세무 파트너",
-  realestate: "당신의 꿈의 공간을 찾아드립니다",
-  pet: "우리 아이를 위한 최고의 케어",
-  wedding: "인생에서 가장 아름다운 순간",
-  manufacturing: "품질과 신뢰의 제조 파트너",
-  logistics: "빠르고 안전한 물류 솔루션",
-  freelance: "전문성으로 만드는 차이",
-};
+type Step = "template" | "name" | "description" | "contact" | "generating" | "edit";
 
-// ══════════════════════════════
-// MAIN — starts in LLM chat UI immediately
-// ══════════════════════════════
-export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; plan: string; openModal?: any; closeModal?: any }) {
+export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; plan: string }) {
   const isPro = plan === "pro" || plan === "team";
-
-  // Site state
   const [site, setSite] = useState<Website | null>(null);
   const [c, setC] = useState<WebsiteContent>(EMPTY_CONTENT);
   const [saving, setSaving] = useState(false);
@@ -95,45 +63,20 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [mobileView, setMobileView] = useState<"chat" | "preview">("chat");
   const [loaded, setLoaded] = useState(false);
 
-  // Chat state
-  const [step, setStep] = useState<"template" | "name" | "slug" | "edit">("template");
+  const [step, setStep] = useState<Step>("template");
   const [template, setTemplate] = useState("");
   const [bizName, setBizName] = useState("");
   const [slug, setSlug] = useState("");
+  const [description, setDescription] = useState("");
+  const [contactInfo, setContactInfo] = useState("");
+
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "system", text: "안녕하세요! AI 홈페이지 빌더입니다.\n어떤 업종의 사이트를 만들까요?", action: "template" },
+    { role: "system", text: "안녕하세요! AI 홈페이지 빌더입니다.\n몇 가지 질문에 답하시면 완성된 웹사이트를 만들어 드릴게요.\n\n어떤 업종인가요?", action: "template" },
   ]);
   const [input, setInput] = useState("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Load existing site
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data, error } = await supabase.from("websites").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1);
-        if (!error && data && data.length > 0) {
-          const s = data[0] as Website;
-          setSite(s);
-          setC(s.content || EMPTY_CONTENT);
-          setStatus(s.status);
-          setTemplate(s.template);
-          setBizName(s.business_name);
-          setSlug(s.slug);
-          setStep("edit");
-          setMessages([
-            { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n어떤 항목을 수정할까요?`, action: "sections" },
-          ]);
-        }
-      } catch (e) {
-        // Table might not exist yet — continue with fresh state
-      }
-      setLoaded(true);
-    })();
-  }, [userId]);
-
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
@@ -143,86 +86,146 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     { id: "theme", icon: "🎨", label: "브랜드 컬러" },
   ];
 
-  // ── Template selection ──
+  // Load existing site
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await supabase.from("websites").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1);
+        if (!error && data && data.length > 0) {
+          const s = data[0] as Website;
+          setSite(s); setC(s.content || EMPTY_CONTENT); setStatus(s.status);
+          setTemplate(s.template); setBizName(s.business_name); setSlug(s.slug);
+          setStep("edit");
+          setMessages([
+            { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n수정할 항목을 선택하거나, 자유롭게 입력하세요.`, action: "sections" },
+          ]);
+        }
+      } catch {}
+      setLoaded(true);
+    })();
+  }, [userId]);
+
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // ═══ STEP HANDLERS ═══
+
   function pickTemplate(id: string) {
     setTemplate(id);
     const t = TEMPLATES.find(t => t.id === id);
     setMessages(prev => [
       ...prev,
       { role: "user", text: `${t?.icon} ${t?.name}` },
-      { role: "system", text: "좋아요! 가게(회사) 이름을 입력해주세요.", action: "name-input" },
+      { role: "system", text: "가게(회사) 이름이 뭔가요?" },
     ]);
     setStep("name");
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
-  // ── Name → Slug ──
   function submitName() {
-    if (!input.trim()) return;
     const name = input.trim();
+    if (!name) return;
     setBizName(name);
-    const autoSlug = name.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 30);
-    setSlug(autoSlug);
     setMessages(prev => [
       ...prev,
       { role: "user", text: name },
-      { role: "system", text: `사이트 주소를 정해주세요. (영문 주소)\n자동 생성: ${autoSlug}.ilpro.ai\n\n이대로 괜찮으면 "확인"을, 변경하려면 원하는 영문 주소를 입력하세요.`, action: "slug-input" },
+      { role: "system", text: "어떤 곳인지 한 줄로 설명해 주세요.\n예: \"20년 전통 한식당\", \"울산 최고의 네일샵\"" },
     ]);
     setInput("");
-    setStep("slug");
+    setStep("description");
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
-  // ── Slug → Create site ──
-  async function submitSlug() {
-    const text = input.trim();
-    const finalSlug = text === "확인" || text === "" ? slug : text.toLowerCase().replace(/[^a-z0-9-]/g, "");
-    if (finalSlug.length < 2) {
-      setMessages(prev => [...prev, { role: "system", text: "주소는 2자 이상이어야 해요. 다시 입력해주세요." }]);
-      return;
-    }
-
-    // Check duplicate
-    const { data: existing } = await supabase.from("websites").select("id").eq("slug", finalSlug).maybeSingle();
-    if (existing) {
-      setMessages(prev => [...prev, { role: "system", text: `"${finalSlug}.ilpro.ai"는 이미 사용 중이에요. 다른 주소를 입력해주세요.` }]);
-      return;
-    }
-
-    setSlug(finalSlug);
-    setMessages(prev => [...prev, { role: "user", text: `${finalSlug}.ilpro.ai` }]);
-    setInput("");
-
-    // Create site in DB
-    const content = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: SUBTITLES[template] || "" } };
-    const { data, error } = await supabase.from("websites").insert({
-      user_id: userId, slug: finalSlug, business_name: bizName, template, status: "draft", content,
-    }).select().single();
-
-    if (error) {
-      setMessages(prev => [...prev, { role: "system", text: "오류가 발생했어요: " + error.message }]);
-      return;
-    }
-
-    const newSite = data as Website;
-    setSite(newSite);
-    setC(content);
-    setStep("edit");
+  function submitDescription() {
+    const desc = input.trim();
+    if (!desc) return;
+    setDescription(desc);
     setMessages(prev => [
       ...prev,
-      { role: "system", text: `"${bizName}" 사이트가 생성됐어요! 🎉\n${finalSlug}.ilpro.ai\n\n이제 내용을 채워볼까요? 아래에서 항목을 선택하세요.`, action: "sections" },
+      { role: "user", text: desc },
+      { role: "system", text: "연락처를 알려주세요.\n전화번호, 주소, 이메일 등 아는 만큼 입력하시면 돼요.\n\n예: 052-123-4567, 울산 남구 삼산동 123" },
     ]);
+    setInput("");
+    setStep("contact");
+    setTimeout(() => inputRef.current?.focus(), 100);
   }
 
-  // ── Section editing ──
+  async function submitContact() {
+    const contact = input.trim();
+    setContactInfo(contact);
+    setMessages(prev => [...prev, { role: "user", text: contact || "(건너뛰기)" }]);
+    setInput("");
+
+    // Generate slug
+    const autoSlug = bizName.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 30) || "my-site";
+    setSlug(autoSlug);
+
+    // Show generating state
+    setStep("generating");
+    setMessages(prev => [...prev, { role: "system", text: "AI가 웹사이트를 만들고 있어요... ✨", action: "loading" }]);
+
+    // Call AI API
+    try {
+      const res = await fetch("/api/generate-site", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ template, bizName, description, contact, features: "" }),
+      });
+      const { content } = await res.json();
+
+      // Ensure proper structure
+      const generated: WebsiteContent = {
+        hero: { title: content.hero?.title || bizName, subtitle: content.hero?.subtitle || description, image: "" },
+        about: { text: content.about?.text || "", image: "" },
+        services: (content.services || []).filter((s: any) => s.name),
+        hours: { mon: "", tue: "", wed: "", thu: "", fri: "", sat: "", sun: "" },
+        contact: { phone: content.contact?.phone || "", email: content.contact?.email || "", address: content.contact?.address || "", kakao: content.contact?.kakao || "" },
+        gallery: [],
+        theme: { color: content.theme?.color || "#7D2AE7", font: "default" },
+      };
+
+      setC(generated);
+
+      // Save to DB
+      const { data: existing } = await supabase.from("websites").select("id").eq("slug", autoSlug).maybeSingle();
+      const finalSlug = existing ? autoSlug + Math.floor(Math.random() * 100) : autoSlug;
+      setSlug(finalSlug);
+
+      const { data, error } = await supabase.from("websites").insert({
+        user_id: userId, slug: finalSlug, business_name: bizName, template, status: "draft", content: generated,
+      }).select().single();
+
+      if (error) {
+        setMessages(prev => [...prev, { role: "system", text: "저장 중 오류: " + error.message }]);
+        setStep("edit");
+        return;
+      }
+
+      setSite(data as Website);
+      setStep("edit");
+      setMobileView("preview");
+      setMessages(prev => [
+        ...prev.filter(m => m.action !== "loading"),
+        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n📍 ${finalSlug}.ilpro.ai\n\n오른쪽 미리보기를 확인하세요.\n수정하고 싶은 부분이 있으면 아래에서 선택하세요.`, action: "sections" },
+      ]);
+    } catch (e) {
+      setMessages(prev => [
+        ...prev.filter(m => m.action !== "loading"),
+        { role: "system", text: "생성 중 오류가 발생했어요. 다시 시도해 주세요." },
+      ]);
+      setStep("contact");
+    }
+  }
+
+  // ═══ EDIT MODE — section editing ═══
+
   function handleSectionClick(sectionId: string) {
     setActiveSection(sectionId);
     const hints: Record<string, string> = {
-      hero: `메인 타이틀을 입력하세요.\n예: "맛있는한식당" / "정성을 담은 한 끼"\n\n제목과 부제를 / 로 구분하거나 두 줄로 입력하세요.`,
-      about: `가게 소개를 자유롭게 작성해주세요.\n예: "20년 전통의 한식 전문점입니다. 매일 새벽 시장에서 직접 재료를 골라옵니다."`,
-      services: `${template === "restaurant" ? "메뉴" : "서비스"}를 입력하세요. 한 줄에 하나씩:\n예:\n갈비탕 - 한우 갈비 - 15,000\n된장찌개 - 집된장 - 9,000`,
-      contact: `연락처를 입력하세요.\n예:\n전화: 052-123-4567\n주소: 울산 남구 삼산동 123\n이메일: info@example.com`,
-      theme: "아래에서 브랜드 컬러를 선택하세요.",
+      hero: `메인 타이틀을 수정하세요.\n제목 / 부제목 형식으로 입력하세요.`,
+      about: `소개글을 수정하세요. 자유롭게 작성하시면 됩니다.`,
+      services: `${template === "restaurant" ? "메뉴" : "서비스"}를 수정하세요.\n이름 - 설명 - 가격 형식으로 한 줄에 하나씩.`,
+      contact: `연락처를 수정하세요.\n전화, 주소, 이메일 등.`,
+      theme: "브랜드 컬러를 선택하세요.",
     };
     setMessages(prev => [...prev, { role: "system", text: hints[sectionId] || "", action: sectionId === "theme" ? "colors" : undefined }]);
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -231,41 +234,30 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   function parseAndApply(text: string) {
     if (!activeSection) return;
     const updated = { ...c };
-
     switch (activeSection) {
       case "hero": {
-        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-        if (lines[0]) {
-          const parts = lines[0].split(/[\/\|]/).map(s => s.trim());
-          updated.hero = { ...updated.hero, title: parts[0] || updated.hero.title, subtitle: parts[1] || lines[1] || updated.hero.subtitle };
-        }
-        if (lines[1] && !lines[0].includes("/")) updated.hero.subtitle = lines[1];
+        const parts = text.split(/[\/\|]/).map(s => s.trim());
+        updated.hero = { ...updated.hero, title: parts[0] || updated.hero.title, subtitle: parts[1] || updated.hero.subtitle };
         break;
       }
-      case "about":
-        updated.about = { ...updated.about, text: text.trim() };
-        break;
+      case "about": updated.about = { ...updated.about, text: text.trim() }; break;
       case "services": {
-        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-        const svcs = lines.map(line => {
-          const parts = line.split(/[-–—,]/).map(s => s.trim());
-          return { name: parts[0] || "", description: parts[1] || "", price: parts[2] || "" };
+        const svcs = text.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
+          const p = line.split(/[-–—,]/).map(s => s.trim());
+          return { name: p[0] || "", description: p[1] || "", price: p[2] || "" };
         }).filter(s => s.name);
-        if (svcs.length > 0) updated.services = [...updated.services.filter(s => s.name), ...svcs];
+        if (svcs.length) updated.services = svcs;
         break;
       }
       case "contact": {
-        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-        for (const line of lines) {
-          const lower = line.toLowerCase();
-          const val = line.replace(/^(전화|주소|이메일|카카오톡?|메일|email|phone|address)[\s:：]+/i, "").trim();
-          if (lower.match(/^(전화|phone|tel)/)) updated.contact.phone = val;
-          else if (lower.match(/^(주소|address)/)) updated.contact.address = val;
-          else if (lower.match(/^(이메일|메일|email)/)) updated.contact.email = val;
-          else if (lower.match(/^(카카오)/)) updated.contact.kakao = val;
-          else if (line.match(/^\d{2,3}-\d{3,4}-\d{4}$/)) updated.contact.phone = line;
-          else if (line.includes("@")) updated.contact.email = line;
-          else updated.contact.address = line;
+        for (const line of text.split("\n").map(l => l.trim()).filter(Boolean)) {
+          const val = line.replace(/^(전화|주소|이메일|카카오톡?|메일)[\s:：]+/i, "").trim();
+          if (line.match(/\d{2,3}-\d{3,4}-\d{4}/)) updated.contact.phone = line.match(/\d{2,3}-\d{3,4}-\d{4}/)![0];
+          else if (line.includes("@")) updated.contact.email = val;
+          else if (line.toLowerCase().match(/^(전화|phone)/)) updated.contact.phone = val;
+          else if (line.toLowerCase().match(/^(주소|address)/)) updated.contact.address = val;
+          else if (line.toLowerCase().match(/^(이메일|email)/)) updated.contact.email = val;
+          else if (line.length > 5) updated.contact.address = val;
         }
         break;
       }
@@ -273,13 +265,15 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     setC(updated);
   }
 
-  // ── Send message ──
+  // ═══ SEND ═══
+
   function handleSend() {
     if (!input.trim()) return;
     const text = input.trim();
 
     if (step === "name") { submitName(); return; }
-    if (step === "slug") { submitSlug(); return; }
+    if (step === "description") { submitDescription(); return; }
+    if (step === "contact") { submitContact(); return; }
 
     // Edit mode
     setMessages(prev => [...prev, { role: "user", text }]);
@@ -287,7 +281,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
 
     if (activeSection) {
       parseAndApply(text);
-      setMessages(prev => [...prev, { role: "system", text: "적용했어요! 미리보기를 확인하세요.\n다른 항목을 수정할까요?", action: "sections" }]);
+      setMessages(prev => [...prev, { role: "system", text: "수정했어요! 미리보기를 확인하세요.", action: "sections" }]);
       setActiveSection(null);
     } else {
       const lower = text.toLowerCase();
@@ -296,7 +290,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       else if (lower.match(/메뉴|서비스|가격|목록/)) handleSectionClick("services");
       else if (lower.match(/연락|전화|주소|이메일/)) handleSectionClick("contact");
       else if (lower.match(/색|컬러|디자인|테마/)) handleSectionClick("theme");
-      else setMessages(prev => [...prev, { role: "system", text: "아래 버튼에서 수정할 항목을 선택해주세요.", action: "sections" }]);
+      else setMessages(prev => [...prev, { role: "system", text: "아래에서 수정할 항목을 선택해주세요.", action: "sections" }]);
     }
     setTimeout(() => inputRef.current?.focus(), 100);
   }
@@ -306,35 +300,28 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     setSaving(true);
     const newStatus = publish !== undefined ? (publish ? "published" : "draft") : status;
     await supabase.from("websites").update({ content: c, status: newStatus, updated_at: new Date().toISOString() }).eq("id", site.id);
-    setStatus(newStatus);
-    setSaving(false);
+    setStatus(newStatus); setSaving(false);
   }
 
   async function deleteSite() {
-    if (!site || !confirm("이 사이트를 삭제하시겠습니까?")) return;
+    if (!site || !confirm("사이트를 삭제하시겠습니까?")) return;
     await supabase.from("websites").delete().eq("id", site.id);
-    setSite(null);
-    setC(EMPTY_CONTENT);
-    setStep("template");
-    setTemplate("");
-    setBizName("");
-    setSlug("");
-    setMessages([{ role: "system", text: "사이트가 삭제됐어요.\n새로 만들까요? 업종을 선택해주세요.", action: "template" }]);
+    setSite(null); setC(EMPTY_CONTENT); setStep("template"); setTemplate(""); setBizName(""); setSlug("");
+    setMessages([{ role: "system", text: "삭제했어요. 새로 만들까요?", action: "template" }]);
   }
 
-  if (!loaded) return <div className="flex items-center justify-center h-[50vh]"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" /></div>;
+  if (!loaded) return <div className="flex items-center justify-center h-full"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" /></div>;
 
-  // ══════════════════════════════
-  // RENDER — full-screen split pane
-  // ══════════════════════════════
+  const hasContent = c.hero.title || c.about.text || c.services.some(s => s.name) || c.contact.phone;
+
+  // ═══ RENDER ═══
   return (
     <div className="flex flex-col overflow-hidden h-full">
-      {/* Split pane — no top bar, cleaner */}
       <div className="flex flex-1 min-h-0">
-        {/* LEFT — Chat (narrow panel) */}
+        {/* ═══ LEFT — Chat ═══ */}
         <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[380px] lg:w-[420px] shrink-0`}
           style={{ background: "var(--bg-card)" }}>
-          {/* Chat header */}
+          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#7D2AE7" }}>
@@ -350,21 +337,17 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
               </button>
               {site && (
                 <>
-                  {status === "published" ? (
-                    <button onClick={() => save(false)} className="text-[10px] px-2 py-1 rounded-md" style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>비공개</button>
-                  ) : isPro ? (
+                  {status !== "published" && isPro && (
                     <button onClick={() => save(true)} className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#30D158" }}>게시</button>
-                  ) : (
-                    <button className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#7D2AE7" }}
-                      onClick={() => alert("PRO 플랜으로 업그레이드하면 사이트를 게시할 수 있습니다.\n₩29,900/월")}>PRO</button>
                   )}
-                  <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md" style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>
-                    {saving ? "..." : "저장"}
-                  </button>
+                  <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md"
+                    style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>{saving ? "..." : "저장"}</button>
                 </>
               )}
             </div>
           </div>
+
+          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2.5" style={{ scrollbarWidth: "none", background: "var(--bg)" }}>
             {messages.map((msg, i) => (
               <div key={i}>
@@ -374,42 +357,46 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                       style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }}>
                       <div className="whitespace-pre-wrap">{msg.text}</div>
                     </div>
-                    {/* Template picker */}
                     {msg.action === "template" && (
-                      <div className="flex flex-wrap gap-2 mt-3">
+                      <div className="grid grid-cols-2 gap-1.5 mt-2">
                         {TEMPLATES.map(t => (
                           <button key={t.id} onClick={() => pickTemplate(t.id)}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-medium active:scale-[0.97] transition-all"
                             style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }}>
-                            <span className="text-xl">{t.icon}</span> {t.name}
+                            <span>{t.icon}</span> {t.name}
                           </button>
                         ))}
                       </div>
                     )}
-                    {/* Section picker */}
                     {msg.action === "sections" && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {sections.map(s => (
                           <button key={s.id} onClick={() => handleSectionClick(s.id)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-medium active:scale-[0.97] transition-all"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-medium active:scale-[0.97]"
                             style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
                             <span>{s.icon}</span> {s.label}
                           </button>
                         ))}
                       </div>
                     )}
-                    {/* Color picker */}
                     {msg.action === "colors" && (
-                      <div className="flex flex-wrap gap-2 mt-3">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         {COLORS.map(color => (
                           <button key={color} onClick={() => {
                             setC(prev => ({ ...prev, theme: { ...prev.theme, color } }));
-                            setMessages(prev => [...prev, { role: "user", text: `컬러: ${color}` }, { role: "system", text: "적용했어요! 다른 항목을 수정할까요?", action: "sections" }]);
+                            setMessages(prev => [...prev, { role: "user", text: color }, { role: "system", text: "적용했어요!", action: "sections" }]);
                             setActiveSection(null);
-                          }}
-                            className="w-7 h-7 rounded-full border-2 transition-all active:scale-90"
-                            style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
+                          }} className="w-7 h-7 rounded-full border-2 transition-all active:scale-90"
+                            style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent" }} />
                         ))}
+                      </div>
+                    )}
+                    {msg.action === "loading" && (
+                      <div className="flex gap-1 mt-2">
+                        {[0,1,2].map(i => (
+                          <div key={i} className="w-2 h-2 rounded-full" style={{ background: "#7D2AE7", animation: `bounce 1s ease-in-out ${i * 0.2}s infinite` }} />
+                        ))}
+                        <style>{`@keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }`}</style>
                       </div>
                     )}
                   </div>
@@ -436,11 +423,11 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   className="text-[10px]" style={{ color: "var(--text-muted)" }}>취소</button>
               </div>
             )}
-            {(step !== "template") && (
+            {step !== "template" && step !== "generating" && (
               <div className="flex gap-1.5 items-end">
                 <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                  placeholder={step === "name" ? "가게 이름" : step === "slug" ? "확인 또는 주소 입력" : activeSection ? "내용 입력..." : "항목을 선택하세요"}
+                  placeholder={step === "name" ? "이름을 입력하세요" : step === "description" ? "한 줄 소개" : step === "contact" ? "전화, 주소 등" : "자유롭게 입력하세요"}
                   className="flex-1 resize-none rounded-lg px-3 py-2 text-[12px] outline-none min-h-[38px] max-h-[100px]"
                   style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}
                   rows={1} />
@@ -453,156 +440,131 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
             )}
           </div>
 
-          {/* Actions */}
           {site && (
             <div className="shrink-0 px-3 py-2 flex justify-center gap-3" style={{ borderTop: "1px solid var(--border)" }}>
               <button onClick={() => {
-                if (!confirm("모든 내용을 초기화하시겠습니까?")) return;
-                const fresh = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: SUBTITLES[template] || "" } };
-                setC(fresh);
-                setMessages(prev => [...prev, { role: "system", text: "초기화했어요!", action: "sections" }]);
-                setActiveSection(null);
+                if (!confirm("초기화하시겠습니까?")) return;
+                setC(EMPTY_CONTENT); setStep("template"); setSite(null);
+                setMessages([{ role: "system", text: "초기화했어요. 다시 시작할까요?", action: "template" }]);
               }} className="text-[10px]" style={{ color: "var(--text-muted)" }}>초기화</button>
               <button onClick={deleteSite} className="text-[10px] text-[var(--danger)]">삭제</button>
             </div>
           )}
         </div>
 
-        {/* RIGHT — Live preview */}
-        {(() => {
-          const hasContent = c.hero.title || c.about.text || c.services.some(s => s.name) || c.contact.phone;
-          return (
-            <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
-              {!hasContent ? (
-                /* ═══ INSPIRATIONAL PHOTO — empty state ═══ */
-                <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
-                  {/* Background photo */}
-                  <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format"
-                    alt="" className="absolute inset-0 w-full h-full object-cover" />
-                  {/* Dark overlay */}
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%)" }} />
-                  {/* Text */}
-                  <div className="relative z-10 text-center px-8">
-                    <div className="text-[38px] font-extrabold text-white leading-tight tracking-tight mb-5"
-                      style={{ textShadow: "0 2px 40px rgba(0,0,0,0.5)" }}>
-                      당신의 상상력을<br/>펼쳐 보세요
-                    </div>
-                    <div className="text-[15px] text-white/70 leading-relaxed"
-                      style={{ textShadow: "0 1px 20px rgba(0,0,0,0.5)" }}>
-                      왼쪽에서 업종을 선택하고<br/>대화를 시작하면 사이트가 만들어집니다
-                    </div>
-                    <div className="mt-10 flex justify-center gap-1.5">
-                      {[0,1,2].map(i => (
-                        <div key={i} className="w-2 h-2 rounded-full bg-white/40" style={{ animation: `pulse 2s ease-in-out ${i * 0.4}s infinite` }} />
-                      ))}
-                    </div>
-                  </div>
-                  <style>{`
-                    @keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
-                  `}</style>
+        {/* ═══ RIGHT — Preview ═══ */}
+        <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
+          {!hasContent ? (
+            <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format"
+                alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.4) 100%)" }} />
+              <div className="relative z-10 text-center px-8">
+                <div className="text-[38px] font-extrabold text-white leading-tight tracking-tight mb-5"
+                  style={{ textShadow: "0 2px 40px rgba(0,0,0,0.5)" }}>
+                  당신의 상상력을<br/>펼쳐 보세요
                 </div>
-              ) : (
-                /* ═══ SITE PREVIEW — shows when content exists ═══ */
-                <div className="flex-1 flex flex-col items-center overflow-y-auto"
-                  style={{ background: "linear-gradient(160deg, #0F0F1A 0%, #1A1A2E 50%, #16213E 100%)" }}>
-                  <div className="py-6 px-6 w-full max-w-[560px]">
-                    {/* Browser chrome */}
-                    <div className="flex items-center gap-2 rounded-t-2xl px-4 py-2.5"
-                      style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                      <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                        <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                        <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                      </div>
-                      <div className="flex-1 text-center text-[11px] text-white/40 rounded-lg py-1 px-3"
-                        style={{ background: "rgba(255,255,255,0.06)" }}>
-                        {slug}.ilpro.ai
-                      </div>
-                    </div>
-
-                    <div className="rounded-b-2xl overflow-hidden" style={{ background: "#0A0A0F", boxShadow: "0 25px 60px rgba(0,0,0,0.5)" }}>
-                      {/* Hero */}
-                      <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${c.theme.color}CC 0%, ${c.theme.color}44 50%, #0A0A0F 100%)` }} />
-                        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30" style={{ background: c.theme.color, filter: "blur(60px)" }} />
-                        <div className="absolute bottom-0 -left-10 w-32 h-32 rounded-full opacity-20" style={{ background: "#A78BFA", filter: "blur(50px)" }} />
-                        {c.hero.image && <img src={c.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />}
-                        <div className="relative px-6 pt-12 pb-8">
-                          <div className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>
-                            {TEMPLATES.find(t => t.id === template)?.name || "WEBSITE"}
-                          </div>
-                          <div className="text-[26px] font-extrabold text-white leading-tight tracking-tight">{c.hero.title || bizName}</div>
-                          {c.hero.subtitle && <div className="text-[13px] text-white/50 mt-2 leading-relaxed">{c.hero.subtitle}</div>}
-                          <div className="flex gap-2 mt-5">
-                            <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white" style={{ background: c.theme.color }}>
-                              {c.contact.phone ? `📞 ${c.contact.phone}` : "연락하기"}
-                            </div>
-                            <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white/70"
-                              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>더 알아보기</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* About */}
-                      {c.about.text && (
-                        <div className="px-5 py-5">
-                          <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>소개</div>
-                            <div className="text-[12px] leading-[1.8] text-white/60 whitespace-pre-wrap">{c.about.text}</div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Services */}
-                      {c.services.some(s => s.name) && (
-                        <div className="px-5 pb-5">
-                          <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>
-                            {template === "restaurant" ? "MENU" : "SERVICES"}
-                          </div>
-                          <div className="space-y-2">
-                            {c.services.filter(s => s.name).map((svc, i) => (
-                              <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl"
-                                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold"
-                                    style={{ background: `${c.theme.color}15`, color: c.theme.color }}>{String(i + 1).padStart(2, "0")}</div>
-                                  <div>
-                                    <div className="text-[12px] font-semibold text-white/90">{svc.name}</div>
-                                    {svc.description && <div className="text-[10px] text-white/35 mt-0.5">{svc.description}</div>}
-                                  </div>
-                                </div>
-                                {svc.price && <div className="text-[13px] font-bold ml-3 shrink-0" style={{ color: c.theme.color }}>₩{svc.price}</div>}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Contact */}
-                      {(c.contact.phone || c.contact.address || c.contact.email) && (
-                        <div className="px-5 pb-5">
-                          <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>CONTACT</div>
-                          <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            {c.contact.phone && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📞</span></div><div className="text-[12px] text-white/70">{c.contact.phone}</div></div>}
-                            {c.contact.email && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📧</span></div><div className="text-[12px] text-white/70">{c.contact.email}</div></div>}
-                            {c.contact.address && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📍</span></div><div className="text-[12px] text-white/70">{c.contact.address}</div></div>}
-                            {c.contact.kakao && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">💬</span></div><div className="text-[12px] text-white/70">카카오톡: {c.contact.kakao}</div></div>}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Footer */}
-                      <div className="py-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                        <div className="text-[9px] text-white/15">Powered by <span style={{ color: `${c.theme.color}88` }}>일프로AI</span></div>
-                      </div>
-                    </div>
-                    <div className="h-8 mx-8 rounded-b-3xl opacity-30" style={{ background: `linear-gradient(to bottom, ${c.theme.color}15, transparent)`, filter: "blur(8px)" }} />
-                  </div>
+                <div className="text-[15px] text-white/70 leading-relaxed" style={{ textShadow: "0 1px 20px rgba(0,0,0,0.5)" }}>
+                  {step === "generating" ? "AI가 웹사이트를 만들고 있어요..." : "몇 가지 질문에 답하시면\n완성된 웹사이트를 만들어 드립니다"}
                 </div>
-              )}
+                {step === "generating" && (
+                  <div className="mt-8 flex justify-center gap-1.5">
+                    {[0,1,2].map(i => (
+                      <div key={i} className="w-2.5 h-2.5 rounded-full bg-white" style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                    ))}
+                    <style>{`@keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }`}</style>
+                  </div>
+                )}
+              </div>
             </div>
-          );
-        })()}
+          ) : (
+            <div className="flex-1 flex flex-col items-center overflow-y-auto"
+              style={{ background: "linear-gradient(160deg, #0F0F1A 0%, #1A1A2E 50%, #16213E 100%)" }}>
+              <div className="py-6 px-6 w-full max-w-[560px]">
+                {/* Browser chrome */}
+                <div className="flex items-center gap-2 rounded-t-2xl px-4 py-2.5"
+                  style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                    <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                    <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                  </div>
+                  <div className="flex-1 text-center text-[11px] text-white/40 rounded-lg py-1 px-3" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    {slug}.ilpro.ai
+                  </div>
+                </div>
+
+                <div className="rounded-b-2xl overflow-hidden" style={{ background: "#0A0A0F", boxShadow: "0 25px 60px rgba(0,0,0,0.5)" }}>
+                  {/* Hero */}
+                  <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
+                    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${c.theme.color}CC 0%, ${c.theme.color}44 50%, #0A0A0F 100%)` }} />
+                    <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30" style={{ background: c.theme.color, filter: "blur(60px)" }} />
+                    <div className="relative px-6 pt-12 pb-8">
+                      <div className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>
+                        {TEMPLATES.find(t => t.id === template)?.name || "WEBSITE"}
+                      </div>
+                      <div className="text-[26px] font-extrabold text-white leading-tight">{c.hero.title || bizName}</div>
+                      {c.hero.subtitle && <div className="text-[13px] text-white/50 mt-2">{c.hero.subtitle}</div>}
+                      <div className="flex gap-2 mt-5">
+                        <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white" style={{ background: c.theme.color }}>
+                          {c.contact.phone ? `📞 ${c.contact.phone}` : "연락하기"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {c.about.text && (
+                    <div className="px-5 py-5">
+                      <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>소개</div>
+                        <div className="text-[12px] leading-[1.8] text-white/60 whitespace-pre-wrap">{c.about.text}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {c.services.some(s => s.name) && (
+                    <div className="px-5 pb-5">
+                      <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>
+                        {template === "restaurant" ? "MENU" : "SERVICES"}
+                      </div>
+                      <div className="space-y-2">
+                        {c.services.filter(s => s.name).map((svc, i) => (
+                          <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl"
+                            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold"
+                                style={{ background: `${c.theme.color}15`, color: c.theme.color }}>{String(i + 1).padStart(2, "0")}</div>
+                              <div>
+                                <div className="text-[12px] font-semibold text-white/90">{svc.name}</div>
+                                {svc.description && <div className="text-[10px] text-white/35 mt-0.5">{svc.description}</div>}
+                              </div>
+                            </div>
+                            {svc.price && <div className="text-[13px] font-bold ml-3 shrink-0" style={{ color: c.theme.color }}>₩{svc.price}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(c.contact.phone || c.contact.address || c.contact.email) && (
+                    <div className="px-5 pb-5">
+                      <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>CONTACT</div>
+                      <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        {c.contact.phone && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📞</span></div><div className="text-[12px] text-white/70">{c.contact.phone}</div></div>}
+                        {c.contact.email && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📧</span></div><div className="text-[12px] text-white/70">{c.contact.email}</div></div>}
+                        {c.contact.address && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📍</span></div><div className="text-[12px] text-white/70">{c.contact.address}</div></div>}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="py-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div className="text-[9px] text-white/15">Powered by <span style={{ color: `${c.theme.color}88` }}>일프로AI</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

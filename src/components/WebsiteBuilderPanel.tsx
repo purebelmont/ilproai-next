@@ -308,7 +308,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       {/* Split pane — no top bar, cleaner */}
       <div className="flex flex-1 min-h-0">
         {/* LEFT — Chat (narrow panel) */}
-        <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[240px] lg:w-[280px] shrink-0`}
+        <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[380px] lg:w-[420px] shrink-0`}
           style={{ background: "#0D0D12" }}>
           {/* Chat header */}
           <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>

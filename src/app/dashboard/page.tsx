@@ -243,24 +243,21 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex">
       {/* ═══ SIDEBAR — Canva-style dark nav ═══ */}
-      <div className="hidden md:flex flex-col w-[200px] fixed top-0 left-0 bottom-0 z-40"
+      <div className="hidden md:flex flex-col w-[120px] fixed top-0 left-0 bottom-0 z-40"
         style={{ background: "#0D0D12" }}>
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 shrink-0">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold text-white shrink-0"
+        <div className="flex flex-col items-center py-4 shrink-0">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold text-white"
             style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
-          <div>
-            <div className="text-sm font-bold text-white">일프로<span style={{ color: "#7D2AE7" }}>AI</span></div>
-            <div className="text-[10px] text-[#6B6B80] truncate max-w-[110px]">{bizName}</div>
-          </div>
+          <div className="text-[9px] text-[#6B6B80] mt-1 truncate max-w-[100px] text-center">{bizName}</div>
         </div>
 
         {/* AI Create Button */}
-        <div className="px-4 pb-4 shrink-0">
+        <div className="flex justify-center pb-3 shrink-0">
           <button onClick={() => setTab("website")}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white active:scale-[0.97] transition-all"
+            className="w-[80px] flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold text-white active:scale-[0.97] transition-all"
             style={{ background: "#7D2AE7", boxShadow: "0 4px 12px rgba(125,42,231,0.4)" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
             AI
           </button>
         </div>
@@ -269,58 +266,58 @@ export default function Dashboard() {
         <div className="flex-1 overflow-y-auto px-3" style={{ scrollbarWidth: "none" }}>
           {SIDEBAR_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-200 mb-0.5 active:scale-[0.97]"
+              className="flex flex-col items-center w-full py-2.5 rounded-xl transition-all duration-200 mb-0.5 active:scale-[0.97]"
               style={{
                 background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
                 color: tab === t.id ? "#A78BFA" : "#8E8EA0",
               }}>
-              <span className="text-lg">{t.icon}</span>
-              <span className="text-[13px] font-medium">{t.label}</span>
+              <span className="text-[18px]">{t.icon}</span>
+              <span className="text-[10px] font-medium">{t.label}</span>
             </button>
           ))}
 
           {/* Pro divider */}
-          <div className="h-px my-3 mx-2" style={{ background: "rgba(255,255,255,0.08)" }} />
-          <div className="px-3 mb-1">
-            <span className="text-[9px] font-bold tracking-widest text-[#6B6B80] uppercase">Pro</span>
+          <div className="h-px my-3 mx-4" style={{ background: "rgba(255,255,255,0.08)" }} />
+          <div className="text-center mb-1">
+            <span className="text-[8px] font-bold tracking-widest text-[#6B6B80] uppercase">Pro</span>
           </div>
           {SIDEBAR_PRO.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-200 mb-0.5 active:scale-[0.97]"
+              className="flex flex-col items-center w-full py-2.5 rounded-xl transition-all duration-200 mb-0.5 active:scale-[0.97]"
               style={{
                 background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
                 color: tab === t.id ? "#A78BFA" : "#8E8EA0",
               }}>
-              <span className="text-lg">{t.icon}</span>
-              <span className="text-[13px] font-medium">{t.label}</span>
+              <span className="text-[18px]">{t.icon}</span>
+              <span className="text-[10px] font-medium">{t.label}</span>
             </button>
           ))}
         </div>
 
         {/* Bottom actions */}
-        <div className="px-3 py-3 space-y-0.5 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex flex-col items-center gap-1 py-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <button onClick={toggleDark}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
-            <span className="text-base">{dark ? "☀️" : "🌙"}</span>
-            <span className="text-[12px]">{dark ? "라이트 모드" : "다크 모드"}</span>
+            className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
+            <span className="text-[16px]">{dark ? "☀️" : "🌙"}</span>
+            <span className="text-[9px]">{dark ? "라이트" : "다크"}</span>
           </button>
           {hasSample ? (
             <button onClick={clearSample} disabled={sampleLoading}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
-              <span className="text-base">{sampleLoading ? "⏳" : "📦"}</span>
-              <span className="text-[12px]">{sampleLoading ? "처리 중..." : "샘플 삭제"}</span>
+              className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
+              <span className="text-[16px]">{sampleLoading ? "⏳" : "📦"}</span>
+              <span className="text-[9px]">샘플</span>
             </button>
           ) : (
             <button onClick={generateSample} disabled={sampleLoading}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#A78BFA" }}>
-              <span className="text-base">{sampleLoading ? "⏳" : "📦"}</span>
-              <span className="text-[12px]">{sampleLoading ? "생성 중..." : "샘플 추가"}</span>
+              className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#A78BFA" }}>
+              <span className="text-[16px]">{sampleLoading ? "⏳" : "📦"}</span>
+              <span className="text-[9px]">샘플</span>
             </button>
           )}
           <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
-            <span className="text-base">🚪</span>
-            <span className="text-[12px]">로그아웃</span>
+            className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
+            <span className="text-[16px]">🚪</span>
+            <span className="text-[9px]">나가기</span>
           </button>
         </div>
       </div>
@@ -350,7 +347,7 @@ export default function Dashboard() {
       </div>
 
       {/* ═══ MAIN CONTENT ═══ */}
-      <div className="flex-1 md:ml-[200px] min-h-screen" style={{ background: "var(--bg)" }}>
+      <div className="flex-1 md:ml-[120px] min-h-screen" style={{ background: "var(--bg)" }}>
         {/* Mobile header */}
         <div className="md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between"
           style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
@@ -373,8 +370,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Website builder — rendered full-bleed, no padding wrapper */}
-        {tab === "website" && <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} />}
+        {/* Website builder — full-bleed */}
+        {tab === "website" && (
+          <div className="fixed inset-0 md:left-[120px] z-20" style={{ background: "#0A1628" }}>
+            <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} />
+          </div>
+        )}
 
         <div className={`pb-[var(--tab-h)] md:pb-0 ${tab === "website" ? "hidden" : ""}`}>
           {tab === "home" && <HomePanel userId={user.id} profile={profile} setTab={setTab} />}

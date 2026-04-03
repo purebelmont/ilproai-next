@@ -304,7 +304,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   // RENDER — full-screen split pane
   // ══════════════════════════════
   return (
-    <div className="flex flex-col overflow-hidden" style={{ height: "calc(100vh - 56px)", background: "#0A1628" }}>
+    <div className="flex flex-col overflow-hidden h-full">
       {/* Split pane — no top bar, cleaner */}
       <div className="flex flex-1 min-h-0">
         {/* LEFT — Chat (narrow panel) */}

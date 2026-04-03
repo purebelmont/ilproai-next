@@ -343,7 +343,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       {/* Split pane */}
       <div className="flex flex-1 min-h-0">
         {/* LEFT — Chat (narrow panel) */}
-        <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[360px] lg:w-[400px] shrink-0`} style={{ borderRight: "1px solid var(--border)", background: "var(--bg)" }}>
+        <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[220px] lg:w-[250px] shrink-0`} style={{ borderRight: "1px solid var(--border)", background: "var(--bg)" }}>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((msg, i) => (
               <div key={i}>

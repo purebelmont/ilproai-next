@@ -373,7 +373,7 @@ export default function Dashboard() {
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
-          {tab === "website" && <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} openModal={openModal} closeModal={closeModal} />}
+          {tab === "website" && <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} />}
         </div>
       </div>
 

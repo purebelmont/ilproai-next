@@ -226,113 +226,146 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar */}
-      <div className="hidden md:flex flex-col w-[220px] fixed top-0 left-0 bottom-0 z-40" style={{ background: "var(--bg-card)", borderRight: "1px solid var(--border)" }}>
-        <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border-light)" }}>
-          <div className="text-lg font-extrabold" style={{ color: "var(--text)" }}>일프로<span className="text-[var(--primary)]">AI</span></div>
-          <div className="text-xs text-[var(--gray-500)] mt-0.5">{bizName}</div>
+      {/* ═══ SIDEBAR — Canva-style dark nav ═══ */}
+      <div className="hidden md:flex flex-col w-[72px] hover:w-[220px] group/sidebar fixed top-0 left-0 bottom-0 z-40 transition-all duration-300 overflow-hidden"
+        style={{ background: "#0D0D12" }}>
+        {/* Logo */}
+        <div className="px-4 py-5 flex items-center gap-3 shrink-0">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg font-extrabold text-white"
+            style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+          <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            <div className="text-sm font-bold text-white">일프로<span style={{ color: "#7D2AE7" }}>AI</span></div>
+            <div className="text-[10px] text-[#8E8EA0] truncate max-w-[130px]">{bizName}</div>
+          </div>
         </div>
-        {/* AI Button — like Canva's Create */}
-        <div className="px-3 pt-3 pb-1">
+
+        {/* AI Create Button */}
+        <div className="px-3 pb-3 shrink-0">
           <button onClick={() => setTab("website")}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white active:scale-[0.97] transition-all"
-            style={{ background: "linear-gradient(135deg, #7C3AED, #0071E3)", boxShadow: "0 4px 15px rgba(124,58,237,0.3)" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-            AI
+            style={{ background: "#7D2AE7", boxShadow: "0 4px 15px rgba(125,42,231,0.35)" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">AI</span>
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto py-2 px-2">
+
+        {/* Tier 1 Tabs */}
+        <div className="flex-1 overflow-y-auto px-2 py-1" style={{ scrollbarWidth: "none" }}>
           {TIER1_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5"
-              style={{ background: tab === t.id ? "var(--primary-light)" : "transparent", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", fontWeight: tab === t.id ? 600 : 400 }}>
-              <span className="text-lg">{t.icon}</span>
-              <span>{t.label}</span>
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-200 mb-0.5"
+              style={{
+                background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
+                color: tab === t.id ? "#A78BFA" : "#8E8EA0",
+              }}>
+              <span className="text-xl shrink-0 w-6 text-center">{t.icon}</span>
+              <span className="text-[13px] font-medium opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{t.label}</span>
             </button>
           ))}
+
           {/* Tier 2 separator */}
-          <div className="mx-3 mt-3 mb-2 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
-            <div className="flex items-center gap-1.5 px-1 mb-1">
-              <span className="text-[10px] font-bold tracking-wider text-[var(--text-muted)]">PRO</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)", color: "white" }}>Tier 2</span>
-            </div>
+          <div className="mx-2 my-3 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+          <div className="px-3 mb-2 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
+            <span className="text-[9px] font-bold tracking-widest text-[#8E8EA0] uppercase">Pro</span>
           </div>
           {TIER2_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-left text-sm transition-all mb-0.5"
-              style={{ background: tab === t.id ? "var(--primary-light)" : "transparent", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", fontWeight: tab === t.id ? 600 : 400 }}>
-              <span className="text-lg">{t.icon}</span>
-              <span>{t.label}</span>
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-200 mb-0.5 relative"
+              style={{
+                background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
+                color: tab === t.id ? "#A78BFA" : "#8E8EA0",
+              }}>
+              <span className="text-xl shrink-0 w-6 text-center">{t.icon}</span>
+              <span className="text-[13px] font-medium opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{t.label}</span>
             </button>
           ))}
         </div>
-        <div className="p-3 space-y-1" style={{ borderTop: "1px solid var(--border)" }}>
-          <button onClick={toggleDark} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block px-2 w-full text-left">
-            {dark ? "☀️ 라이트 모드" : "🌙 다크 모드"}
+
+        {/* Bottom actions */}
+        <div className="px-2 py-3 space-y-0.5 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <button onClick={toggleDark}
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200"
+            style={{ color: "#8E8EA0" }}>
+            <span className="text-lg shrink-0 w-6 text-center">{dark ? "☀️" : "🌙"}</span>
+            <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+              {dark ? "라이트 모드" : "다크 모드"}
+            </span>
           </button>
           {hasSample ? (
             <button onClick={clearSample} disabled={sampleLoading}
-              className="text-xs text-[var(--gray-500)] hover:text-[var(--danger)] block px-2 w-full text-left">
-              {sampleLoading ? "처리 중..." : "📦 샘플 삭제"}
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
+              <span className="text-lg shrink-0 w-6 text-center">📦</span>
+              <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{sampleLoading ? "처리 중..." : "샘플 삭제"}</span>
             </button>
           ) : (
             <button onClick={generateSample} disabled={sampleLoading}
-              className="text-xs text-[var(--primary)] block px-2 w-full text-left">
-              {sampleLoading ? "생성 중..." : "📦 샘플 추가"}
+              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#A78BFA" }}>
+              <span className="text-lg shrink-0 w-6 text-center">📦</span>
+              <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{sampleLoading ? "생성 중..." : "샘플 추가"}</span>
             </button>
           )}
-          <button onClick={() => router.push("/")} className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)] block px-2">홈으로</button>
-          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-xs text-[var(--gray-500)] hover:text-[var(--danger)] block px-2">로그아웃</button>
+          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
+            <span className="text-lg shrink-0 w-6 text-center">🚪</span>
+            <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">로그아웃</span>
+          </button>
         </div>
       </div>
 
-      {/* Mobile bottom tab bar — 5 tabs + more */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 backdrop-blur-xl z-50"
-        style={{ background: dark ? "rgba(28,28,30,0.95)" : "rgba(255,255,255,0.95)", borderTop: "1px solid var(--border)", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
+      {/* ═══ MOBILE — bottom tab bar ═══ */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50"
+        style={{ background: "#0D0D12", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         <div className="flex h-[var(--tab-h)]">
           {TIER1_TABS.slice(0, 4).map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px]"
-              style={{ color: tab === t.id ? "var(--primary)" : "var(--text-muted)" }}>
-              <span className="text-[22px] leading-none">{t.icon}</span>
-              <span className="text-[10px] font-medium">{t.label}</span>
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] transition-colors duration-200"
+              style={{ color: tab === t.id ? "#A78BFA" : "#5A5A6E" }}>
+              <span className="text-[20px] leading-none">{t.icon}</span>
+              <span className="text-[9px] font-medium">{t.label}</span>
             </button>
           ))}
-          <button onClick={() => setMobileMore(!mobileMore)}
+          {/* AI button in mobile bar */}
+          <button onClick={() => setTab("website")}
             className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px]"
-            style={{ color: mobileMore ? "var(--primary)" : "var(--text-muted)" }}>
-            <span className="text-[22px] leading-none">⋯</span>
-            <span className="text-[10px] font-medium">더보기</span>
+            style={{ color: tab === "website" ? "#A78BFA" : "#5A5A6E" }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#7D2AE7" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            </div>
+            <span className="text-[9px] font-bold" style={{ color: "#A78BFA" }}>AI</span>
+          </button>
+          <button onClick={() => setMobileMore(!mobileMore)}
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] transition-colors duration-200"
+            style={{ color: mobileMore ? "#A78BFA" : "#5A5A6E" }}>
+            <span className="text-[20px] leading-none">⋯</span>
+            <span className="text-[9px] font-medium">더보기</span>
           </button>
         </div>
 
         {/* More menu */}
         {mobileMore && (
-          <div className="border-t px-3 py-3 animate-[slideUp_0.2s_ease]" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
-            {/* Tier 1 remaining tabs */}
+          <div className="px-3 py-3 animate-[slideUp_0.2s_ease]" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", background: "#0D0D12" }}>
             <div className="grid grid-cols-4 gap-2 mb-3">
               {TIER1_TABS.slice(4).map((t) => (
                 <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
-                  style={{ background: tab === t.id ? "var(--primary-light)" : "var(--bg-hover)", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)" }}>
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
+                  style={{ background: tab === t.id ? "rgba(125,42,231,0.15)" : "rgba(255,255,255,0.05)", color: tab === t.id ? "#A78BFA" : "#8E8EA0" }}>
                   <span className="text-2xl">{t.icon}</span>
-                  <span className="text-[11px] font-medium">{t.label}</span>
+                  <span className="text-[10px] font-medium">{t.label}</span>
                 </button>
               ))}
             </div>
-            {/* Tier 2 section */}
             <div className="flex items-center gap-1.5 mb-2 mt-1">
-              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-              <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)", color: "white" }}>PRO</span>
-              <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+              <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{ background: "#7D2AE7", color: "white" }}>PRO</span>
+              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
             </div>
             <div className="grid grid-cols-4 gap-2">
               {TIER2_TABS.map((t) => (
                 <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
-                  className="flex flex-col items-center gap-1 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform relative"
-                  style={{ background: tab === t.id ? "var(--primary-light)" : "var(--bg-hover)", color: tab === t.id ? "var(--primary)" : "var(--text-secondary)", border: "1px solid", borderColor: tab === t.id ? "var(--primary)" : "transparent" }}>
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
+                  style={{ background: tab === t.id ? "rgba(125,42,231,0.15)" : "rgba(255,255,255,0.05)", color: tab === t.id ? "#A78BFA" : "#8E8EA0" }}>
                   <span className="text-2xl">{t.icon}</span>
-                  <span className="text-[11px] font-medium">{t.label}</span>
+                  <span className="text-[10px] font-medium">{t.label}</span>
                 </button>
               ))}
             </div>
@@ -340,29 +373,27 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 md:ml-[220px] min-h-screen" style={{ background: "var(--bg)" }}>
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div className="flex-1 md:ml-[72px] min-h-screen" style={{ background: "var(--bg)" }}>
         {/* Mobile header */}
         <div className="md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between"
           style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
-          <div>
-            <div className="text-base font-bold">{bizName}</div>
-            <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
+              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+            <div>
+              <div className="text-sm font-bold">{bizName}</div>
+              <div className="text-[10px] text-[var(--text-muted)]">{dateLabel}</div>
+            </div>
           </div>
           <div className="flex gap-2 items-center">
-            <button onClick={() => setTab("website")}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white active:scale-[0.95]"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #0071E3)" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-              AI
-            </button>
             <button onClick={toggleDark} className="text-sm">{dark ? "☀️" : "🌙"}</button>
             {hasSample ? (
-              <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--gray-400)]">{sampleLoading ? "..." : "📦"}</button>
+              <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--text-muted)]">{sampleLoading ? "..." : "📦"}</button>
             ) : (
-              <button onClick={generateSample} disabled={sampleLoading} className="text-xs text-[var(--primary)]">{sampleLoading ? "..." : "📦"}</button>
+              <button onClick={generateSample} disabled={sampleLoading} className="text-xs" style={{ color: "#7D2AE7" }}>{sampleLoading ? "..." : "📦"}</button>
             )}
-            <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
+            <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-xs text-[var(--text-muted)]">나가기</button>
           </div>
         </div>
 

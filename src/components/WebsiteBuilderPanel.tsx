@@ -440,171 +440,167 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
         </div>
 
         {/* RIGHT — Live preview */}
-        <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 items-center overflow-y-auto`}
-          style={{ background: "linear-gradient(160deg, #0F0F1A 0%, #1A1A2E 50%, #16213E 100%)" }}>
-          <div className="py-6 px-4 w-full max-w-[440px]">
-            {/* Browser chrome — glass */}
-            <div className="flex items-center gap-2 rounded-t-2xl px-4 py-2.5"
-              style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-              </div>
-              <div className="flex-1 text-center text-[11px] text-white/40 rounded-lg py-1 px-3"
-                style={{ background: "rgba(255,255,255,0.06)" }}>
-                {slug || "my-store"}.ilpro.ai
-              </div>
-            </div>
-
-            {/* Site preview — premium dark design */}
-            <div className="rounded-b-2xl overflow-hidden" style={{ background: "#0A0A0F", boxShadow: "0 25px 60px rgba(0,0,0,0.5)" }}>
-
-              {/* Hero — full-bleed gradient with glass overlay */}
-              <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
-                {/* Animated gradient bg */}
-                <div className="absolute inset-0" style={{
-                  background: `linear-gradient(135deg, ${c.theme.color}CC 0%, ${c.theme.color}44 50%, #0A0A0F 100%)`,
-                }} />
-                {/* Decorative orbs */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30" style={{ background: c.theme.color, filter: "blur(60px)" }} />
-                <div className="absolute bottom-0 -left-10 w-32 h-32 rounded-full opacity-20" style={{ background: "#A78BFA", filter: "blur(50px)" }} />
-                {c.hero.image && <img src={c.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />}
-                {/* Content */}
-                <div className="relative px-6 pt-12 pb-8">
-                  <div className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: `${c.theme.color}` }}>
-                    {TEMPLATES.find(t => t.id === template)?.name || "WEBSITE"}
+        {(() => {
+          const hasContent = c.hero.title || c.about.text || c.services.some(s => s.name) || c.contact.phone;
+          return (
+            <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
+              {!hasContent ? (
+                /* ═══ OCEAN SCENE — inspirational empty state ═══ */
+                <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden"
+                  style={{ background: "linear-gradient(180deg, #0A1628 0%, #0E2A47 30%, #1A5276 55%, #2E86AB 75%, #48B1BF 90%, #A8E6CF 100%)" }}>
+                  {/* Stars */}
+                  <div className="absolute inset-0 overflow-hidden">
+                    {[...Array(30)].map((_, i) => (
+                      <div key={i} className="absolute rounded-full bg-white" style={{
+                        width: Math.random() * 2 + 1, height: Math.random() * 2 + 1,
+                        top: `${Math.random() * 40}%`, left: `${Math.random() * 100}%`,
+                        opacity: Math.random() * 0.6 + 0.2,
+                      }} />
+                    ))}
                   </div>
-                  <div className="text-[26px] font-extrabold text-white leading-tight tracking-tight">
-                    {c.hero.title || bizName || "Your Brand"}
+                  {/* Moon glow */}
+                  <div className="absolute top-[12%] right-[20%] w-16 h-16 rounded-full"
+                    style={{ background: "radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)" }} />
+                  <div className="absolute top-[14%] right-[22%] w-8 h-8 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.08)" }} />
+                  {/* Waves */}
+                  <div className="absolute bottom-0 left-0 right-0" style={{ height: "45%" }}>
+                    <svg viewBox="0 0 1440 320" className="absolute bottom-[120px] left-0 w-[200%] opacity-20"
+                      style={{ animation: "waveMove 8s ease-in-out infinite" }}>
+                      <path fill="#48B1BF" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,208C960,192,1056,160,1152,165.3C1248,171,1344,213,1392,234.7L1440,256L1440,320L0,320Z" />
+                    </svg>
+                    <svg viewBox="0 0 1440 320" className="absolute bottom-[80px] left-0 w-[200%] opacity-30"
+                      style={{ animation: "waveMove 6s ease-in-out infinite reverse" }}>
+                      <path fill="#2E86AB" d="M0,256L48,245.3C96,235,192,213,288,208C384,203,480,213,576,229.3C672,245,768,267,864,261.3C960,256,1056,224,1152,208C1248,192,1344,192,1392,192L1440,192L1440,320L0,320Z" />
+                    </svg>
+                    <svg viewBox="0 0 1440 320" className="absolute bottom-[30px] left-0 w-[200%] opacity-40"
+                      style={{ animation: "waveMove 7s ease-in-out infinite" }}>
+                      <path fill="#1A5276" d="M0,288L48,272C96,256,192,224,288,218.7C384,213,480,235,576,250.7C672,267,768,277,864,266.7C960,256,1056,224,1152,213.3C1248,203,1344,213,1392,218.7L1440,224L1440,320L0,320Z" />
+                    </svg>
+                    <div className="absolute bottom-0 left-0 right-0 h-[40px]" style={{ background: "#0E2236" }} />
                   </div>
-                  {(c.hero.subtitle || SUBTITLES[template]) && (
-                    <div className="text-[13px] text-white/50 mt-2 leading-relaxed">{c.hero.subtitle || SUBTITLES[template]}</div>
-                  )}
-                  {/* CTA buttons */}
-                  <div className="flex gap-2 mt-5">
-                    <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white" style={{ background: c.theme.color }}>
-                      {c.contact.phone ? `📞 ${c.contact.phone}` : "연락하기"}
+                  {/* Text */}
+                  <div className="relative z-10 text-center px-8 -mt-16">
+                    <div className="text-[32px] font-extrabold text-white leading-tight tracking-tight mb-4"
+                      style={{ textShadow: "0 4px 30px rgba(0,0,0,0.4)" }}>
+                      당신의 상상력을<br/>펼쳐 보세요
                     </div>
-                    <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white/70"
-                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                      더 알아보기
+                    <div className="text-[14px] text-white/40 leading-relaxed">
+                      왼쪽에서 업종을 선택하고<br/>대화를 시작하면 사이트가 만들어집니다
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* About — glass card */}
-              {c.about.text ? (
-                <div className="px-5 py-5">
-                  <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>소개</div>
-                    <div className="text-[12px] leading-[1.8] text-white/60 whitespace-pre-wrap">{c.about.text}</div>
-                  </div>
-                </div>
-              ) : !c.services.some(s => s.name) && !c.contact.phone ? (
-                /* Beautiful empty state */
-                <div className="px-5 py-8">
-                  <div className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.08)" }}>
-                    <div className="w-12 h-12 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: `${c.theme.color}20` }}>
-                      <span className="text-2xl">✨</span>
-                    </div>
-                    <div className="text-[13px] font-semibold text-white/40">채팅으로 내용을 채워보세요</div>
-                    <div className="text-[11px] text-white/20 mt-1">왼쪽에서 입력하면 실시간 반영됩니다</div>
-                    {/* Placeholder cards */}
-                    <div className="mt-5 space-y-2">
-                      {[1,2,3].map(i => (
-                        <div key={i} className="h-3 rounded-full mx-auto" style={{ background: "rgba(255,255,255,0.04)", width: `${80 - i * 15}%` }} />
+                    <div className="mt-8 flex justify-center gap-1">
+                      {[0,1,2].map(i => (
+                        <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.3)", animation: `waveDot 1.5s ease-in-out ${i * 0.3}s infinite` }} />
                       ))}
                     </div>
                   </div>
+                  <style>{`
+                    @keyframes waveMove { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-25%); } }
+                    @keyframes waveDot { 0%,100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+                  `}</style>
                 </div>
-              ) : null}
+              ) : (
+                /* ═══ SITE PREVIEW — shows when content exists ═══ */
+                <div className="flex-1 flex flex-col items-center overflow-y-auto"
+                  style={{ background: "linear-gradient(160deg, #0F0F1A 0%, #1A1A2E 50%, #16213E 100%)" }}>
+                  <div className="py-6 px-4 w-full max-w-[440px]">
+                    {/* Browser chrome */}
+                    <div className="flex items-center gap-2 rounded-t-2xl px-4 py-2.5"
+                      style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                        <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                        <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                      </div>
+                      <div className="flex-1 text-center text-[11px] text-white/40 rounded-lg py-1 px-3"
+                        style={{ background: "rgba(255,255,255,0.06)" }}>
+                        {slug}.ilpro.ai
+                      </div>
+                    </div>
 
-              {/* Services — modern grid cards */}
-              {c.services.some(s => s.name) && (
-                <div className="px-5 pb-5">
-                  <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>
-                    {template === "restaurant" ? "MENU" : "SERVICES"}
-                  </div>
-                  <div className="space-y-2">
-                    {c.services.filter(s => s.name).map((svc, i) => (
-                      <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl"
-                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold"
-                            style={{ background: `${c.theme.color}15`, color: c.theme.color }}>
-                            {String(i + 1).padStart(2, "0")}
+                    <div className="rounded-b-2xl overflow-hidden" style={{ background: "#0A0A0F", boxShadow: "0 25px 60px rgba(0,0,0,0.5)" }}>
+                      {/* Hero */}
+                      <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${c.theme.color}CC 0%, ${c.theme.color}44 50%, #0A0A0F 100%)` }} />
+                        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30" style={{ background: c.theme.color, filter: "blur(60px)" }} />
+                        <div className="absolute bottom-0 -left-10 w-32 h-32 rounded-full opacity-20" style={{ background: "#A78BFA", filter: "blur(50px)" }} />
+                        {c.hero.image && <img src={c.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-luminosity" />}
+                        <div className="relative px-6 pt-12 pb-8">
+                          <div className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>
+                            {TEMPLATES.find(t => t.id === template)?.name || "WEBSITE"}
                           </div>
-                          <div>
-                            <div className="text-[12px] font-semibold text-white/90">{svc.name}</div>
-                            {svc.description && <div className="text-[10px] text-white/35 mt-0.5">{svc.description}</div>}
+                          <div className="text-[26px] font-extrabold text-white leading-tight tracking-tight">{c.hero.title || bizName}</div>
+                          {c.hero.subtitle && <div className="text-[13px] text-white/50 mt-2 leading-relaxed">{c.hero.subtitle}</div>}
+                          <div className="flex gap-2 mt-5">
+                            <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white" style={{ background: c.theme.color }}>
+                              {c.contact.phone ? `📞 ${c.contact.phone}` : "연락하기"}
+                            </div>
+                            <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white/70"
+                              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>더 알아보기</div>
                           </div>
                         </div>
-                        {svc.price && (
-                          <div className="text-[13px] font-bold ml-3 shrink-0" style={{ color: c.theme.color }}>
-                            ₩{svc.price}
-                          </div>
-                        )}
                       </div>
-                    ))}
+
+                      {/* About */}
+                      {c.about.text && (
+                        <div className="px-5 py-5">
+                          <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>소개</div>
+                            <div className="text-[12px] leading-[1.8] text-white/60 whitespace-pre-wrap">{c.about.text}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Services */}
+                      {c.services.some(s => s.name) && (
+                        <div className="px-5 pb-5">
+                          <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>
+                            {template === "restaurant" ? "MENU" : "SERVICES"}
+                          </div>
+                          <div className="space-y-2">
+                            {c.services.filter(s => s.name).map((svc, i) => (
+                              <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl"
+                                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold"
+                                    style={{ background: `${c.theme.color}15`, color: c.theme.color }}>{String(i + 1).padStart(2, "0")}</div>
+                                  <div>
+                                    <div className="text-[12px] font-semibold text-white/90">{svc.name}</div>
+                                    {svc.description && <div className="text-[10px] text-white/35 mt-0.5">{svc.description}</div>}
+                                  </div>
+                                </div>
+                                {svc.price && <div className="text-[13px] font-bold ml-3 shrink-0" style={{ color: c.theme.color }}>₩{svc.price}</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Contact */}
+                      {(c.contact.phone || c.contact.address || c.contact.email) && (
+                        <div className="px-5 pb-5">
+                          <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>CONTACT</div>
+                          <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                            {c.contact.phone && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📞</span></div><div className="text-[12px] text-white/70">{c.contact.phone}</div></div>}
+                            {c.contact.email && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📧</span></div><div className="text-[12px] text-white/70">{c.contact.email}</div></div>}
+                            {c.contact.address && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📍</span></div><div className="text-[12px] text-white/70">{c.contact.address}</div></div>}
+                            {c.contact.kakao && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">💬</span></div><div className="text-[12px] text-white/70">카카오톡: {c.contact.kakao}</div></div>}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <div className="py-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                        <div className="text-[9px] text-white/15">Powered by <span style={{ color: `${c.theme.color}88` }}>일프로AI</span></div>
+                      </div>
+                    </div>
+                    <div className="h-8 mx-8 rounded-b-3xl opacity-30" style={{ background: `linear-gradient(to bottom, ${c.theme.color}15, transparent)`, filter: "blur(8px)" }} />
                   </div>
                 </div>
               )}
-
-              {/* Contact — glass card with icons */}
-              {(c.contact.phone || c.contact.address || c.contact.email) && (
-                <div className="px-5 pb-5">
-                  <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>CONTACT</div>
-                  <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                    {c.contact.phone && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}>
-                          <span className="text-[13px]">📞</span>
-                        </div>
-                        <div className="text-[12px] text-white/70">{c.contact.phone}</div>
-                      </div>
-                    )}
-                    {c.contact.email && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}>
-                          <span className="text-[13px]">📧</span>
-                        </div>
-                        <div className="text-[12px] text-white/70">{c.contact.email}</div>
-                      </div>
-                    )}
-                    {c.contact.address && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}>
-                          <span className="text-[13px]">📍</span>
-                        </div>
-                        <div className="text-[12px] text-white/70">{c.contact.address}</div>
-                      </div>
-                    )}
-                    {c.contact.kakao && (
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}>
-                          <span className="text-[13px]">💬</span>
-                        </div>
-                        <div className="text-[12px] text-white/70">카카오톡: {c.contact.kakao}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Footer */}
-              <div className="py-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                <div className="text-[9px] text-white/15">
-                  Powered by <span style={{ color: `${c.theme.color}88` }}>일프로AI</span>
-                </div>
-              </div>
             </div>
-
-            {/* Reflection glow */}
-            <div className="h-8 mx-8 rounded-b-3xl opacity-30" style={{ background: `linear-gradient(to bottom, ${c.theme.color}15, transparent)`, filter: "blur(8px)" }} />
-          </div>
-        </div>
+          );
+        })()}
       </div>
     </div>
   );

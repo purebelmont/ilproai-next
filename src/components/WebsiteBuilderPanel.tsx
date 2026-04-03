@@ -304,61 +304,60 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   // RENDER — full-screen split pane
   // ══════════════════════════════
   return (
-    <div className="flex flex-col overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)" }}>
-        <div className="flex items-center gap-3">
-          <div className="text-sm font-bold" style={{ color: "#7D2AE7" }}>AI 홈페이지</div>
-          {site && <span className="text-xs text-[var(--text-muted)]">{slug}.ilpro.ai</span>}
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Mobile toggle */}
-          <div className="flex md:hidden rounded-lg overflow-hidden border border-[var(--border)]">
-            <button onClick={() => setMobileView("chat")} className="px-3 py-1.5 text-xs font-medium"
-              style={{ background: mobileView === "chat" ? "var(--primary)" : "transparent", color: mobileView === "chat" ? "white" : "var(--text-secondary)" }}>채팅</button>
-            <button onClick={() => setMobileView("preview")} className="px-3 py-1.5 text-xs font-medium"
-              style={{ background: mobileView === "preview" ? "var(--primary)" : "transparent", color: mobileView === "preview" ? "white" : "var(--text-secondary)" }}>미리보기</button>
-          </div>
-          {site && (
-            <>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full ${status === "published" ? "bg-[#30D15820] text-[#30D158]" : "bg-[var(--bg-hover)] text-[var(--text-muted)]"}`}>
-                {status === "published" ? "게시됨" : "초안"}
-              </span>
-              {status === "published" ? (
-                <button onClick={() => save(false)} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--bg-hover)] text-[var(--text-secondary)]">비공개</button>
-              ) : isPro ? (
-                <button onClick={() => save(true)} className="px-3 py-1.5 text-xs rounded-lg bg-[#30D158] text-white font-medium">게시</button>
-              ) : (
-                <button className="px-3 py-1.5 text-xs rounded-lg text-white font-medium" style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}
-                  onClick={() => alert("PRO 플랜으로 업그레이드하면 사이트를 게시할 수 있습니다.\n₩29,900/월")}>🔒 게시</button>
-              )}
-              <button onClick={() => save()} disabled={saving} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white font-medium">
-                {saving ? "..." : "저장"}
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Split pane */}
+    <div className="flex flex-col overflow-hidden" style={{ height: "calc(100vh - 56px)", background: "#0A1628" }}>
+      {/* Split pane — no top bar, cleaner */}
       <div className="flex flex-1 min-h-0">
         {/* LEFT — Chat (narrow panel) */}
-        <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[220px] lg:w-[250px] shrink-0`} style={{ borderRight: "1px solid var(--border)", background: "var(--bg)" }}>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className={`${mobileView === "chat" ? "flex" : "hidden"} md:flex flex-col w-full md:w-[240px] lg:w-[280px] shrink-0`}
+          style={{ background: "#0D0D12" }}>
+          {/* Chat header */}
+          <div className="flex items-center justify-between px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#7D2AE7" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              </div>
+              <span className="text-[12px] font-semibold text-white/80">AI 홈페이지</span>
+              {site && <span className="text-[10px] text-white/30">{slug}.ilpro.ai</span>}
+            </div>
+            <div className="flex items-center gap-1.5">
+              {/* Mobile toggle */}
+              <button onClick={() => setMobileView(mobileView === "chat" ? "preview" : "chat")}
+                className="md:hidden text-[10px] px-2 py-1 rounded-md text-white/50" style={{ background: "rgba(255,255,255,0.06)" }}>
+                {mobileView === "chat" ? "미리보기" : "채팅"}
+              </button>
+              {site && (
+                <>
+                  {status === "published" ? (
+                    <button onClick={() => save(false)} className="text-[10px] px-2 py-1 rounded-md text-white/50" style={{ background: "rgba(255,255,255,0.06)" }}>비공개</button>
+                  ) : isPro ? (
+                    <button onClick={() => save(true)} className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#30D158" }}>게시</button>
+                  ) : (
+                    <button className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#7D2AE7" }}
+                      onClick={() => alert("PRO 플랜으로 업그레이드하면 사이트를 게시할 수 있습니다.\n₩29,900/월")}>PRO</button>
+                  )}
+                  <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md text-white/70" style={{ background: "rgba(255,255,255,0.08)" }}>
+                    {saving ? "..." : "저장"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5" style={{ scrollbarWidth: "none" }}>
             {messages.map((msg, i) => (
               <div key={i}>
                 {msg.role === "system" ? (
                   <div>
-                    <div className="inline-block max-w-[90%] rounded-2xl rounded-tl-md px-4 py-2.5 text-sm" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
-                      <div className="whitespace-pre-wrap" style={{ color: "var(--text)" }}>{msg.text}</div>
+                    <div className="inline-block max-w-[95%] rounded-2xl rounded-tl-md px-3 py-2 text-[12px] leading-relaxed"
+                      style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)" }}>
+                      <div className="whitespace-pre-wrap">{msg.text}</div>
                     </div>
                     {/* Template picker */}
                     {msg.action === "template" && (
                       <div className="flex flex-wrap gap-2 mt-3">
                         {TEMPLATES.map(t => (
                           <button key={t.id} onClick={() => pickTemplate(t.id)}
-                            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium active:scale-[0.97] transition-all"
-                            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }}>
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-medium active:scale-[0.97] transition-all"
+                            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)" }}>
                             <span className="text-xl">{t.icon}</span> {t.name}
                           </button>
                         ))}
@@ -369,8 +368,8 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {sections.map(s => (
                           <button key={s.id} onClick={() => handleSectionClick(s.id)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium active:scale-[0.97] transition-all"
-                            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-medium active:scale-[0.97] transition-all"
+                            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>
                             <span>{s.icon}</span> {s.label}
                           </button>
                         ))}
@@ -385,15 +384,15 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                             setMessages(prev => [...prev, { role: "user", text: `컬러: ${color}` }, { role: "system", text: "적용했어요! 다른 항목을 수정할까요?", action: "sections" }]);
                             setActiveSection(null);
                           }}
-                            className="w-9 h-9 rounded-full border-2 transition-all active:scale-90"
-                            style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
+                            className="w-7 h-7 rounded-full border-2 transition-all active:scale-90"
+                            style={{ background: color, borderColor: c.theme.color === color ? "white" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
                         ))}
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="flex justify-end">
-                    <div className="inline-block max-w-[85%] rounded-2xl rounded-tr-md px-4 py-2.5 text-sm text-white" style={{ background: "#7D2AE7" }}>
+                    <div className="inline-block max-w-[90%] rounded-2xl rounded-tr-md px-3 py-2 text-[12px] text-white" style={{ background: "#7D2AE7" }}>
                       <div className="whitespace-pre-wrap">{msg.text}</div>
                     </div>
                   </div>
@@ -404,45 +403,44 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           </div>
 
           {/* Input */}
-          <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--border)", background: "var(--bg-card)" }}>
+          <div className="shrink-0 p-2.5" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
             {activeSection && (
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(125,42,231,0.1)", color: "#7D2AE7" }}>
-                  {sections.find(s => s.id === activeSection)?.icon} {sections.find(s => s.id === activeSection)?.label} 수정 중
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "rgba(125,42,231,0.15)", color: "#A78BFA" }}>
+                  {sections.find(s => s.id === activeSection)?.icon} {sections.find(s => s.id === activeSection)?.label}
                 </span>
                 <button onClick={() => { setActiveSection(null); setMessages(prev => [...prev, { role: "system", text: "취소했어요.", action: "sections" }]); }}
-                  className="text-[11px] text-[var(--text-muted)]">취소</button>
+                  className="text-[10px] text-white/30">취소</button>
               </div>
             )}
             {(step !== "template") && (
-              <div className="flex gap-2 items-end">
+              <div className="flex gap-1.5 items-end">
                 <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                  placeholder={step === "name" ? "가게 이름을 입력하세요" : step === "slug" ? "확인 또는 원하는 주소 입력" : activeSection ? "내용을 입력하세요..." : "수정할 항목을 선택하거나 입력하세요"}
-                  className="flex-1 resize-none rounded-xl px-4 py-2.5 text-sm outline-none min-h-[44px] max-h-[120px]"
-                  style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                  placeholder={step === "name" ? "가게 이름" : step === "slug" ? "확인 또는 주소 입력" : activeSection ? "내용 입력..." : "항목을 선택하세요"}
+                  className="flex-1 resize-none rounded-lg px-3 py-2 text-[12px] outline-none min-h-[38px] max-h-[100px] text-white/80 placeholder-white/20"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
                   rows={1} />
                 <button onClick={handleSend}
-                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white active:scale-95"
-                  style={{ background: input.trim() ? "#7D2AE7" : "var(--border)" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+                  className="shrink-0 w-[38px] h-[38px] rounded-lg flex items-center justify-center text-white active:scale-95"
+                  style={{ background: input.trim() ? "#7D2AE7" : "rgba(255,255,255,0.06)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
                 </button>
               </div>
             )}
           </div>
 
-          {/* Delete */}
+          {/* Actions */}
           {site && (
-            <div className="shrink-0 px-4 py-2 text-center" style={{ borderTop: "1px solid var(--border)" }}>
+            <div className="shrink-0 px-3 py-2 flex justify-center gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
               <button onClick={() => {
                 if (!confirm("모든 내용을 초기화하시겠습니까?")) return;
                 const fresh = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: SUBTITLES[template] || "" } };
                 setC(fresh);
-                setMessages(prev => [...prev, { role: "system", text: "초기화했어요! 처음부터 다시 채워볼까요?", action: "sections" }]);
+                setMessages(prev => [...prev, { role: "system", text: "초기화했어요!", action: "sections" }]);
                 setActiveSection(null);
-              }} className="text-xs text-[var(--text-muted)]">초기화</button>
-              <span className="text-[var(--border)] mx-2">|</span>
-              <button onClick={deleteSite} className="text-xs text-[var(--danger)]">사이트 삭제</button>
+              }} className="text-[10px] text-white/25 hover:text-white/50 transition-colors">초기화</button>
+              <button onClick={deleteSite} className="text-[10px] text-[#FF453A]/60 hover:text-[#FF453A] transition-colors">삭제</button>
             </div>
           )}
         </div>

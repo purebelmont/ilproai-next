@@ -243,84 +243,72 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex">
       {/* ═══ SIDEBAR — Canva-style dark nav ═══ */}
-      <div className="hidden md:flex flex-col w-[72px] hover:w-[240px] group/sidebar fixed top-0 left-0 bottom-0 z-40 transition-all duration-300 overflow-hidden hover:shadow-[8px_0_30px_rgba(0,0,0,0.4)]"
+      <div className="hidden md:flex flex-col w-[72px] fixed top-0 left-0 bottom-0 z-40"
         style={{ background: "#0D0D12" }}>
         {/* Logo */}
-        <div className="px-4 py-5 flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg font-extrabold text-white"
+        <div className="flex justify-center py-5 shrink-0">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-extrabold text-white"
             style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
-          <div className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-            <div className="text-sm font-bold text-white">일프로<span style={{ color: "#7D2AE7" }}>AI</span></div>
-            <div className="text-[10px] text-[#8E8EA0] truncate max-w-[130px]">{bizName}</div>
-          </div>
         </div>
 
         {/* AI Create Button */}
-        <div className="px-3 pb-3 shrink-0">
-          <button onClick={() => setTab("website")}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white active:scale-[0.97] transition-all"
-            style={{ background: "#7D2AE7", boxShadow: "0 4px 15px rgba(125,42,231,0.35)" }}>
+        <div className="flex justify-center pb-4 shrink-0">
+          <button onClick={() => setTab("website")} title="AI"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white active:scale-[0.93] transition-all"
+            style={{ background: "#7D2AE7", boxShadow: "0 4px 12px rgba(125,42,231,0.4)" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            <span className="opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">AI</span>
           </button>
         </div>
 
-        {/* Main nav — only essentials */}
-        <div className="flex-1 overflow-y-auto px-2 py-1" style={{ scrollbarWidth: "none" }}>
+        {/* Main nav */}
+        <div className="flex-1 flex flex-col items-center gap-1 px-2" style={{ scrollbarWidth: "none" }}>
           {SIDEBAR_TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-all duration-200 mb-1"
+            <button key={t.id} onClick={() => setTab(t.id)} title={t.label}
+              className="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 active:scale-[0.93]"
               style={{
                 background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
-                color: tab === t.id ? "#A78BFA" : "#8E8EA0",
+                color: tab === t.id ? "#A78BFA" : "#6B6B80",
               }}>
-              <span className="text-xl shrink-0 w-6 text-center">{t.icon}</span>
-              <span className="text-[13px] font-medium opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{t.label}</span>
+              <span className="text-[20px] leading-none">{t.icon}</span>
+              <span className="text-[8px] font-medium">{t.label}</span>
             </button>
           ))}
 
-          {/* Pro section */}
-          <div className="mx-2 my-4 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+          {/* Pro divider */}
+          <div className="w-8 h-px my-2" style={{ background: "rgba(255,255,255,0.1)" }} />
           {SIDEBAR_PRO.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-all duration-200 mb-1 relative"
+            <button key={t.id} onClick={() => setTab(t.id)} title={t.label}
+              className="w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all duration-200 active:scale-[0.93]"
               style={{
                 background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
-                color: tab === t.id ? "#A78BFA" : "#8E8EA0",
+                color: tab === t.id ? "#A78BFA" : "#6B6B80",
               }}>
-              <span className="text-xl shrink-0 w-6 text-center">{t.icon}</span>
-              <span className="text-[13px] font-medium opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{t.label}</span>
+              <span className="text-[20px] leading-none">{t.icon}</span>
+              <span className="text-[8px] font-medium">{t.label}</span>
             </button>
           ))}
         </div>
 
         {/* Bottom actions */}
-        <div className="px-2 py-3 space-y-0.5 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <button onClick={toggleDark}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200"
-            style={{ color: "#8E8EA0" }}>
-            <span className="text-lg shrink-0 w-6 text-center">{dark ? "☀️" : "🌙"}</span>
-            <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-              {dark ? "라이트 모드" : "다크 모드"}
-            </span>
+        <div className="flex flex-col items-center gap-1 py-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <button onClick={toggleDark} title={dark ? "라이트 모드" : "다크 모드"}
+            className="w-12 h-10 rounded-xl flex items-center justify-center transition-all duration-200" style={{ color: "#6B6B80" }}>
+            <span className="text-[18px]">{dark ? "☀️" : "🌙"}</span>
           </button>
           {hasSample ? (
-            <button onClick={clearSample} disabled={sampleLoading}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
-              <span className="text-lg shrink-0 w-6 text-center">📦</span>
-              <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{sampleLoading ? "처리 중..." : "샘플 삭제"}</span>
+            <button onClick={clearSample} disabled={sampleLoading} title="샘플 삭제"
+              className="w-12 h-10 rounded-xl flex items-center justify-center transition-all duration-200" style={{ color: "#6B6B80" }}>
+              <span className="text-[18px]">{sampleLoading ? "⏳" : "📦"}</span>
             </button>
           ) : (
-            <button onClick={generateSample} disabled={sampleLoading}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#A78BFA" }}>
-              <span className="text-lg shrink-0 w-6 text-center">📦</span>
-              <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">{sampleLoading ? "생성 중..." : "샘플 추가"}</span>
+            <button onClick={generateSample} disabled={sampleLoading} title="샘플 추가"
+              className="w-12 h-10 rounded-xl flex items-center justify-center transition-all duration-200" style={{ color: "#A78BFA" }}>
+              <span className="text-[18px]">{sampleLoading ? "⏳" : "📦"}</span>
             </button>
           )}
-          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-left transition-all duration-200" style={{ color: "#8E8EA0" }}>
-            <span className="text-lg shrink-0 w-6 text-center">🚪</span>
-            <span className="text-[12px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200 whitespace-nowrap">로그아웃</span>
+          <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} title="로그아웃"
+            className="w-12 h-10 rounded-xl flex items-center justify-center transition-all duration-200" style={{ color: "#6B6B80" }}>
+            <span className="text-[18px]">🚪</span>
           </button>
         </div>
       </div>

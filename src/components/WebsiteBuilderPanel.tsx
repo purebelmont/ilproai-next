@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface Website {
@@ -43,14 +43,15 @@ const TEMPLATES = [
 ];
 
 const COLORS = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500", "#000000", "#E53935"];
-
 const DAY_LABELS: Record<string, string> = { mon: "월", tue: "화", wed: "수", thu: "목", fri: "금", sat: "토", sun: "일" };
 
+// ══════════════════════════════
+// MAIN PANEL
+// ══════════════════════════════
 export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModal }: { userId: string; plan: string; openModal: any; closeModal: any }) {
   const [sites, setSites] = useState<Website[]>([]);
   const [editing, setEditing] = useState<Website | null>(null);
   const [creating, setCreating] = useState(false);
-  const [preview, setPreview] = useState<Website | null>(null);
   const isPro = plan === "pro" || plan === "team";
 
   const load = useCallback(async () => {
@@ -60,17 +61,13 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
 
   useEffect(() => { load(); }, [load]);
 
-  // Free users: can create 1 site, pick template, edit content — but "게시하기" is locked
   const canCreate = isPro || sites.length === 0;
 
-  // ── Sub-views ──
-  if (preview) return <PreviewPanel site={preview} onBack={() => setPreview(null)} />;
   if (editing) return <EditorPanel site={editing} isPro={isPro} onSave={async (s) => { await saveSite(s); setEditing(null); load(); }} onBack={() => setEditing(null)} onDelete={async (id) => { await deleteSite(id); setEditing(null); load(); }} />;
   if (creating) return <CreatePanel userId={userId} onCreated={(s) => { setCreating(false); setEditing(s); load(); }} onBack={() => setCreating(false)} />;
 
   return (
     <div className="p-5">
-      {/* PRO Header banner for free users */}
       {!isPro && (
         <div className="rounded-2xl p-5 mb-5 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)" }}>
           <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20" style={{ background: "white", transform: "translate(30%, -30%)" }} />
@@ -80,12 +77,8 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
               <span className="text-white/80 text-xs">Tier 2</span>
             </div>
             <div className="text-white font-bold text-lg mb-1">AI 홈페이지 빌더</div>
-            <div className="text-white/80 text-sm mb-3">5분만에 내 가게 웹사이트를 만들어보세요</div>
-            <div className="flex items-center gap-3">
-              <div className="text-white/60 text-xs line-through">₩29,900/월</div>
-              <div className="text-white font-bold">무료 체험</div>
-            </div>
-            <div className="text-white/60 text-[11px] mt-1">사이트 1개 무료 생성 · 게시는 PRO 전용</div>
+            <div className="text-white/80 text-sm mb-3">대화형으로 내 가게 웹사이트를 만들어보세요</div>
+            <div className="text-white/60 text-[11px]">사이트 1개 무료 체험 · 게시는 PRO 전용</div>
           </div>
         </div>
       )}
@@ -94,12 +87,11 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
         <div>
           <h4 className="text-lg font-bold">내 홈페이지</h4>
           <p className="text-xs text-[var(--text-muted)]">
-            {isPro ? "사이트를 만들고 게시하세요" : `무료 체험: 1개 사이트 생성 가능${sites.length > 0 ? " (사용 중)" : ""}`}
+            {isPro ? "사이트를 만들고 게시하세요" : `무료 체험: 1개 사이트${sites.length > 0 ? " (사용 중)" : ""}`}
           </p>
         </div>
         {canCreate && (
-          <button onClick={() => setCreating(true)}
-            className="px-4 py-2 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold active:scale-[0.98]">
+          <button onClick={() => setCreating(true)} className="px-4 py-2 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold active:scale-[0.98]">
             + 새 사이트
           </button>
         )}
@@ -110,8 +102,6 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
           <div className="text-5xl mb-4">🌐</div>
           <div className="font-semibold mb-1">아직 만든 사이트가 없습니다</div>
           <div className="text-sm mb-6">템플릿을 선택하면 바로 시작할 수 있어요</div>
-
-          {/* Template preview cards — visible to everyone */}
           <div className="grid grid-cols-2 gap-3 text-left mb-6">
             {TEMPLATES.map((t) => (
               <div key={t.id} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4">
@@ -121,9 +111,7 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
               </div>
             ))}
           </div>
-
-          <button onClick={() => setCreating(true)}
-            className="px-6 py-3 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold">
+          <button onClick={() => setCreating(true)} className="px-6 py-3 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold">
             {isPro ? "홈페이지 만들기" : "무료로 체험하기"}
           </button>
         </div>
@@ -133,8 +121,7 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
             <div key={s.id} className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
-                    style={{ background: (s.content?.theme?.color || "#0071E3") + "15", color: s.content?.theme?.color || "#0071E3" }}>
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style={{ background: (s.content?.theme?.color || "#0071E3") + "15", color: s.content?.theme?.color || "#0071E3" }}>
                     {TEMPLATES.find(t => t.id === s.template)?.icon || "🌐"}
                   </div>
                   <div>
@@ -147,36 +134,22 @@ export default function WebsiteBuilderPanel({ userId, plan, openModal, closeModa
                 </span>
               </div>
               <div className="flex gap-2 mt-3">
-                <button onClick={() => setEditing(s)}
-                  className="flex-1 py-2 text-xs font-medium rounded-lg bg-[var(--bg-hover)] text-[var(--text-secondary)] active:scale-[0.98]">
-                  수정
+                <button onClick={() => setEditing(s)} className="flex-1 py-2 text-xs font-medium rounded-lg bg-[var(--primary)] text-white active:scale-[0.98]">
+                  편집하기
                 </button>
-                <button onClick={() => setPreview(s)}
-                  className="flex-1 py-2 text-xs font-medium rounded-lg bg-[var(--bg-hover)] text-[var(--text-secondary)] active:scale-[0.98]">
-                  미리보기
-                </button>
-                {s.status === "published" ? (
-                  <a href={`/sites/${s.slug}`} target="_blank" rel="noopener noreferrer"
-                    className="flex-1 py-2 text-xs font-medium rounded-lg bg-[var(--primary)] text-white text-center active:scale-[0.98]">
-                    방문
+                {s.status === "published" && (
+                  <a href={`/sites/${s.slug}`} target="_blank" rel="noopener noreferrer" className="flex-1 py-2 text-xs font-medium rounded-lg bg-[var(--bg-hover)] text-[var(--text-secondary)] text-center active:scale-[0.98]">
+                    방문 ↗
                   </a>
-                ) : (
-                  <div className="flex-1 py-2 text-xs font-medium rounded-lg text-center active:scale-[0.98]"
-                    style={{ background: isPro ? "var(--primary)" : "linear-gradient(135deg, #0071E3, #5856D6)", color: "white" }}>
-                    {isPro ? "게시하기" : "🔒 PRO"}
-                  </div>
                 )}
               </div>
             </div>
           ))}
-
-          {/* Upgrade nudge for free users */}
           {!isPro && (
             <div className="rounded-xl border-2 border-dashed p-4 text-center mt-4" style={{ borderColor: "var(--primary)" }}>
               <div className="text-sm font-semibold mb-1" style={{ color: "var(--primary)" }}>사이트를 게시하려면?</div>
               <div className="text-xs text-[var(--text-muted)] mb-3">PRO 플랜으로 업그레이드하면 {"{가게}.ilpro.ai"}로 바로 게시됩니다</div>
-              <button className="px-5 py-2.5 text-sm font-semibold rounded-xl text-white"
-                style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)" }}>
+              <button className="px-5 py-2.5 text-sm font-semibold rounded-xl text-white" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)" }}>
                 PRO 업그레이드 — ₩29,900/월
               </button>
             </div>
@@ -198,10 +171,6 @@ function CreatePanel({ userId, onCreated, onBack }: { userId: string; onCreated:
   const [slugError, setSlugError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  function toSlug(text: string) {
-    return text.toLowerCase().replace(/[^a-z0-9가-힣ㄱ-ㅎ]/g, "").replace(/\s+/g, "-").substring(0, 30);
-  }
-
   async function checkSlug(s: string) {
     if (!s) { setSlugError(""); return; }
     if (s.length < 2) { setSlugError("2자 이상 입력해주세요"); return; }
@@ -214,30 +183,17 @@ function CreatePanel({ userId, onCreated, onBack }: { userId: string; onCreated:
   async function create() {
     if (!template || !bizName || !slug || slugError) return;
     setSaving(true);
-    const content = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: getSubtitle(template) } };
-    const { data, error } = await supabase.from("websites").insert({
-      user_id: userId, slug, business_name: bizName, template, status: "draft",
-      content,
-    }).select().single();
+    const subtitles: Record<string, string> = { restaurant: "맛있는 음식과 따뜻한 분위기", service: "최고의 서비스를 제공합니다", retail: "좋은 상품을 합리적인 가격에", office: "신뢰할 수 있는 비즈니스 파트너" };
+    const content = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: subtitles[template] || "" } };
+    const { data, error } = await supabase.from("websites").insert({ user_id: userId, slug, business_name: bizName, template, status: "draft", content }).select().single();
     setSaving(false);
     if (error) { alert("오류: " + error.message); return; }
     onCreated(data as Website);
   }
 
-  function getSubtitle(t: string) {
-    const map: Record<string, string> = {
-      restaurant: "맛있는 음식과 따뜻한 분위기",
-      service: "최고의 서비스를 제공합니다",
-      retail: "좋은 상품을 합리적인 가격에",
-      office: "신뢰할 수 있는 비즈니스 파트너",
-    };
-    return map[t] || "";
-  }
-
   return (
     <div className="p-5">
       <button onClick={onBack} className="text-[var(--primary)] text-sm font-medium mb-4">← 돌아가기</button>
-
       {step === 1 && (
         <>
           <h4 className="text-lg font-bold mb-1">템플릿 선택</h4>
@@ -255,7 +211,6 @@ function CreatePanel({ userId, onCreated, onBack }: { userId: string; onCreated:
           </div>
         </>
       )}
-
       {step === 2 && (
         <>
           <h4 className="text-lg font-bold mb-1">기본 정보</h4>
@@ -263,29 +218,20 @@ function CreatePanel({ userId, onCreated, onBack }: { userId: string; onCreated:
           <div className="ios-fields mb-4">
             <div className="ios-field">
               <label>가게 이름</label>
-              <input value={bizName} onChange={(e) => { setBizName(e.target.value); if (!slug) setSlug(toSlug(e.target.value)); }}
-                placeholder="맛있는한식당" autoFocus />
+              <input value={bizName} onChange={(e) => { setBizName(e.target.value); if (!slug) { const v = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 30); setSlug(v); } }} placeholder="맛있는한식당" autoFocus />
             </div>
             <div className="ios-field">
               <label>사이트 주소</label>
               <div className="flex items-center gap-1 flex-1">
-                <input value={slug} onChange={(e) => { const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""); setSlug(v); checkSlug(v); }}
-                  placeholder="my-store" className="flex-1" />
+                <input value={slug} onChange={(e) => { const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""); setSlug(v); checkSlug(v); }} placeholder="my-store" className="flex-1" />
                 <span className="text-xs text-[var(--text-muted)] whitespace-nowrap">.ilpro.ai</span>
               </div>
             </div>
           </div>
           {slugError && <div className="text-xs text-[var(--danger)] mb-3 px-1">{slugError}</div>}
-          <div className="bg-[var(--bg-hover)] rounded-xl p-3 mb-4">
-            <div className="text-xs text-[var(--text-muted)]">사이트 주소 미리보기</div>
-            <div className="font-semibold text-sm mt-1" style={{ color: "var(--primary)" }}>
-              {slug || "my-store"}.ilpro.ai
-            </div>
-          </div>
           <div className="flex gap-2">
             <button onClick={() => setStep(1)} className="flex-1 py-3 text-sm font-medium rounded-xl bg-[var(--bg-hover)] text-[var(--text-secondary)]">뒤로</button>
-            <button onClick={create} disabled={!bizName || !slug || !!slugError || saving}
-              className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--primary)] text-white disabled:opacity-50">
+            <button onClick={create} disabled={!bizName || !slug || !!slugError || saving} className="flex-1 py-3 text-sm font-semibold rounded-xl bg-[var(--primary)] text-white disabled:opacity-50">
               {saving ? "생성 중..." : "사이트 만들기"}
             </button>
           </div>
@@ -296,296 +242,382 @@ function CreatePanel({ userId, onCreated, onBack }: { userId: string; onCreated:
 }
 
 // ══════════════════════════════
-// EDITOR — edit site content
+// EDITOR — split pane: chat left + preview right
 // ══════════════════════════════
+
+interface ChatMessage {
+  role: "system" | "user";
+  text: string;
+  section?: string;
+}
+
 function EditorPanel({ site, isPro, onSave, onBack, onDelete }: { site: Website; isPro: boolean; onSave: (s: Website) => void; onBack: () => void; onDelete: (id: number) => void }) {
   const [c, setC] = useState<WebsiteContent>(site.content || EMPTY_CONTENT);
-  const [section, setSection] = useState("hero");
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(site.status);
+  const [mobileView, setMobileView] = useState<"edit" | "preview">("edit");
+
+  // Chat state
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: "system", text: `"${site.business_name}" 홈페이지를 만들어볼게요! 아래 항목을 채워주세요. 하나씩 입력해도 되고, 한번에 여러 개 입력해도 돼요.` },
+    { role: "system", text: "어떤 항목을 수정할까요?", section: "menu" },
+  ]);
+  const [input, setInput] = useState("");
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const sections = [
-    { id: "hero", icon: "🎯", label: "메인" },
-    { id: "about", icon: "📖", label: "소개" },
-    { id: "services", icon: "📋", label: "서비스" },
-    { id: "hours", icon: "🕐", label: "영업시간" },
-    { id: "contact", icon: "📞", label: "연락처" },
-    { id: "theme", icon: "🎨", label: "디자인" },
+    { id: "hero", icon: "🎯", label: "메인 타이틀", fields: ["제목", "부제목"] },
+    { id: "about", icon: "📖", label: "소개글", fields: ["소개글"] },
+    { id: "services", icon: "📋", label: site.template === "restaurant" ? "메뉴" : "서비스", fields: ["이름, 설명, 가격"] },
+    { id: "hours", icon: "🕐", label: "영업시간", fields: ["월~일 영업시간"] },
+    { id: "contact", icon: "📞", label: "연락처", fields: ["전화, 이메일, 주소"] },
+    { id: "theme", icon: "🎨", label: "브랜드 컬러", fields: ["컬러 선택"] },
   ];
+
+  function handleSectionClick(sectionId: string) {
+    setActiveSection(sectionId);
+    const sec = sections.find(s => s.id === sectionId);
+    if (!sec) return;
+
+    const hints: Record<string, string> = {
+      hero: `메인 타이틀을 입력하세요.\n예: "맛있는한식당" / "정성을 담은 한 끼"`,
+      about: `가게 소개를 자유롭게 작성해주세요.\n예: "20년 전통의 한식 전문점입니다. 매일 새벽 시장에서 직접 재료를 골라옵니다."`,
+      services: `${site.template === "restaurant" ? "메뉴" : "서비스"}를 입력하세요. 한 줄에 하나씩:\n예:\n갈비탕 - 한우 갈비 - 15,000\n된장찌개 - 집된장 - 9,000\n불고기정식 - 1인분 - 12,000`,
+      hours: `영업시간을 입력하세요.\n예:\n월~금 09:00-21:00\n토 10:00-18:00\n일 휴무`,
+      contact: `연락처를 입력하세요.\n예:\n전화: 052-123-4567\n주소: 울산 남구 삼산동 123\n이메일: info@example.com`,
+      theme: "아래에서 브랜드 컬러를 선택하세요.",
+    };
+
+    setMessages(prev => [...prev, { role: "system", text: hints[sectionId] || "", section: sectionId }]);
+  }
+
+  function parseAndApply(text: string) {
+    if (!activeSection) return;
+    const updated = { ...c };
+
+    switch (activeSection) {
+      case "hero": {
+        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+        if (lines[0]) {
+          const parts = lines[0].split(/[\/\|]/).map(s => s.trim());
+          updated.hero = { ...updated.hero, title: parts[0] || updated.hero.title, subtitle: parts[1] || lines[1] || updated.hero.subtitle };
+        }
+        if (lines[1] && !lines[0].includes("/")) updated.hero.subtitle = lines[1];
+        break;
+      }
+      case "about": {
+        updated.about = { ...updated.about, text: text.trim() };
+        break;
+      }
+      case "services": {
+        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+        const svcs = lines.map(line => {
+          const parts = line.split(/[-–—,]/).map(s => s.trim());
+          return { name: parts[0] || "", description: parts[1] || "", price: parts[2] || "" };
+        }).filter(s => s.name);
+        if (svcs.length > 0) updated.services = [...updated.services.filter(s => s.name), ...svcs];
+        break;
+      }
+      case "hours": {
+        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+        const dayMap: Record<string, string[]> = {
+          "월": ["mon"], "화": ["tue"], "수": ["wed"], "목": ["thu"], "금": ["fri"], "토": ["sat"], "일": ["sun"],
+          "월~금": ["mon", "tue", "wed", "thu", "fri"], "월-금": ["mon", "tue", "wed", "thu", "fri"],
+          "토~일": ["sat", "sun"], "토-일": ["sat", "sun"],
+          "매일": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+        };
+        for (const line of lines) {
+          for (const [key, days] of Object.entries(dayMap)) {
+            if (line.startsWith(key)) {
+              const time = line.replace(key, "").replace(/^[\s:]+/, "").trim();
+              for (const d of days) updated.hours[d] = time;
+            }
+          }
+        }
+        break;
+      }
+      case "contact": {
+        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+        for (const line of lines) {
+          const lower = line.toLowerCase();
+          const val = line.replace(/^(전화|주소|이메일|카카오톡?|메일|email|phone|address)[\s:：]+/i, "").trim();
+          if (lower.match(/^(전화|phone|tel)/)) updated.contact.phone = val;
+          else if (lower.match(/^(주소|address)/)) updated.contact.address = val;
+          else if (lower.match(/^(이메일|메일|email)/)) updated.contact.email = val;
+          else if (lower.match(/^(카카오)/)) updated.contact.kakao = val;
+          else if (line.match(/^\d{2,3}-\d{3,4}-\d{4}$/)) updated.contact.phone = line;
+          else if (line.includes("@")) updated.contact.email = line;
+          else updated.contact.address = line;
+        }
+        break;
+      }
+    }
+    setC(updated);
+  }
+
+  function handleSend() {
+    if (!input.trim()) return;
+    const text = input.trim();
+    setMessages(prev => [...prev, { role: "user", text }]);
+    setInput("");
+
+    if (activeSection) {
+      parseAndApply(text);
+      setMessages(prev => [...prev, { role: "system", text: "적용했어요! 미리보기에서 확인하세요. 다른 항목을 수정할까요?", section: "menu" }]);
+      setActiveSection(null);
+    } else {
+      // Try to guess which section from keywords
+      const lower = text.toLowerCase();
+      if (lower.match(/제목|타이틀|이름|메인/)) { setActiveSection("hero"); handleSectionClick("hero"); }
+      else if (lower.match(/소개|설명|about/)) { setActiveSection("about"); handleSectionClick("about"); }
+      else if (lower.match(/메뉴|서비스|가격|목록/)) { setActiveSection("services"); handleSectionClick("services"); }
+      else if (lower.match(/시간|영업|오픈/)) { setActiveSection("hours"); handleSectionClick("hours"); }
+      else if (lower.match(/연락|전화|주소|이메일/)) { setActiveSection("contact"); handleSectionClick("contact"); }
+      else if (lower.match(/색|컬러|디자인|테마/)) { setActiveSection("theme"); handleSectionClick("theme"); }
+      else {
+        setMessages(prev => [...prev, { role: "system", text: "아래 버튼에서 수정할 항목을 선택해주세요.", section: "menu" }]);
+      }
+    }
+
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }
 
   async function save(publish?: boolean) {
     setSaving(true);
     const newStatus = publish !== undefined ? (publish ? "published" : "draft") : status;
-    const updated = { ...site, content: c, status: newStatus, updated_at: new Date().toISOString() };
     await supabase.from("websites").update({ content: c, status: newStatus, updated_at: new Date().toISOString() }).eq("id", site.id);
     setStatus(newStatus);
     setSaving(false);
-    onSave(updated);
+    onSave({ ...site, content: c, status: newStatus });
   }
 
-  function updateService(idx: number, key: string, val: string) {
-    const svcs = [...c.services];
-    svcs[idx] = { ...svcs[idx], [key]: val };
-    setC({ ...c, services: svcs });
-  }
-
-  function addService() {
-    setC({ ...c, services: [...c.services, { name: "", description: "", price: "" }] });
-  }
-
-  function removeService(idx: number) {
-    if (c.services.length <= 1) return;
-    setC({ ...c, services: c.services.filter((_, i) => i !== idx) });
-  }
-
+  // ── Render ──
   return (
-    <div className="p-5">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="text-[var(--primary)] text-sm font-medium">← 돌아가기</button>
-        <div className="flex gap-2">
+    <div className="h-[calc(100vh-56px)] md:h-screen flex flex-col" style={{ marginLeft: -20, marginRight: -20, marginTop: -20 }}>
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)" }}>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="text-[var(--primary)] text-sm font-medium">← 나가기</button>
+          <div className="hidden sm:block">
+            <span className="font-semibold text-sm">{site.business_name}</span>
+            <span className="text-xs text-[var(--text-muted)] ml-2">{site.slug}.ilpro.ai</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Mobile toggle */}
+          <div className="flex md:hidden rounded-lg overflow-hidden border border-[var(--border)]">
+            <button onClick={() => setMobileView("edit")}
+              className="px-3 py-1.5 text-xs font-medium"
+              style={{ background: mobileView === "edit" ? "var(--primary)" : "transparent", color: mobileView === "edit" ? "white" : "var(--text-secondary)" }}>
+              편집
+            </button>
+            <button onClick={() => setMobileView("preview")}
+              className="px-3 py-1.5 text-xs font-medium"
+              style={{ background: mobileView === "preview" ? "var(--primary)" : "transparent", color: mobileView === "preview" ? "white" : "var(--text-secondary)" }}>
+              미리보기
+            </button>
+          </div>
+
+          <span className={`text-[10px] px-2 py-0.5 rounded-full ${status === "published" ? "bg-[#30D15820] text-[#30D158]" : "bg-[var(--bg-hover)] text-[var(--text-muted)]"}`}>
+            {status === "published" ? "게시됨" : "초안"}
+          </span>
           {status === "published" ? (
-            <button onClick={() => save(false)} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--bg-hover)] text-[var(--text-secondary)]">
-              비공개로
-            </button>
+            <button onClick={() => save(false)} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--bg-hover)] text-[var(--text-secondary)]">비공개</button>
           ) : isPro ? (
-            <button onClick={() => save(true)} className="px-3 py-1.5 text-xs rounded-lg bg-[#30D158] text-white font-medium">
-              게시하기
-            </button>
+            <button onClick={() => save(true)} className="px-3 py-1.5 text-xs rounded-lg bg-[#30D158] text-white font-medium">게시</button>
           ) : (
-            <button className="px-3 py-1.5 text-xs rounded-lg text-white font-medium"
-              style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)" }}
-              onClick={() => alert("PRO 플랜으로 업그레이드하면 사이트를 게시할 수 있습니다.\n₩29,900/월")}>
-              🔒 게시 (PRO)
-            </button>
+            <button className="px-3 py-1.5 text-xs rounded-lg text-white font-medium" style={{ background: "linear-gradient(135deg, #0071E3, #5856D6)" }}
+              onClick={() => alert("PRO 플랜으로 업그레이드하면 사이트를 게시할 수 있습니다.\n₩29,900/월")}>🔒 게시</button>
           )}
-          <button onClick={() => save()} disabled={saving}
-            className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white font-medium">
-            {saving ? "저장 중..." : "저장"}
+          <button onClick={() => save()} disabled={saving} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white font-medium">
+            {saving ? "..." : "저장"}
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-1">
-        <h4 className="text-lg font-bold">{site.business_name}</h4>
-        <span className={`text-[10px] px-2 py-0.5 rounded-full ${status === "published" ? "bg-[#30D15820] text-[#30D158]" : "bg-[var(--bg-hover)] text-[var(--text-muted)]"}`}>
-          {status === "published" ? "게시됨" : "초안"}
-        </span>
-      </div>
-      <div className="text-xs text-[var(--text-muted)] mb-4">{site.slug}.ilpro.ai</div>
-
-      {/* Section tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-3 mb-4 -mx-5 px-5" style={{ scrollbarWidth: "none" }}>
-        {sections.map((s) => (
-          <button key={s.id} onClick={() => setSection(s.id)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap shrink-0 transition-all"
-            style={{ background: section === s.id ? "var(--primary)" : "var(--bg-hover)", color: section === s.id ? "white" : "var(--text-secondary)" }}>
-            <span>{s.icon}</span> {s.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Hero */}
-      {section === "hero" && (
-        <div>
-          <div className="ios-fields">
-            <div className="ios-field"><label>제목</label><input value={c.hero.title} onChange={(e) => setC({ ...c, hero: { ...c.hero, title: e.target.value } })} placeholder="가게 이름" /></div>
-            <div className="ios-field"><label>부제</label><input value={c.hero.subtitle} onChange={(e) => setC({ ...c, hero: { ...c.hero, subtitle: e.target.value } })} placeholder="한줄 소개" /></div>
-            <div className="ios-field"><label>이미지 URL</label><input value={c.hero.image} onChange={(e) => setC({ ...c, hero: { ...c.hero, image: e.target.value } })} placeholder="https://..." /></div>
-          </div>
-          <div className="mt-4 bg-[var(--bg-hover)] rounded-xl p-4">
-            <div className="text-[10px] text-[var(--text-muted)] mb-2">미리보기</div>
-            <div className="rounded-lg overflow-hidden" style={{ background: c.theme.color, minHeight: 120 }}>
-              {c.hero.image && <img src={c.hero.image} alt="" className="w-full h-32 object-cover opacity-60" />}
-              <div className="p-4 text-white" style={{ marginTop: c.hero.image ? -60 : 0, position: "relative" }}>
-                <div className="text-xl font-bold">{c.hero.title || "가게 이름"}</div>
-                <div className="text-sm opacity-80 mt-1">{c.hero.subtitle || "한줄 소개"}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* About */}
-      {section === "about" && (
-        <div className="ios-fields">
-          <div className="ios-field" style={{ alignItems: "flex-start" }}>
-            <label style={{ paddingTop: 8 }}>소개글</label>
-            <textarea value={c.about.text} onChange={(e) => setC({ ...c, about: { ...c.about, text: e.target.value } })}
-              placeholder="가게에 대한 소개를 작성하세요" style={{ minHeight: 120 }} />
-          </div>
-          <div className="ios-field"><label>이미지 URL</label><input value={c.about.image} onChange={(e) => setC({ ...c, about: { ...c.about, image: e.target.value } })} placeholder="https://..." /></div>
-        </div>
-      )}
-
-      {/* Services */}
-      {section === "services" && (
-        <div>
-          {c.services.map((svc, i) => (
-            <div key={i} className="ios-fields mb-3">
-              <div className="ios-field">
-                <label>{site.template === "restaurant" ? "메뉴" : "서비스"} {i + 1}</label>
-                <input value={svc.name} onChange={(e) => updateService(i, "name", e.target.value)} placeholder="이름" />
-              </div>
-              <div className="ios-field"><label>설명</label><input value={svc.description} onChange={(e) => updateService(i, "description", e.target.value)} placeholder="간단한 설명" /></div>
-              <div className="ios-field">
-                <label>가격</label>
-                <div className="flex items-center gap-2 flex-1">
-                  <input value={svc.price} onChange={(e) => updateService(i, "price", e.target.value)} placeholder="10,000" />
-                  {c.services.length > 1 && <button onClick={() => removeService(i)} className="text-[var(--danger)] text-xs shrink-0">삭제</button>}
-                </div>
-              </div>
-            </div>
-          ))}
-          <button onClick={addService} className="w-full py-2.5 text-sm text-[var(--primary)] font-medium rounded-xl border border-dashed border-[var(--primary)] active:scale-[0.98]">
-            + {site.template === "restaurant" ? "메뉴" : "서비스"} 추가
-          </button>
-        </div>
-      )}
-
-      {/* Hours */}
-      {section === "hours" && (
-        <div className="ios-fields">
-          {Object.entries(DAY_LABELS).map(([key, label]) => (
-            <div key={key} className="ios-field">
-              <label>{label}</label>
-              <input value={c.hours[key] || ""} onChange={(e) => setC({ ...c, hours: { ...c.hours, [key]: e.target.value } })} placeholder="09:00 - 18:00" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Contact */}
-      {section === "contact" && (
-        <div className="ios-fields">
-          <div className="ios-field"><label>전화</label><input value={c.contact.phone} onChange={(e) => setC({ ...c, contact: { ...c.contact, phone: e.target.value } })} placeholder="052-123-4567" /></div>
-          <div className="ios-field"><label>이메일</label><input value={c.contact.email} onChange={(e) => setC({ ...c, contact: { ...c.contact, email: e.target.value } })} placeholder="info@example.com" /></div>
-          <div className="ios-field"><label>주소</label><input value={c.contact.address} onChange={(e) => setC({ ...c, contact: { ...c.contact, address: e.target.value } })} placeholder="울산 남구 삼산동 123" /></div>
-          <div className="ios-field"><label>카카오톡</label><input value={c.contact.kakao} onChange={(e) => setC({ ...c, contact: { ...c.contact, kakao: e.target.value } })} placeholder="카카오톡 채널 ID" /></div>
-        </div>
-      )}
-
-      {/* Theme */}
-      {section === "theme" && (
-        <div>
-          <div className="text-sm font-semibold mb-3">브랜드 컬러</div>
-          <div className="flex gap-2 flex-wrap mb-6">
-            {COLORS.map((color) => (
-              <button key={color} onClick={() => setC({ ...c, theme: { ...c.theme, color } })}
-                className="w-10 h-10 rounded-full border-2 transition-all"
-                style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
-            ))}
-          </div>
-          <div className="text-sm font-semibold mb-3">미리보기</div>
-          <div className="rounded-xl overflow-hidden border border-[var(--border)]">
-            <div className="p-6 text-white" style={{ background: c.theme.color }}>
-              <div className="text-xl font-bold">{site.business_name}</div>
-              <div className="text-sm opacity-80 mt-1">{c.hero.subtitle || "한줄 소개"}</div>
-            </div>
-            <div className="p-4 bg-[var(--bg-card)]">
-              <div className="text-sm font-semibold mb-2" style={{ color: c.theme.color }}>서비스</div>
-              <div className="text-xs text-[var(--text-muted)]">콘텐츠가 이 스타일로 표시됩니다</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete button */}
-      <div className="mt-8 pt-4 border-t border-[var(--border)]">
-        <button onClick={() => { if (confirm("이 사이트를 삭제하시겠습니까?")) onDelete(site.id); }}
-          className="w-full py-3 text-sm text-[var(--danger)] font-medium rounded-xl">
-          사이트 삭제
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════
-// PREVIEW — live preview
-// ══════════════════════════════
-function PreviewPanel({ site, onBack }: { site: Website; onBack: () => void }) {
-  const c = site.content || EMPTY_CONTENT;
-  const color = c.theme?.color || "#0071E3";
-
-  return (
-    <div className="p-5">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={onBack} className="text-[var(--primary)] text-sm font-medium">← 돌아가기</button>
-        <a href={`/sites/${site.slug}`} target="_blank" rel="noopener noreferrer"
-          className="text-xs text-[var(--primary)] font-medium">새 탭에서 열기 ↗</a>
-      </div>
-
-      {/* Phone frame */}
-      <div className="mx-auto max-w-[375px] rounded-[2rem] border-4 border-[var(--text)] overflow-hidden shadow-2xl" style={{ background: "var(--bg)" }}>
-        {/* Status bar */}
-        <div className="h-6 flex items-center justify-center text-[10px] text-[var(--text-muted)]" style={{ background: "var(--bg-card)" }}>
-          {site.slug}.ilpro.ai
-        </div>
-
-        {/* Hero */}
-        <div className="relative" style={{ background: color, minHeight: 180 }}>
-          {c.hero.image && <img src={c.hero.image} alt="" className="w-full h-44 object-cover opacity-50" />}
-          <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
-            <div className="text-2xl font-bold">{c.hero.title || site.business_name}</div>
-            <div className="text-sm opacity-80 mt-1">{c.hero.subtitle}</div>
-          </div>
-        </div>
-
-        {/* About */}
-        {c.about.text && (
-          <div className="p-5">
-            <div className="text-sm font-bold mb-2" style={{ color }}>소개</div>
-            <div className="text-xs text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">{c.about.text}</div>
-          </div>
-        )}
-
-        {/* Services */}
-        {c.services.some(s => s.name) && (
-          <div className="p-5 pt-0">
-            <div className="text-sm font-bold mb-3" style={{ color }}>
-              {site.template === "restaurant" ? "메뉴" : "서비스"}
-            </div>
-            {c.services.filter(s => s.name).map((svc, i) => (
-              <div key={i} className="flex justify-between items-start py-2 border-b border-[var(--border)]">
-                <div>
-                  <div className="text-sm font-medium">{svc.name}</div>
-                  {svc.description && <div className="text-[11px] text-[var(--text-muted)]">{svc.description}</div>}
-                </div>
-                {svc.price && <div className="text-sm font-bold shrink-0 ml-3" style={{ color }}>₩{svc.price}</div>}
+      {/* Split pane */}
+      <div className="flex flex-1 min-h-0">
+        {/* LEFT — Chat input */}
+        <div className={`${mobileView === "edit" ? "flex" : "hidden"} md:flex flex-col w-full md:w-1/2 lg:w-[45%]`} style={{ borderRight: "1px solid var(--border)", background: "var(--bg)" }}>
+          {/* Chat messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {messages.map((msg, i) => (
+              <div key={i}>
+                {msg.role === "system" ? (
+                  <div>
+                    <div className="inline-block max-w-[90%] rounded-2xl rounded-tl-md px-4 py-2.5 text-sm" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                      <div className="whitespace-pre-wrap" style={{ color: "var(--text)" }}>{msg.text}</div>
+                    </div>
+                    {/* Section menu buttons */}
+                    {msg.section === "menu" && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {sections.map(s => (
+                          <button key={s.id} onClick={() => handleSectionClick(s.id)}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium active:scale-[0.97] transition-all"
+                            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+                            <span>{s.icon}</span> {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {/* Color picker inline */}
+                    {msg.section === "theme" && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {COLORS.map(color => (
+                          <button key={color} onClick={() => {
+                            setC(prev => ({ ...prev, theme: { ...prev.theme, color } }));
+                            setMessages(prev => [...prev, { role: "user", text: `컬러: ${color}` }, { role: "system", text: "브랜드 컬러를 적용했어요! 다른 항목을 수정할까요?", section: "menu" }]);
+                            setActiveSection(null);
+                          }}
+                            className="w-9 h-9 rounded-full border-2 transition-all active:scale-90"
+                            style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent", transform: c.theme.color === color ? "scale(1.15)" : "scale(1)" }} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex justify-end">
+                    <div className="inline-block max-w-[85%] rounded-2xl rounded-tr-md px-4 py-2.5 text-sm text-white" style={{ background: "var(--primary)" }}>
+                      <div className="whitespace-pre-wrap">{msg.text}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
+            <div ref={chatEndRef} />
           </div>
-        )}
 
-        {/* Hours */}
-        {Object.values(c.hours).some(v => v) && (
-          <div className="p-5 pt-0">
-            <div className="text-sm font-bold mb-3" style={{ color }}>영업시간</div>
-            {Object.entries(DAY_LABELS).map(([key, label]) => (
-              c.hours[key] && (
-                <div key={key} className="flex justify-between py-1.5 text-xs">
-                  <span className="font-medium">{label}요일</span>
-                  <span className="text-[var(--text-muted)]">{c.hours[key]}</span>
+          {/* Input area */}
+          <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--border)", background: "var(--bg-card)" }}>
+            {activeSection && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
+                  {sections.find(s => s.id === activeSection)?.icon} {sections.find(s => s.id === activeSection)?.label} 수정 중
+                </span>
+                <button onClick={() => { setActiveSection(null); setMessages(prev => [...prev, { role: "system", text: "취소했어요. 다른 항목을 선택해주세요.", section: "menu" }]); }}
+                  className="text-[11px] text-[var(--text-muted)]">취소</button>
+              </div>
+            )}
+            <div className="flex gap-2 items-end">
+              <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                placeholder={activeSection ? "내용을 입력하세요..." : "수정할 항목을 선택하거나 자유롭게 입력하세요"}
+                className="flex-1 resize-none rounded-xl px-4 py-2.5 text-sm outline-none min-h-[44px] max-h-[120px]"
+                style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                rows={1} />
+              <button onClick={handleSend}
+                className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-white active:scale-95"
+                style={{ background: input.trim() ? "var(--primary)" : "var(--border)" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Delete at bottom */}
+          <div className="shrink-0 px-4 py-2 text-center" style={{ borderTop: "1px solid var(--border)" }}>
+            <button onClick={() => { if (confirm("이 사이트를 삭제하시겠습니까?")) onDelete(site.id); }} className="text-xs text-[var(--danger)]">사이트 삭제</button>
+          </div>
+        </div>
+
+        {/* RIGHT — Live preview */}
+        <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 items-center overflow-y-auto`} style={{ background: "var(--bg-hover)" }}>
+          <div className="py-4 px-4 w-full max-w-[420px]">
+            {/* URL bar */}
+            <div className="flex items-center gap-2 rounded-t-xl px-3 py-2" style={{ background: "var(--bg-card)", borderBottom: "1px solid var(--border)" }}>
+              <div className="flex gap-1">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
+              </div>
+              <div className="flex-1 text-center text-[11px] text-[var(--text-muted)] bg-[var(--bg)] rounded-md py-1 px-2">
+                {site.slug}.ilpro.ai
+              </div>
+            </div>
+
+            {/* Site preview */}
+            <div className="rounded-b-xl overflow-hidden shadow-lg" style={{ background: "#FAFAFA" }}>
+              {/* Hero */}
+              <div className="relative" style={{ background: c.theme.color, minHeight: 160 }}>
+                {c.hero.image && <img src={c.hero.image} alt="" className="w-full h-40 object-cover opacity-50" />}
+                <div className="absolute inset-0 flex flex-col justify-end p-5 text-white">
+                  <div className="text-xl font-bold leading-tight">{c.hero.title || site.business_name}</div>
+                  {c.hero.subtitle && <div className="text-sm opacity-80 mt-1">{c.hero.subtitle}</div>}
+                  {c.contact.phone && (
+                    <div className="mt-3 inline-block px-4 py-1.5 bg-white/20 backdrop-blur rounded-lg text-xs font-medium">
+                      📞 {c.contact.phone}
+                    </div>
+                  )}
                 </div>
-              )
-            ))}
-          </div>
-        )}
+              </div>
 
-        {/* Contact */}
-        {(c.contact.phone || c.contact.address) && (
-          <div className="p-5 pt-0">
-            <div className="text-sm font-bold mb-3" style={{ color }}>연락처</div>
-            {c.contact.phone && <div className="text-xs mb-1.5">📞 {c.contact.phone}</div>}
-            {c.contact.email && <div className="text-xs mb-1.5">📧 {c.contact.email}</div>}
-            {c.contact.address && <div className="text-xs mb-1.5">📍 {c.contact.address}</div>}
-            {c.contact.kakao && <div className="text-xs mb-1.5">💬 카카오톡: {c.contact.kakao}</div>}
-          </div>
-        )}
+              {/* About */}
+              {c.about.text && (
+                <div className="p-4">
+                  <div className="text-xs font-bold mb-2" style={{ color: c.theme.color }}>소개</div>
+                  <div className="text-[11px] leading-relaxed text-[#56565A] whitespace-pre-wrap">{c.about.text}</div>
+                </div>
+              )}
 
-        {/* Footer */}
-        <div className="p-4 text-center text-[10px] text-[var(--text-muted)] border-t border-[var(--border)]">
-          Powered by 일프로AI
+              {/* Services */}
+              {c.services.some(s => s.name) && (
+                <div className="px-4 pb-4">
+                  <div className="text-xs font-bold mb-2" style={{ color: c.theme.color }}>
+                    {site.template === "restaurant" ? "메뉴" : "서비스"}
+                  </div>
+                  <div className="rounded-xl overflow-hidden" style={{ background: "white", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    {c.services.filter(s => s.name).map((svc, i) => (
+                      <div key={i} className="flex justify-between items-center px-3 py-2.5" style={{ borderBottom: i < c.services.filter(s => s.name).length - 1 ? "1px solid #F0F0F0" : "none" }}>
+                        <div>
+                          <div className="text-[12px] font-semibold text-[#1D1D1F]">{svc.name}</div>
+                          {svc.description && <div className="text-[10px] text-[#86868B]">{svc.description}</div>}
+                        </div>
+                        {svc.price && <div className="text-[12px] font-bold ml-2" style={{ color: c.theme.color }}>₩{svc.price}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Hours */}
+              {Object.values(c.hours).some(v => v) && (
+                <div className="px-4 pb-4">
+                  <div className="text-xs font-bold mb-2" style={{ color: c.theme.color }}>영업시간</div>
+                  <div className="rounded-xl overflow-hidden" style={{ background: "white", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    {Object.entries(DAY_LABELS).map(([key, label]) => (
+                      c.hours[key] ? (
+                        <div key={key} className="flex justify-between px-3 py-2" style={{ borderBottom: "1px solid #F5F5F5", fontSize: 11 }}>
+                          <span className="font-medium text-[#1D1D1F]">{label}요일</span>
+                          <span style={{ color: c.hours[key] === "휴무" ? "#FF3B30" : "#86868B" }}>{c.hours[key]}</span>
+                        </div>
+                      ) : null
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contact */}
+              {(c.contact.phone || c.contact.address || c.contact.email) && (
+                <div className="px-4 pb-4">
+                  <div className="text-xs font-bold mb-2" style={{ color: c.theme.color }}>연락처</div>
+                  <div className="rounded-xl p-3 space-y-1.5" style={{ background: "white", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    {c.contact.phone && <div className="text-[11px]">📞 {c.contact.phone}</div>}
+                    {c.contact.email && <div className="text-[11px]">📧 {c.contact.email}</div>}
+                    {c.contact.address && <div className="text-[11px]">📍 {c.contact.address}</div>}
+                    {c.contact.kakao && <div className="text-[11px]">💬 카카오톡: {c.contact.kakao}</div>}
+                  </div>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="py-3 text-center text-[9px] text-[#AEAEB2]" style={{ borderTop: "1px solid #F0F0F0" }}>
+                Powered by <span style={{ color: c.theme.color }}>일프로AI</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -596,11 +628,7 @@ function PreviewPanel({ site, onBack }: { site: Website; onBack: () => void }) {
 // HELPERS
 // ══════════════════════════════
 async function saveSite(site: Website) {
-  await supabase.from("websites").update({
-    content: site.content,
-    status: site.status,
-    updated_at: new Date().toISOString(),
-  }).eq("id", site.id);
+  await supabase.from("websites").update({ content: site.content, status: site.status, updated_at: new Date().toISOString() }).eq("id", site.id);
 }
 
 async function deleteSite(id: number) {

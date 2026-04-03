@@ -300,7 +300,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   // RENDER — full-screen split pane
   // ══════════════════════════════
   return (
-    <div className="flex flex-col" style={{ marginLeft: -20, marginRight: -20, marginTop: -20, height: "calc(100vh - 56px)", maxHeight: "calc(100dvh - 56px)" }}>
+    <div className="flex flex-col overflow-hidden" style={{ height: "calc(100vh - 56px)" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)" }}>
         <div className="flex items-center gap-3">

@@ -373,7 +373,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="pb-[var(--tab-h)] md:pb-0">
+        {/* Website builder — rendered full-bleed, no padding wrapper */}
+        {tab === "website" && <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} />}
+
+        <div className={`pb-[var(--tab-h)] md:pb-0 ${tab === "website" ? "hidden" : ""}`}>
           {tab === "home" && <HomePanel userId={user.id} profile={profile} setTab={setTab} />}
           {tab === "contacts" && <ContactsPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "calendar" && <CalendarPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
@@ -385,7 +388,6 @@ export default function Dashboard() {
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
-          {tab === "website" && <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} />}
         </div>
       </div>
 

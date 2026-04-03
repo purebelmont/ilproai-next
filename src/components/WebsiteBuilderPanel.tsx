@@ -35,7 +35,7 @@ const EMPTY_CONTENT: WebsiteContent = {
   hero: { title: "", subtitle: "", image: "" },
   about: { text: "", image: "" },
   services: [{ name: "", description: "", price: "" }],
-  hours: { mon: "09:00 - 18:00", tue: "09:00 - 18:00", wed: "09:00 - 18:00", thu: "09:00 - 18:00", fri: "09:00 - 18:00", sat: "휴무", sun: "휴무" },
+  hours: { mon: "", tue: "", wed: "", thu: "", fri: "", sat: "", sun: "" },
   contact: { phone: "", email: "", address: "", kakao: "" },
   gallery: [],
   theme: { color: "#0071E3", font: "default" },
@@ -49,7 +49,6 @@ const TEMPLATES = [
 ];
 
 const COLORS = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500", "#000000", "#E53935"];
-const DAY_LABELS: Record<string, string> = { mon: "월", tue: "화", wed: "수", thu: "목", fri: "금", sat: "토", sun: "일" };
 
 const SUBTITLES: Record<string, string> = {
   restaurant: "맛있는 음식과 따뜻한 분위기",
@@ -112,7 +111,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
     { id: "about", icon: "📖", label: "소개글" },
     { id: "services", icon: "📋", label: template === "restaurant" ? "메뉴" : "서비스" },
-    { id: "hours", icon: "🕐", label: "영업시간" },
     { id: "contact", icon: "📞", label: "연락처" },
     { id: "theme", icon: "🎨", label: "브랜드 컬러" },
   ];
@@ -195,7 +193,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       hero: `메인 타이틀을 입력하세요.\n예: "맛있는한식당" / "정성을 담은 한 끼"\n\n제목과 부제를 / 로 구분하거나 두 줄로 입력하세요.`,
       about: `가게 소개를 자유롭게 작성해주세요.\n예: "20년 전통의 한식 전문점입니다. 매일 새벽 시장에서 직접 재료를 골라옵니다."`,
       services: `${template === "restaurant" ? "메뉴" : "서비스"}를 입력하세요. 한 줄에 하나씩:\n예:\n갈비탕 - 한우 갈비 - 15,000\n된장찌개 - 집된장 - 9,000`,
-      hours: `영업시간을 입력하세요.\n예:\n월~금 09:00-21:00\n토 10:00-18:00\n일 휴무`,
       contact: `연락처를 입력하세요.\n예:\n전화: 052-123-4567\n주소: 울산 남구 삼산동 123\n이메일: info@example.com`,
       theme: "아래에서 브랜드 컬러를 선택하세요.",
     };
@@ -227,24 +224,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           return { name: parts[0] || "", description: parts[1] || "", price: parts[2] || "" };
         }).filter(s => s.name);
         if (svcs.length > 0) updated.services = [...updated.services.filter(s => s.name), ...svcs];
-        break;
-      }
-      case "hours": {
-        const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-        const dayMap: Record<string, string[]> = {
-          "월": ["mon"], "화": ["tue"], "수": ["wed"], "목": ["thu"], "금": ["fri"], "토": ["sat"], "일": ["sun"],
-          "월~금": ["mon", "tue", "wed", "thu", "fri"], "월-금": ["mon", "tue", "wed", "thu", "fri"],
-          "토~일": ["sat", "sun"], "토-일": ["sat", "sun"],
-          "매일": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
-        };
-        for (const line of lines) {
-          for (const [key, days] of Object.entries(dayMap)) {
-            if (line.startsWith(key)) {
-              const time = line.replace(key, "").replace(/^[\s:]+/, "").trim();
-              for (const d of days) updated.hours[d] = time;
-            }
-          }
-        }
         break;
       }
       case "contact": {
@@ -287,7 +266,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       if (lower.match(/제목|타이틀|이름|메인/)) handleSectionClick("hero");
       else if (lower.match(/소개|설명|about/)) handleSectionClick("about");
       else if (lower.match(/메뉴|서비스|가격|목록/)) handleSectionClick("services");
-      else if (lower.match(/시간|영업|오픈/)) handleSectionClick("hours");
       else if (lower.match(/연락|전화|주소|이메일/)) handleSectionClick("contact");
       else if (lower.match(/색|컬러|디자인|테마/)) handleSectionClick("theme");
       else setMessages(prev => [...prev, { role: "system", text: "아래 버튼에서 수정할 항목을 선택해주세요.", action: "sections" }]);
@@ -322,7 +300,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   // RENDER — full-screen split pane
   // ══════════════════════════════
   return (
-    <div className="h-[calc(100vh-56px)] md:h-screen flex flex-col" style={{ marginLeft: -20, marginRight: -20, marginTop: -20 }}>
+    <div className="flex flex-col" style={{ marginLeft: -20, marginRight: -20, marginTop: -20, height: "calc(100vh - 56px)", maxHeight: "calc(100dvh - 56px)" }}>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 shrink-0" style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)" }}>
         <div className="flex items-center gap-3">
@@ -505,23 +483,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                         </div>
                         {svc.price && <div className="text-[12px] font-bold ml-2" style={{ color: c.theme.color }}>₩{svc.price}</div>}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Hours */}
-              {Object.values(c.hours).some(v => v) && (
-                <div className="px-4 pb-4">
-                  <div className="text-xs font-bold mb-2" style={{ color: c.theme.color }}>영업시간</div>
-                  <div className="rounded-xl overflow-hidden" style={{ background: "white", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                    {Object.entries(DAY_LABELS).map(([key, label]) => (
-                      c.hours[key] ? (
-                        <div key={key} className="flex justify-between px-3 py-2" style={{ borderBottom: "1px solid #F5F5F5", fontSize: 11 }}>
-                          <span className="font-medium text-[#1D1D1F]">{label}요일</span>
-                          <span style={{ color: c.hours[key] === "휴무" ? "#FF3B30" : "#86868B" }}>{c.hours[key]}</span>
-                        </div>
-                      ) : null
                     ))}
                   </div>
                 </div>

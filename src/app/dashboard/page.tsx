@@ -232,6 +232,15 @@ export default function Dashboard() {
           <div className="text-lg font-extrabold" style={{ color: "var(--text)" }}>일프로<span className="text-[var(--primary)]">AI</span></div>
           <div className="text-xs text-[var(--gray-500)] mt-0.5">{bizName}</div>
         </div>
+        {/* AI Button — like Canva's Create */}
+        <div className="px-3 pt-3 pb-1">
+          <button onClick={() => setTab("website")}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white active:scale-[0.97] transition-all"
+            style={{ background: "linear-gradient(135deg, #7C3AED, #0071E3)", boxShadow: "0 4px 15px rgba(124,58,237,0.3)" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            AI
+          </button>
+        </div>
         <div className="flex-1 overflow-y-auto py-2 px-2">
           {TIER1_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
@@ -341,13 +350,18 @@ export default function Dashboard() {
             <div className="text-xs text-[var(--gray-500)]">{dateLabel}</div>
           </div>
           <div className="flex gap-2 items-center">
+            <button onClick={() => setTab("website")}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-white active:scale-[0.95]"
+              style={{ background: "linear-gradient(135deg, #7C3AED, #0071E3)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+              AI
+            </button>
             <button onClick={toggleDark} className="text-sm">{dark ? "☀️" : "🌙"}</button>
             {hasSample ? (
               <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--gray-400)]">{sampleLoading ? "..." : "📦"}</button>
             ) : (
               <button onClick={generateSample} disabled={sampleLoading} className="text-xs text-[var(--primary)]">{sampleLoading ? "..." : "📦"}</button>
             )}
-            <button onClick={() => router.push("/")} className="text-sm text-[var(--primary)]">홈</button>
             <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-sm text-[var(--gray-500)]">나가기</button>
           </div>
         </div>

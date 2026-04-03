@@ -87,19 +87,23 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   // Load existing site
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("websites").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1);
-      if (data && data.length > 0) {
-        const s = data[0] as Website;
-        setSite(s);
-        setC(s.content || EMPTY_CONTENT);
-        setStatus(s.status);
-        setTemplate(s.template);
-        setBizName(s.business_name);
-        setSlug(s.slug);
-        setStep("edit");
-        setMessages([
-          { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n어떤 항목을 수정할까요?`, action: "sections" },
-        ]);
+      try {
+        const { data, error } = await supabase.from("websites").select("*").eq("user_id", userId).order("created_at", { ascending: false }).limit(1);
+        if (!error && data && data.length > 0) {
+          const s = data[0] as Website;
+          setSite(s);
+          setC(s.content || EMPTY_CONTENT);
+          setStatus(s.status);
+          setTemplate(s.template);
+          setBizName(s.business_name);
+          setSlug(s.slug);
+          setStep("edit");
+          setMessages([
+            { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n어떤 항목을 수정할까요?`, action: "sections" },
+          ]);
+        }
+      } catch (e) {
+        // Table might not exist yet — continue with fresh state
       }
       setLoaded(true);
     })();

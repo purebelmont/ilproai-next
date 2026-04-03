@@ -46,6 +46,18 @@ const TEMPLATES = [
   { id: "service", name: "서비스/뷰티", icon: "💇" },
   { id: "retail", name: "매장/쇼핑", icon: "🛍️" },
   { id: "office", name: "사무실/B2B", icon: "🏢" },
+  { id: "medical", name: "병원/의원", icon: "🏥" },
+  { id: "education", name: "학원/교육", icon: "📚" },
+  { id: "fitness", name: "헬스/스포츠", icon: "💪" },
+  { id: "lodging", name: "숙박/펜션", icon: "🏨" },
+  { id: "repair", name: "수리/정비", icon: "🔧" },
+  { id: "legal", name: "법률/세무", icon: "⚖️" },
+  { id: "realestate", name: "부동산", icon: "🏠" },
+  { id: "pet", name: "반려동물", icon: "🐾" },
+  { id: "wedding", name: "웨딩/이벤트", icon: "💐" },
+  { id: "manufacturing", name: "제조/공장", icon: "🏭" },
+  { id: "logistics", name: "물류/운송", icon: "🚚" },
+  { id: "freelance", name: "프리랜서", icon: "💻" },
 ];
 
 const COLORS = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500", "#000000", "#E53935"];
@@ -55,6 +67,18 @@ const SUBTITLES: Record<string, string> = {
   service: "최고의 서비스를 제공합니다",
   retail: "좋은 상품을 합리적인 가격에",
   office: "신뢰할 수 있는 비즈니스 파트너",
+  medical: "건강한 삶을 위한 전문 의료 서비스",
+  education: "미래를 여는 교육의 시작",
+  fitness: "더 강하고 건강한 나를 만드는 곳",
+  lodging: "편안한 휴식, 특별한 추억",
+  repair: "빠르고 정확한 전문 수리 서비스",
+  legal: "든든한 법률·세무 파트너",
+  realestate: "당신의 꿈의 공간을 찾아드립니다",
+  pet: "우리 아이를 위한 최고의 케어",
+  wedding: "인생에서 가장 아름다운 순간",
+  manufacturing: "품질과 신뢰의 제조 파트너",
+  logistics: "빠르고 안전한 물류 솔루션",
+  freelance: "전문성으로 만드는 차이",
 };
 
 // ══════════════════════════════

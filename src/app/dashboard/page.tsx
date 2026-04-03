@@ -12,8 +12,29 @@ import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
 
 type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website";
 
-const TIER1_TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: "home", icon: "🏠", label: "대시보드" },
+// Sidebar — only essential navigation (like Canva: Home, Projects, Templates, Brand)
+const SIDEBAR_TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: "home", icon: "🏠", label: "홈" },
+  { id: "calendar", icon: "📅", label: "일정" },
+  { id: "ledger", icon: "💰", label: "매출" },
+  { id: "report", icon: "📊", label: "리포트" },
+];
+
+const SIDEBAR_PRO: { id: Tab; icon: string; label: string }[] = [
+  { id: "website", icon: "🌐", label: "홈페이지" },
+];
+
+// Mobile bottom bar — 4 key tabs + AI
+const MOBILE_TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: "home", icon: "🏠", label: "홈" },
+  { id: "calendar", icon: "📅", label: "일정" },
+  { id: "ledger", icon: "💰", label: "매출" },
+  { id: "report", icon: "📊", label: "리포트" },
+];
+
+// All tabs (for rendering content)
+const ALL_TABS: { id: Tab; icon: string; label: string }[] = [
+  { id: "home", icon: "🏠", label: "홈" },
   { id: "contacts", icon: "👤", label: "연락처" },
   { id: "calendar", icon: "📅", label: "캘린더" },
   { id: "reservations", icon: "📋", label: "예약" },
@@ -24,13 +45,8 @@ const TIER1_TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "quotes", icon: "💼", label: "견적" },
   { id: "payroll", icon: "👥", label: "급여" },
   { id: "report", icon: "📊", label: "리포트" },
-];
-
-const TIER2_TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "website", icon: "🌐", label: "홈페이지" },
 ];
-
-const TABS = [...TIER1_TABS, ...TIER2_TABS];
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -249,11 +265,11 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Tier 1 Tabs */}
+        {/* Main nav — only essentials */}
         <div className="flex-1 overflow-y-auto px-2 py-1" style={{ scrollbarWidth: "none" }}>
-          {TIER1_TABS.map((t) => (
+          {SIDEBAR_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-200 mb-0.5"
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-all duration-200 mb-1"
               style={{
                 background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
                 color: tab === t.id ? "#A78BFA" : "#8E8EA0",
@@ -263,14 +279,11 @@ export default function Dashboard() {
             </button>
           ))}
 
-          {/* Tier 2 separator */}
-          <div className="mx-2 my-3 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-          <div className="px-3 mb-2 opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-200">
-            <span className="text-[9px] font-bold tracking-widest text-[#8E8EA0] uppercase">Pro</span>
-          </div>
-          {TIER2_TABS.map((t) => (
+          {/* Pro section */}
+          <div className="mx-2 my-4 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+          {SIDEBAR_PRO.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-all duration-200 mb-0.5 relative"
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-left transition-all duration-200 mb-1 relative"
               style={{
                 background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
                 color: tab === t.id ? "#A78BFA" : "#8E8EA0",
@@ -316,7 +329,7 @@ export default function Dashboard() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50"
         style={{ background: "#0D0D12", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         <div className="flex h-[var(--tab-h)]">
-          {TIER1_TABS.slice(0, 4).map((t) => (
+          {MOBILE_TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] transition-colors duration-200"
               style={{ color: tab === t.id ? "#A78BFA" : "#5A5A6E" }}>
@@ -333,44 +346,7 @@ export default function Dashboard() {
             </div>
             <span className="text-[9px] font-bold" style={{ color: "#A78BFA" }}>AI</span>
           </button>
-          <button onClick={() => setMobileMore(!mobileMore)}
-            className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] transition-colors duration-200"
-            style={{ color: mobileMore ? "#A78BFA" : "#5A5A6E" }}>
-            <span className="text-[20px] leading-none">⋯</span>
-            <span className="text-[9px] font-medium">더보기</span>
-          </button>
         </div>
-
-        {/* More menu */}
-        {mobileMore && (
-          <div className="px-3 py-3 animate-[slideUp_0.2s_ease]" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", background: "#0D0D12" }}>
-            <div className="grid grid-cols-4 gap-2 mb-3">
-              {TIER1_TABS.slice(4).map((t) => (
-                <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
-                  style={{ background: tab === t.id ? "rgba(125,42,231,0.15)" : "rgba(255,255,255,0.05)", color: tab === t.id ? "#A78BFA" : "#8E8EA0" }}>
-                  <span className="text-2xl">{t.icon}</span>
-                  <span className="text-[10px] font-medium">{t.label}</span>
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-1.5 mb-2 mt-1">
-              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-              <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{ background: "#7D2AE7", color: "white" }}>PRO</span>
-              <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {TIER2_TABS.map((t) => (
-                <button key={t.id} onClick={() => { setTab(t.id); setMobileMore(false); }}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl min-h-[60px] active:scale-95 transition-transform"
-                  style={{ background: tab === t.id ? "rgba(125,42,231,0.15)" : "rgba(255,255,255,0.05)", color: tab === t.id ? "#A78BFA" : "#8E8EA0" }}>
-                  <span className="text-2xl">{t.icon}</span>
-                  <span className="text-[10px] font-medium">{t.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ═══ MAIN CONTENT ═══ */}

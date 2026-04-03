@@ -434,6 +434,14 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           {/* Delete */}
           {site && (
             <div className="shrink-0 px-4 py-2 text-center" style={{ borderTop: "1px solid var(--border)" }}>
+              <button onClick={() => {
+                if (!confirm("모든 내용을 초기화하시겠습니까?")) return;
+                const fresh = { ...EMPTY_CONTENT, hero: { ...EMPTY_CONTENT.hero, title: bizName, subtitle: SUBTITLES[template] || "" } };
+                setC(fresh);
+                setMessages(prev => [...prev, { role: "system", text: "초기화했어요! 처음부터 다시 채워볼까요?", action: "sections" }]);
+                setActiveSection(null);
+              }} className="text-xs text-[var(--text-muted)]">초기화</button>
+              <span className="text-[var(--border)] mx-2">|</span>
               <button onClick={deleteSite} className="text-xs text-[var(--danger)]">사이트 삭제</button>
             </div>
           )}

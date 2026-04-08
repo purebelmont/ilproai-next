@@ -296,6 +296,11 @@ export default function Dashboard() {
 
         {/* Bottom actions */}
         <div className="flex flex-col items-center gap-1 py-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <a href="/harness"
+            className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#A78BFA", textDecoration: "none" }}>
+            <span className="text-[16px]">⚙️</span>
+            <span className="text-[9px]">하네스</span>
+          </a>
           <button onClick={toggleDark}
             className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
             <span className="text-[16px]">{dark ? "☀️" : "🌙"}</span>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Harness System — Claude Code Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A0F; color: #E2E8F0; min-height: 100vh; }
+
+  /* Header */
+  .header { padding: 40px 24px 20px; text-align: center; }
+  .header h1 { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #A78BFA, #60A5FA, #34D399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  .header p { color: #64748B; font-size: 15px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* Architecture diagram */
+  .arch { background: #111118; border-radius: 20px; border: 1px solid #1E1E2E; padding: 32px; margin-bottom: 24px; }
+  .arch-title { font-size: 13px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+  .arch-flow { display: flex; align-items: center; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+  .arch-node { background: #1A1A2E; border: 1px solid #2D2D44; border-radius: 14px; padding: 16px 20px; min-width: 140px; text-align: center; flex-shrink: 0; transition: all 0.3s; }
+  .arch-node.active { border-color: #7D2AE7; box-shadow: 0 0 20px rgba(125,42,231,0.2); }
+  .arch-node.processing { border-color: #F59E0B; box-shadow: 0 0 20px rgba(245,158,11,0.2); animation: pulse 1.5s infinite; }
+  .arch-node.done { border-color: #34D399; box-shadow: 0 0 20px rgba(52,211,153,0.2); }
+  .arch-node-icon { font-size: 24px; margin-bottom: 6px; }
+  .arch-node-label { font-size: 12px; font-weight: 600; color: #94A3B8; }
+  .arch-node-value { font-size: 11px; color: #475569; margin-top: 4px; }
+  .arch-arrow { color: #334155; font-size: 20px; flex-shrink: 0; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* Harness modules */
+  .modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px; }
+  .module { background: #111118; border-radius: 16px; border: 1px solid #1E1E2E; overflow: hidden; }
+  .module-header { padding: 16px 20px; border-bottom: 1px solid #1E1E2E; display: flex; align-items: center; justify-content: space-between; }
+  .module-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .module-badge { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+  .badge-live { background: #34D39920; color: #34D399; }
+  .badge-demo { background: #F59E0B20; color: #F59E0B; }
+  .module-body { padding: 20px; }
+
+  /* Prompt template */
+  .prompt-box { background: #0A0A0F; border-radius: 10px; padding: 14px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; line-height: 1.7; margin-bottom: 12px; border: 1px solid #1E1E2E; max-height: 200px; overflow-y: auto; }
+  .prompt-var { color: #A78BFA; }
+  .prompt-text { color: #94A3B8; }
+  .prompt-comment { color: #475569; }
+
+  /* Router */
+  .router-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; margin-bottom: 8px; background: #0A0A0F; border: 1px solid #1E1E2E; cursor: pointer; transition: all 0.2s; }
+  .router-item:hover { border-color: #7D2AE7; }
+  .router-item.selected { border-color: #7D2AE7; background: #7D2AE710; }
+  .router-icon { font-size: 20px; }
+  .router-label { font-size: 13px; font-weight: 600; flex: 1; }
+  .router-meta { font-size: 10px; color: #475569; }
+  .router-cost { font-size: 11px; font-weight: 700; }
+  .cost-high { color: #EF4444; }
+  .cost-med { color: #F59E0B; }
+  .cost-low { color: #34D399; }
+  .cost-free { color: #60A5FA; }
+
+  /* Output parser */
+  .parser-input { background: #0A0A0F; border-radius: 10px; padding: 12px; font-family: monospace; font-size: 11px; color: #94A3B8; margin-bottom: 8px; border: 1px solid #1E1E2E; }
+  .parser-output { background: #0A0A0F; border-radius: 10px; padding: 12px; font-family: monospace; font-size: 11px; margin-bottom: 8px; border: 1px solid #1E1E2E; }
+  .parser-output.success { border-color: #34D399; color: #34D399; }
+  .parser-output.error { border-color: #EF4444; color: #EF4444; }
+  .parser-arrow { text-align: center; color: #475569; font-size: 16px; margin: 4px 0; }
+
+  /* Fallback chain */
+  .fallback-chain { display: flex; flex-direction: column; gap: 8px; }
+  .fallback-step { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: #0A0A0F; border: 1px solid #1E1E2E; }
+  .fallback-num { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+  .fallback-num.try { background: #7D2AE720; color: #A78BFA; }
+  .fallback-num.fail { background: #EF444420; color: #EF4444; }
+  .fallback-num.ok { background: #34D39920; color: #34D399; }
+  .fallback-text { flex: 1; font-size: 12px; }
+  .fallback-status { font-size: 10px; font-weight: 600; }
+
+  /* Cost tracker */
+  .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1E1E2E; }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-label { font-size: 13px; }
+  .cost-bar { flex: 1; margin: 0 16px; height: 6px; background: #1E1E2E; border-radius: 3px; overflow: hidden; }
+  .cost-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+  .cost-amount { font-size: 13px; font-weight: 700; min-width: 80px; text-align: right; }
+
+  /* Live demo */
+  .demo { background: #111118; border-radius: 20px; border: 1px solid #1E1E2E; overflow: hidden; margin-bottom: 24px; }
+  .demo-header { padding: 16px 20px; border-bottom: 1px solid #1E1E2E; display: flex; align-items: center; justify-content: space-between; }
+  .demo-title { font-size: 16px; font-weight: 700; }
+  .demo-body { display: flex; min-height: 400px; }
+  .demo-input { flex: 1; padding: 20px; border-right: 1px solid #1E1E2E; display: flex; flex-direction: column; }
+  .demo-output { flex: 1; padding: 20px; display: flex; flex-direction: column; }
+  .demo-label { font-size: 11px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .demo-textarea { flex: 1; background: #0A0A0F; border: 1px solid #1E1E2E; border-radius: 10px; padding: 14px; font-size: 13px; color: #E2E8F0; resize: none; outline: none; font-family: inherit; line-height: 1.6; }
+  .demo-textarea:focus { border-color: #7D2AE7; }
+  .demo-textarea::placeholder { color: #334155; }
+  .demo-result { flex: 1; background: #0A0A0F; border: 1px solid #1E1E2E; border-radius: 10px; padding: 14px; font-size: 13px; color: #94A3B8; line-height: 1.6; overflow-y: auto; white-space: pre-wrap; }
+  .demo-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .demo-btn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .demo-btn-primary { background: #7D2AE7; color: white; }
+  .demo-btn-primary:hover { background: #6D1FD7; }
+  .demo-btn-secondary { background: #1E1E2E; color: #94A3B8; }
+  .demo-btn-secondary:hover { background: #2D2D44; }
+  .demo-meta { display: flex; gap: 16px; margin-top: 12px; font-size: 11px; color: #475569; }
+  .demo-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Harness code */
+  .code-section { background: #111118; border-radius: 20px; border: 1px solid #1E1E2E; padding: 24px; margin-bottom: 24px; }
+  .code-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .code-block { background: #0A0A0F; border-radius: 12px; padding: 20px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; line-height: 1.8; overflow-x: auto; border: 1px solid #1E1E2E; }
+  .code-block .kw { color: #C084FC; }
+  .code-block .fn { color: #60A5FA; }
+  .code-block .str { color: #34D399; }
+  .code-block .comment { color: #475569; }
+  .code-block .num { color: #F59E0B; }
+  .code-block .type { color: #F472B6; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 24px; }
+    .arch-flow { flex-direction: column; align-items: stretch; }
+    .arch-arrow { transform: rotate(90deg); text-align: center; }
+    .modules { grid-template-columns: 1fr; }
+    .demo-body { flex-direction: column; }
+    .demo-input { border-right: none; border-bottom: 1px solid #1E1E2E; min-height: 200px; }
+    .demo-output { min-height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>AI Harness System</h1>
+  <p>How Claude Code orchestrates AI models — prompt, route, parse, fallback, serve</p>
+</div>
+
+<div class="container">
+
+<!-- ═══ Architecture Flow ═══ -->
+<div class="arch">
+  <div class="arch-title">Request Pipeline</div>
+  <div class="arch-flow" id="archFlow">
+    <div class="arch-node" id="node-input">
+      <div class="arch-node-icon">📥</div>
+      <div class="arch-node-label">User Input</div>
+      <div class="arch-node-value">"리뷰 답글 써줘"</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node" id="node-router">
+      <div class="arch-node-icon">🔀</div>
+      <div class="arch-node-label">Router</div>
+      <div class="arch-node-value">Task classification</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node" id="node-prompt">
+      <div class="arch-node-icon">📝</div>
+      <div class="arch-node-label">Prompt Builder</div>
+      <div class="arch-node-value">Template + context</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node" id="node-model">
+      <div class="arch-node-icon">🧠</div>
+      <div class="arch-node-label">AI Model</div>
+      <div class="arch-node-value">Claude / Qwen / EXAONE</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node" id="node-parse">
+      <div class="arch-node-icon">🔍</div>
+      <div class="arch-node-label">Output Parser</div>
+      <div class="arch-node-value">JSON validation</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node" id="node-output">
+      <div class="arch-node-icon">✅</div>
+      <div class="arch-node-label">Response</div>
+      <div class="arch-node-value">Structured data</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Harness Modules ═══ -->
+<div class="modules">
+
+  <!-- 1. Prompt Engineering -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-title">📝 Prompt Templates</div>
+      <span class="module-badge badge-live">LIVE</span>
+    </div>
+    <div class="module-body">
+      <div class="prompt-box">
+<span class="prompt-comment">// Review reply template</span>
+<span class="prompt-text">You are a Korean business owner.</span>
+<span class="prompt-text">Business: </span><span class="prompt-var">{business_name}</span>
+<span class="prompt-text">Type: </span><span class="prompt-var">{business_type}</span>
+<span class="prompt-text">
+Review: </span><span class="prompt-var">{review_text}</span>
+<span class="prompt-text">
+Write a warm, professional reply in Korean.
+Include: gratitude, address feedback, invite return.
+Output: JSON </span><span class="prompt-var">{"reply": "..."}</span>
+      </div>
+      <div style="font-size:11px;color:#475569">5 templates: review_reply, website_gen, quote_gen, chatbot, marketing</div>
+    </div>
+  </div>
+
+  <!-- 2. Model Router -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-title">🔀 Smart Router</div>
+      <span class="module-badge badge-live">LIVE</span>
+    </div>
+    <div class="module-body">
+      <div class="router-item selected" onclick="selectRoute(this, 'haiku')">
+        <div class="router-icon">⚡</div>
+        <div>
+          <div class="router-label">Claude Haiku</div>
+          <div class="router-meta">Simple tasks: reviews, chatbot</div>
+        </div>
+        <div class="router-cost cost-med">₩7/req</div>
+      </div>
+      <div class="router-item" onclick="selectRoute(this, 'sonnet')">
+        <div class="router-icon">🧠</div>
+        <div>
+          <div class="router-label">Claude Sonnet</div>
+          <div class="router-meta">Complex: website gen, analysis</div>
+        </div>
+        <div class="router-cost cost-high">₩50/req</div>
+      </div>
+      <div class="router-item" onclick="selectRoute(this, 'qwen')">
+        <div class="router-icon">🏠</div>
+        <div>
+          <div class="router-label">Qwen 7B (Local)</div>
+          <div class="router-meta">Bulk tasks: FAQ, simple replies</div>
+        </div>
+        <div class="router-cost cost-free">₩0/req</div>
+      </div>
+      <div class="router-item" onclick="selectRoute(this, 'exaone')">
+        <div class="router-icon">🇰🇷</div>
+        <div>
+          <div class="router-label">EXAONE 7.8B (GPU)</div>
+          <div class="router-meta">Korean specialized tasks</div>
+        </div>
+        <div class="router-cost cost-free">₩0/req</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Output Parser -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-title">🔍 Output Parser</div>
+      <span class="module-badge badge-live">LIVE</span>
+    </div>
+    <div class="module-body">
+      <div class="parser-input">
+        <div style="color:#475569;font-size:10px;margin-bottom:4px">RAW AI OUTPUT</div>
+        {"reply": "감사합니다! 갈비탕을 맛있게 드셨다니 기쁩니다. 주차 문제는 개선하겠습니다."}
+      </div>
+      <div class="parser-arrow">↓ JSON.parse() + schema validation ↓</div>
+      <div class="parser-output success">
+        <div style="color:#475569;font-size:10px;margin-bottom:4px">PARSED & VALIDATED</div>
+        ✅ Valid JSON<br>
+        ✅ "reply" field exists<br>
+        ✅ Korean text detected<br>
+        ✅ Length: 42 chars (OK)
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Fallback Chain -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-title">🔄 Fallback Chain</div>
+      <span class="module-badge badge-demo">RESILIENT</span>
+    </div>
+    <div class="module-body">
+      <div class="fallback-chain">
+        <div class="fallback-step">
+          <div class="fallback-num try">1</div>
+          <div class="fallback-text">Try <strong>Qwen 7B</strong> (local, free)</div>
+          <div class="fallback-status" style="color:#EF4444">TIMEOUT</div>
+        </div>
+        <div class="fallback-step">
+          <div class="fallback-num fail">2</div>
+          <div class="fallback-text">Fallback → <strong>Claude Haiku</strong> (API)</div>
+          <div class="fallback-status" style="color:#EF4444">JSON ERROR</div>
+        </div>
+        <div class="fallback-step">
+          <div class="fallback-num try">3</div>
+          <div class="fallback-text">Retry with stricter prompt</div>
+          <div class="fallback-status" style="color:#34D399">SUCCESS ✓</div>
+        </div>
+        <div class="fallback-step">
+          <div class="fallback-num ok">✓</div>
+          <div class="fallback-text">Return valid response to user</div>
+          <div class="fallback-status" style="color:#60A5FA">200ms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Cost Tracker -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-title">💰 Cost Optimization</div>
+      <span class="module-badge badge-live">TRACKING</span>
+    </div>
+    <div class="module-body">
+      <div class="cost-row">
+        <div class="cost-label">API Only</div>
+        <div class="cost-bar"><div class="cost-fill" style="width:100%;background:#EF4444"></div></div>
+        <div class="cost-amount cost-high">₩1,000,000</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-label">Smart Routing</div>
+        <div class="cost-bar"><div class="cost-fill" style="width:40%;background:#F59E0B"></div></div>
+        <div class="cost-amount cost-med">₩400,000</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-label">+ Local Model</div>
+        <div class="cost-bar"><div class="cost-fill" style="width:15%;background:#34D399"></div></div>
+        <div class="cost-amount cost-low">₩150,000</div>
+      </div>
+      <div class="cost-row">
+        <div class="cost-label">+ Fine-tuned</div>
+        <div class="cost-bar"><div class="cost-fill" style="width:5%;background:#60A5FA"></div></div>
+        <div class="cost-amount cost-free">₩50,000</div>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:#34D399;font-weight:700">95% cost reduction with full harness</div>
+    </div>
+  </div>
+
+  <!-- 6. Guardrails -->
+  <div class="module">
+    <div class="module-header">
+      <div class="module-title">🛡️ Guardrails</div>
+      <span class="module-badge badge-demo">SAFETY</span>
+    </div>
+    <div class="module-body">
+      <div class="fallback-chain">
+        <div class="fallback-step">
+          <div class="fallback-num ok">✓</div>
+          <div class="fallback-text"><strong>Input validation</strong> — XSS, injection filtering</div>
+          <div class="fallback-status" style="color:#34D399">PASS</div>
+        </div>
+        <div class="fallback-step">
+          <div class="fallback-num ok">✓</div>
+          <div class="fallback-text"><strong>Rate limiting</strong> — Per user, per plan</div>
+          <div class="fallback-status" style="color:#34D399">OK</div>
+        </div>
+        <div class="fallback-step">
+          <div class="fallback-num ok">✓</div>
+          <div class="fallback-text"><strong>Output filtering</strong> — PII removal, toxicity check</div>
+          <div class="fallback-status" style="color:#34D399">CLEAN</div>
+        </div>
+        <div class="fallback-step">
+          <div class="fallback-num ok">✓</div>
+          <div class="fallback-text"><strong>Schema enforcement</strong> — TypeScript interfaces</div>
+          <div class="fallback-status" style="color:#34D399">VALID</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ Live Demo ═══ -->
+<div class="demo">
+  <div class="demo-header">
+    <div class="demo-title">🎮 Live Harness Demo</div>
+    <div style="font-size:12px;color:#475569">Try it — type a task and see the harness in action</div>
+  </div>
+  <div class="demo-body">
+    <div class="demo-input">
+      <div class="demo-label">Input</div>
+      <textarea class="demo-textarea" id="demoInput" placeholder="Try these:
+• 맛있는한식당의 리뷰 답글 써줘: 갈비탕이 맛있었어요
+• 네일샵 홈페이지 만들어줘
+• 이번 달 매출 분석해줘"></textarea>
+      <div class="demo-actions">
+        <button class="demo-btn demo-btn-primary" onclick="runHarness()">Run Harness →</button>
+        <button class="demo-btn demo-btn-secondary" onclick="clearDemo()">Clear</button>
+      </div>
+    </div>
+    <div class="demo-output">
+      <div class="demo-label">Harness Output</div>
+      <div class="demo-result" id="demoOutput">Output will appear here...</div>
+      <div class="demo-meta" id="demoMeta">
+        <span>⏱ —</span>
+        <span>🧠 —</span>
+        <span>💰 —</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Harness Code ═══ -->
+<div class="code-section">
+  <h3>💻 Harness Implementation (TypeScript)</h3>
+  <div class="code-block">
+<span class="comment">// AI Harness — the brain behind ilpro.ai</span>
+
+<span class="kw">interface</span> <span class="type">HarnessConfig</span> {
+  models: <span class="type">ModelConfig</span>[];
+  fallbackChain: <span class="str">string</span>[];
+  maxRetries: <span class="num">3</span>;
+  timeout: <span class="num">10000</span>;
+}
+
+<span class="kw">interface</span> <span class="type">ModelConfig</span> {
+  name: <span class="str">string</span>;
+  endpoint: <span class="str">string</span>;
+  costPerReq: <span class="num">number</span>;
+  tasks: <span class="str">string</span>[];  <span class="comment">// which tasks this model handles</span>
+}
+
+<span class="kw">async function</span> <span class="fn">runHarness</span>(input: <span class="type">UserInput</span>): <span class="type">Promise</span>&lt;<span class="type">AIResponse</span>&gt; {
+
+  <span class="comment">// 1. CLASSIFY — what kind of task is this?</span>
+  <span class="kw">const</span> task = <span class="fn">classifyTask</span>(input.text);
+  <span class="comment">// → "review_reply" | "website_gen" | "chatbot" | "quote" | "marketing"</span>
+
+  <span class="comment">// 2. ROUTE — pick the best model for this task</span>
+  <span class="kw">const</span> model = <span class="fn">selectModel</span>(task, input.plan);
+  <span class="comment">// → Free plan: Qwen local → Pro plan: Claude Haiku/Sonnet</span>
+
+  <span class="comment">// 3. BUILD PROMPT — inject context into template</span>
+  <span class="kw">const</span> prompt = <span class="fn">buildPrompt</span>(task, {
+    business: input.businessInfo,
+    context: input.text,
+    outputFormat: <span class="str">"json"</span>,
+  });
+
+  <span class="comment">// 4. CALL MODEL — with fallback chain</span>
+  <span class="kw">for</span> (<span class="kw">const</span> attempt <span class="kw">of</span> config.fallbackChain) {
+    <span class="kw">try</span> {
+      <span class="kw">const</span> raw = <span class="kw">await</span> <span class="fn">callModel</span>(attempt, prompt);
+
+      <span class="comment">// 5. PARSE — validate and extract structured data</span>
+      <span class="kw">const</span> parsed = <span class="fn">parseOutput</span>(raw, task.schema);
+      <span class="kw">if</span> (!parsed.valid) <span class="kw">throw new</span> Error(<span class="str">"Invalid output"</span>);
+
+      <span class="comment">// 6. GUARDRAILS — safety checks</span>
+      <span class="kw">const</span> safe = <span class="fn">checkGuardrails</span>(parsed.data);
+      <span class="kw">if</span> (!safe) <span class="kw">throw new</span> Error(<span class="str">"Safety violation"</span>);
+
+      <span class="comment">// 7. LOG — track cost, latency, model used</span>
+      <span class="fn">logUsage</span>({ model: attempt, cost: model.costPerReq, latency });
+
+      <span class="kw">return</span> parsed.data;
+
+    } <span class="kw">catch</span> (e) {
+      <span class="fn">logError</span>(attempt, e);
+      <span class="kw">continue</span>; <span class="comment">// try next model in fallback chain</span>
+    }
+  }
+
+  <span class="comment">// All models failed — return template response</span>
+  <span class="kw">return</span> <span class="fn">getTemplateResponse</span>(task);
+}
+  </div>
+</div>
+
+<!-- ═══ Architecture Summary ═══ -->
+<div class="code-section">
+  <h3>🏗️ Full Harness Architecture</h3>
+  <div class="code-block" style="text-align:center;line-height:2.2">
+<span class="str">┌─────────────────────────────────────────────────────┐</span>
+<span class="str">│</span>                    <span class="fn">AI HARNESS</span>                        <span class="str">│</span>
+<span class="str">│</span>                                                     <span class="str">│</span>
+<span class="str">│</span>  <span class="type">User Input</span>                                        <span class="str">│</span>
+<span class="str">│</span>      │                                               <span class="str">│</span>
+<span class="str">│</span>      ▼                                               <span class="str">│</span>
+<span class="str">│</span>  <span class="kw">┌─ Task Classifier ─┐</span>                              <span class="str">│</span>
+<span class="str">│</span>  <span class="kw">│</span> review? website?   <span class="kw">│</span>                              <span class="str">│</span>
+<span class="str">│</span>  <span class="kw">│</span> chatbot? quote?    <span class="kw">│</span>                              <span class="str">│</span>
+<span class="str">│</span>  <span class="kw">└────────┬───────────┘</span>                              <span class="str">│</span>
+<span class="str">│</span>           │                                           <span class="str">│</span>
+<span class="str">│</span>           ▼                                           <span class="str">│</span>
+<span class="str">│</span>  <span class="fn">┌─ Prompt Builder ──┐</span>  <span class="comment">← Templates + Business Context</span> <span class="str">│</span>
+<span class="str">│</span>  <span class="fn">└────────┬───────────┘</span>                              <span class="str">│</span>
+<span class="str">│</span>           │                                           <span class="str">│</span>
+<span class="str">│</span>           ▼                                           <span class="str">│</span>
+<span class="str">│</span>  <span class="num">┌─ Smart Router ────────────────────────────┐</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">│</span>                                           <span class="num">│</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">│</span>  <span class="comment">Simple</span> → Qwen 7B (₩0)                  <span class="num">│</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">│</span>  <span class="comment">Medium</span> → Claude Haiku (₩7)             <span class="num">│</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">│</span>  <span class="comment">Complex</span> → Claude Sonnet (₩50)          <span class="num">│</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">│</span>  <span class="comment">Korean</span> → EXAONE 7.8B (₩0)              <span class="num">│</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">│</span>                                           <span class="num">│</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="num">└──────────┬────────────────────────────────┘</span>      <span class="str">│</span>
+<span class="str">│</span>             │                                         <span class="str">│</span>
+<span class="str">│</span>             ▼                                         <span class="str">│</span>
+<span class="str">│</span>  <span class="kw">┌─ Fallback Chain ──┐</span>  <span class="comment">← Retry up to 3 times</span>      <span class="str">│</span>
+<span class="str">│</span>  <span class="kw">└────────┬───────────┘</span>                              <span class="str">│</span>
+<span class="str">│</span>           │                                           <span class="str">│</span>
+<span class="str">│</span>           ▼                                           <span class="str">│</span>
+<span class="str">│</span>  <span class="type">┌─ Output Parser ───┐</span>  <span class="comment">← JSON validate + schema</span>   <span class="str">│</span>
+<span class="str">│</span>  <span class="type">└────────┬───────────┘</span>                              <span class="str">│</span>
+<span class="str">│</span>           │                                           <span class="str">│</span>
+<span class="str">│</span>           ▼                                           <span class="str">│</span>
+<span class="str">│</span>  <span class="fn">┌─ Guardrails ──────┐</span>  <span class="comment">← Safety + PII + Rate limit</span> <span class="str">│</span>
+<span class="str">│</span>  <span class="fn">└────────┬───────────┘</span>                              <span class="str">│</span>
+<span class="str">│</span>           │                                           <span class="str">│</span>
+<span class="str">│</span>           ▼                                           <span class="str">│</span>
+<span class="str">│</span>  <span class="type">Structured Response</span> → User                          <span class="str">│</span>
+<span class="str">│</span>                                                     <span class="str">│</span>
+<span class="str">└─────────────────────────────────────────────────────┘</span>
+  </div>
+</div>
+
+</div>
+
+<script>
+function selectRoute(el, model) {
+  document.querySelectorAll('.router-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function runHarness() {
+  const input = document.getElementById('demoInput').value;
+  if (!input.trim()) return;
+
+  const output = document.getElementById('demoOutput');
+  const meta = document.getElementById('demoMeta');
+  const nodes = document.querySelectorAll('.arch-node');
+
+  // Animate pipeline
+  output.textContent = '';
+  let step = 0;
+  const steps = [
+    { node: 0, text: '📥 Receiving input...\n' },
+    { node: 1, text: '🔀 Classifying task...\n' },
+    { node: 2, text: '📝 Building prompt with business context...\n' },
+    { node: 3, text: '🧠 Calling AI model...\n' },
+    { node: 4, text: '🔍 Parsing & validating output...\n' },
+    { node: 5, text: '✅ Done!\n\n' },
+  ];
+
+  // Detect task
+  const isReview = input.match(/리뷰|답글|review/i);
+  const isWebsite = input.match(/홈페이지|웹사이트|website/i);
+  const isAnalysis = input.match(/매출|분석|analysis/i);
+
+  let task = 'chatbot';
+  let model = 'Claude Haiku';
+  let cost = '₩7';
+  let result = '';
+
+  if (isReview) {
+    task = 'review_reply';
+    model = 'Qwen 7B (local)';
+    cost = '₩0';
+    result = JSON.stringify({
+      task: "review_reply",
+      model_used: "qwen2.5:7b",
+      reply: "안녕하세요, 소중한 리뷰 감사합니다! 맛있게 드셨다니 정말 기쁩니다. 더 좋은 서비스로 보답하겠습니다. 또 방문해주세요!",
+      confidence: 0.92,
+      cost: "₩0",
+      latency_ms: 340
+    }, null, 2);
+  } else if (isWebsite) {
+    task = 'website_gen';
+    model = 'Claude Sonnet';
+    cost = '₩50';
+    result = JSON.stringify({
+      task: "website_gen",
+      model_used: "claude-sonnet",
+      content: {
+        hero: { title: "네일샵", subtitle: "아름다움을 완성하는 곳" },
+        services: ["젤네일 - 50,000원", "패디큐어 - 40,000원"],
+        contact: { phone: "052-XXX-XXXX" }
+      },
+      confidence: 0.95,
+      cost: "₩50",
+      latency_ms: 2100
+    }, null, 2);
+  } else if (isAnalysis) {
+    task = 'data_analysis';
+    model = 'Claude Sonnet';
+    cost = '₩50';
+    result = JSON.stringify({
+      task: "data_analysis",
+      model_used: "claude-sonnet",
+      insights: [
+        "이번 달 매출 ₩12,500,000 (전월 대비 +8%)",
+        "화요일 점심 시간대가 피크",
+        "노쇼율 15% → 알림톡 자동화 추천"
+      ],
+      recommendation: "Tier 2 알림 자동화 활성화 시 월 ₩200,000 절약 예상",
+      cost: "₩50",
+      latency_ms: 1800
+    }, null, 2);
+  } else {
+    model = 'Claude Haiku';
+    cost = '₩7';
+    result = JSON.stringify({
+      task: "chatbot",
+      model_used: "claude-haiku",
+      response: "안녕하세요! 무엇을 도와드릴까요?",
+      confidence: 0.88,
+      cost: "₩7",
+      latency_ms: 250
+    }, null, 2);
+  }
+
+  function animateStep() {
+    if (step < steps.length) {
+      nodes.forEach(n => n.classList.remove('active', 'processing', 'done'));
+      if (step < nodes.length) {
+        nodes[step].classList.add('processing');
+        for (let i = 0; i < step; i++) nodes[i].classList.add('done');
+      }
+      output.textContent += steps[step].text;
+      step++;
+      setTimeout(animateStep, 400);
+    } else {
+      nodes.forEach(n => { n.classList.remove('processing'); n.classList.add('done'); });
+      output.textContent += '--- RESULT ---\n\n' + result;
+      const latency = isWebsite ? '2.1s' : isAnalysis ? '1.8s' : isReview ? '0.34s' : '0.25s';
+      meta.innerHTML = `<span>⏱ ${latency}</span><span>🧠 ${model}</span><span>💰 ${cost}</span><span>📋 ${task}</span>`;
+    }
+  }
+  animateStep();
+}
+
+function clearDemo() {
+  document.getElementById('demoInput').value = '';
+  document.getElementById('demoOutput').textContent = 'Output will appear here...';
+  document.getElementById('demoMeta').innerHTML = '<span>⏱ —</span><span>🧠 —</span><span>💰 —</span>';
+  document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active', 'processing', 'done'));
+}
+</script>
+
+</body>
+</html>

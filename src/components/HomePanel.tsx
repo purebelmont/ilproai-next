@@ -21,6 +21,7 @@ const TIER1_TOOLS: Tool[] = [
 
 const TIER2_TOOLS: Tool[] = [
   { id: "website", icon: "🌐", label: "홈페이지", color: "#0071E3", pro: true },
+  { id: "automation", icon: "🤖", label: "자동화", color: "#7D2AE7", pro: true },
 ];
 
 const BANNERS = [

@@ -9,8 +9,9 @@ import QuotesPanel from "@/components/QuotesPanel";
 import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
 import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
+import AutomationPanel from "@/components/AutomationPanel";
 
-type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website";
+type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation";
 
 // Sidebar — only essential navigation (like Canva: Home, Projects, Templates, Brand)
 const SIDEBAR_TABS: { id: Tab; icon: string; label: string }[] = [
@@ -22,6 +23,7 @@ const SIDEBAR_TABS: { id: Tab; icon: string; label: string }[] = [
 
 const SIDEBAR_PRO: { id: Tab; icon: string; label: string }[] = [
   { id: "website", icon: "🌐", label: "홈페이지" },
+  { id: "automation", icon: "🤖", label: "자동화" },
 ];
 
 // Mobile bottom bar — 4 key tabs + AI
@@ -394,6 +396,7 @@ export default function Dashboard() {
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
+          {tab === "automation" && <AutomationPanel userId={user.id} plan={profile?.plan || "free"} />}
         </div>
       </div>
 

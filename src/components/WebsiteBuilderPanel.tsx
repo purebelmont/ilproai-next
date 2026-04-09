@@ -78,6 +78,17 @@ function isSkipPhrase(text: string): boolean {
 
 type Step = "template" | "name" | "description" | "contact" | "generating" | "edit";
 
+function highlightHtml(line: string) {
+  // Simple HTML syntax highlighting using spans
+  return line
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/(&lt;\/?)([\w-]+)/g, '<span style="color:#ff7b72">$1$2</span>')
+    .replace(/([\w-]+)(=)/g, '<span style="color:#79c0ff">$1</span><span style="color:#e6edf3">$2</span>')
+    .replace(/(&quot;|")(.*?)(\1)/g, '<span style="color:#a5d6ff">$1$2$3</span>')
+    .replace(/(\/\*.*?\*\/|&lt;!--.*?--&gt;)/g, '<span style="color:#8b949e">$1</span>')
+    .replace(/([{}();:,])/g, '<span style="color:#c9d1d9">$1</span>');
+}
+
 export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; plan: string }) {
   const isPro = plan === "pro" || plan === "team";
   const [site, setSite] = useState<Website | null>(null);
@@ -87,6 +98,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [mobileView, setMobileView] = useState<"chat" | "preview">("chat");
   const [loaded, setLoaded] = useState(false);
   const [generatedHtml, setGeneratedHtml] = useState("");
+  const [streamingCode, setStreamingCode] = useState("");
 
   const [step, setStep] = useState<Step>("template");
   const [template, setTemplate] = useState("");
@@ -102,6 +114,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const codeEndRef = useRef<HTMLDivElement>(null);
 
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
@@ -132,6 +145,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   }, [userId]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { codeEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [streamingCode]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -210,16 +224,56 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     const autoSlug = name.toLowerCase().replace(/[^a-z0-9가-힣]/g, "").substring(0, 30) || "my-site";
     setSlug(autoSlug);
     setStep("generating");
+    setStreamingCode("");
+    setGeneratedHtml("");
     setMessages(prev => [...prev, { role: "system", text: `\"${name}\" 웹사이트를 만들고 있어요... ✨`, action: "loading" }]);
 
     try {
+      // Try streaming first
       const res = await fetch("/api/generate-site", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template, bizName: name, description: desc, contact, features: "" }),
+        body: JSON.stringify({ template, bizName: name, description: desc, contact, features: "", stream: true }),
       });
-      const { html, source } = await res.json();
 
+      let html = "";
+      let source: "ai" | "template" = "ai";
+
+      if (res.headers.get("content-type")?.includes("text/event-stream")) {
+        // Stream the response
+        const reader = res.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              if (parsed.text) {
+                html += parsed.text;
+                setStreamingCode(html);
+              }
+              if (parsed.done) break;
+              if (parsed.error) throw new Error("Stream error");
+            } catch {}
+          }
+        }
+      } else {
+        // Fallback: non-streaming JSON response
+        const data = await res.json();
+        html = data.html;
+        source = data.source;
+      }
+
+      setStreamingCode("");
       setGeneratedHtml(html);
       const contentWithHtml = { ...EMPTY_CONTENT, html, hero: { title: name, subtitle: desc, image: "" } };
       setC(contentWithHtml as any);
@@ -246,6 +300,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
         { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n${source === "ai" ? "🧠 Claude AI가 디자인했습니다." : "📐 템플릿으로 생성했습니다."}\n📍 ${finalSlug}.contavelo.ai\n\n오른쪽 미리보기를 확인하세요.\n수정하려면 아래에서 요청하세요.`, action: "sections" },
       ]);
     } catch (e) {
+      setStreamingCode("");
       setMessages(prev => [
         ...prev.filter(m => m.action !== "loading"),
         { role: "system", text: "생성 중 오류가 발생했어요. 다시 시도해 주세요." },
@@ -510,7 +565,35 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
 
         {/* ═══ RIGHT — Preview (iframe) ═══ */}
         <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
-          {!hasContent ? (
+          {streamingCode ? (
+            /* Live code streaming view */
+            <div className="flex-1 flex flex-col" style={{ background: "#0d1117" }}>
+              <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ background: "#161b22", borderBottom: "1px solid #30363d" }}>
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+                </div>
+                <div className="flex-1 flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "pulse 1.2s ease-in-out infinite" }} />
+                  <span className="text-[11px] text-[#7D2AE7] font-medium">AI 코드 생성 중...</span>
+                </div>
+                <span className="text-[10px] text-[#8b949e] font-mono">{streamingCode.length.toLocaleString()} chars</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] leading-[1.6]" style={{ scrollbarWidth: "thin", scrollbarColor: "#30363d #0d1117" }}>
+                <pre className="whitespace-pre-wrap" style={{ color: "#e6edf3" }}>
+                  {streamingCode.split("\n").map((line, i) => (
+                    <div key={i} className="flex">
+                      <span className="select-none w-[40px] shrink-0 text-right pr-3" style={{ color: "#484f58" }}>{i + 1}</span>
+                      <span dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
+                    </div>
+                  ))}
+                </pre>
+                <div ref={codeEndRef} />
+              </div>
+              <style>{`@keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }`}</style>
+            </div>
+          ) : !hasContent ? (
             /* Empty state — ocean photo */
             <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
               <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format"
@@ -522,16 +605,8 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   당신의 상상력을<br/>펼쳐 보세요
                 </div>
                 <div className="text-[15px] text-white/70 leading-relaxed" style={{ textShadow: "0 1px 20px rgba(0,0,0,0.5)" }}>
-                  {step === "generating" ? "AI가 멋진 웹사이트를 만들고 있어요..." : "몇 가지 질문에 답하시면\nAI가 완성된 웹사이트를 디자인합니다"}
+                  몇 가지 질문에 답하시면{"\n"}AI가 완성된 웹사이트를 디자인합니다
                 </div>
-                {step === "generating" && (
-                  <div className="mt-8 flex justify-center gap-1.5">
-                    {[0,1,2].map(i => (
-                      <div key={i} className="w-2.5 h-2.5 rounded-full bg-white" style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-                    ))}
-                    <style>{`@keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }`}</style>
-                  </div>
-                )}
               </div>
             </div>
           ) : (
@@ -554,7 +629,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                 className="flex-1 w-full border-0"
                 style={{ background: "white" }}
                 title="Website Preview"
-                sandbox="allow-same-origin"
+                sandbox="allow-same-origin allow-scripts"
               />
             </div>
           )}

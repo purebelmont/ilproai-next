@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { template, bizName, description, contact, features } = await req.json();
+  const { template, bizName, description, contact, features, stream: useStream } = await req.json();
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   const prompt = `You are an elite web designer. Generate a complete, single-file HTML website for this Korean business.
@@ -35,6 +35,73 @@ REQUIREMENTS:
 14. Hero section should be full-viewport height with a dramatic gradient.
 15. Add a floating "전화하기" button if phone number is provided.`;
 
+  // Streaming mode
+  if (useStream && apiKey) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 8000,
+          stream: true,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+
+      if (!res.ok) throw new Error("API error");
+
+      const encoder = new TextEncoder();
+      const readable = new ReadableStream({
+        async start(controller) {
+          const reader = res.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+
+              const lines = buffer.split("\n");
+              buffer = lines.pop() || "";
+
+              for (const line of lines) {
+                if (!line.startsWith("data: ")) continue;
+                const data = line.slice(6);
+                if (data === "[DONE]") continue;
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.type === "content_block_delta" && parsed.delta?.text) {
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: parsed.delta.text })}\n\n`));
+                  }
+                } catch {}
+              }
+            }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+          } catch (e) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: true })}\n\n`));
+          }
+          controller.close();
+        },
+      });
+
+      return new Response(readable, {
+        headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" },
+      });
+    } catch (e) {
+      console.error("Stream failed, using fallback:", e);
+      const html = generateFallbackHTML(template, bizName, description, contact);
+      return NextResponse.json({ html, source: "template" });
+    }
+  }
+
+  // Non-streaming mode
   if (apiKey) {
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {

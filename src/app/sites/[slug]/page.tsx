@@ -1,13 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const DAY_LABELS: Record<string, string> = { mon: "월요일", tue: "화요일", wed: "수요일", thu: "목요일", fri: "금요일", sat: "토요일", sun: "일요일" };
 
 export default async function SitePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const supabase = createClient(supabaseUrl, supabaseKey);
   const { data: site } = await supabase
     .from("websites")

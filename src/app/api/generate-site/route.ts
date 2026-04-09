@@ -74,7 +74,6 @@ REQUIREMENTS:
               for (const line of lines) {
                 if (!line.startsWith("data: ")) continue;
                 const data = line.slice(6);
-                if (data === "[DONE]") continue;
                 try {
                   const parsed = JSON.parse(data);
                   if (parsed.type === "content_block_delta" && parsed.delta?.text) {
@@ -141,7 +140,14 @@ REQUIREMENTS:
   return NextResponse.json({ html, source: "template" });
 }
 
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 function generateFallbackHTML(template: string, bizName: string, description: string, contact: string) {
+  bizName = esc(bizName);
+  description = esc(description);
+  contact = esc(contact);
   const colors: Record<string, [string, string]> = {
     restaurant: ["#E85D04", "#DC2626"], service: ["#9B5DE5", "#EC4899"], retail: ["#0071E3", "#06B6D4"],
     office: ["#1E3A5F", "#0071E3"], medical: ["#0891B2", "#06D6A0"], education: ["#D97706", "#F59E0B"],

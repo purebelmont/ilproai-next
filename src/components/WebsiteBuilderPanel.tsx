@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 interface Website {
@@ -269,6 +269,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
             if (!line.startsWith("data: ")) continue;
             try {
               const parsed = JSON.parse(line.slice(6));
+              if (parsed.error) throw new Error("Stream error");
               if (parsed.text) {
                 html += parsed.text;
                 const now = Date.now();
@@ -278,8 +279,9 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                 }
               }
               if (parsed.done) break;
-              if (parsed.error) throw new Error("Stream error");
-            } catch {}
+            } catch (e) {
+              if (e instanceof Error && e.message === "Stream error") throw e;
+            }
           }
         }
         // Final update with complete HTML

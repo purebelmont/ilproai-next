@@ -143,7 +143,9 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streamingCode]);
   useEffect(() => {
-    if (codeScrollRef.current) codeScrollRef.current.scrollTop = codeScrollRef.current.scrollHeight;
+    requestAnimationFrame(() => {
+      if (codeScrollRef.current) codeScrollRef.current.scrollTop = codeScrollRef.current.scrollHeight;
+    });
   }, [streamingCode]);
 
   // ═══ STEP HANDLERS ═══
@@ -619,7 +621,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
               {/* iframe — srcDoc updates live during streaming, key forces fresh mount for final */}
               <iframe
                 key={streamingCode ? "streaming" : "final"}
-                srcDoc={streamingCode || generatedHtml}
+                srcDoc={streamingCode ? streamingCode + '<script>window.scrollTo(0,document.body.scrollHeight)</script>' : generatedHtml}
                 className="flex-1 w-full border-0"
                 style={{ background: "white" }}
                 title="Website Preview"

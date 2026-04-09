@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import HomePanel from "@/components/HomePanel";
 import FilesPanel from "@/components/FilesPanel";
 import QuotesPanel from "@/components/QuotesPanel";
@@ -10,44 +11,67 @@ import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
 import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
 import AutomationPanel from "@/components/AutomationPanel";
+import AIRecommendPanel from "@/components/AIRecommendPanel";
 
-type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation";
+type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai";
 
-// Sidebar — only essential navigation (like Canva: Home, Projects, Templates, Brand)
-const SIDEBAR_TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: "home", icon: "🏠", label: "홈" },
-  { id: "calendar", icon: "📅", label: "일정" },
-  { id: "ledger", icon: "💰", label: "매출" },
-  { id: "report", icon: "📊", label: "리포트" },
+/* ─── Vercel-style grouped sidebar navigation ─── */
+type NavItem = { id: Tab; icon: string; label: string; badge?: string; href?: string };
+type NavSection = { label?: string; pro?: boolean; items: NavItem[] };
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    items: [
+      { id: "home", icon: "🏠", label: "홈" },
+      { id: "calendar", icon: "📅", label: "일정" },
+      { id: "reservations", icon: "📋", label: "예약" },
+      { id: "contacts", icon: "👤", label: "연락처" },
+    ],
+  },
+  {
+    label: "매출 관리",
+    items: [
+      { id: "ledger", icon: "💰", label: "매출장부" },
+      { id: "quotes", icon: "💼", label: "견적" },
+      { id: "payroll", icon: "👥", label: "급여" },
+      { id: "report", icon: "📊", label: "리포트" },
+    ],
+  },
+  {
+    label: "도구",
+    items: [
+      { id: "notes", icon: "📝", label: "메모" },
+      { id: "todos", icon: "✅", label: "할일" },
+      { id: "files", icon: "📎", label: "문서함" },
+    ],
+  },
+  {
+    label: "PRO",
+    pro: true,
+    items: [
+      { id: "website", icon: "🌐", label: "홈페이지" },
+      { id: "automation", icon: "🤖", label: "자동화" },
+    ],
+  },
 ];
 
-const SIDEBAR_PRO: { id: Tab; icon: string; label: string }[] = [
-  { id: "website", icon: "🌐", label: "홈페이지" },
-  { id: "automation", icon: "🤖", label: "자동화" },
+// Automation sub-menu items (Vercel Observability-style drill-down)
+const AUTOMATION_SUB: { id: string; icon: string; label: string; badge?: string }[] = [
+  { id: "review", icon: "⭐", label: "AI 리뷰 답글" },
+  { id: "chatbot", icon: "💬", label: "AI 챗봇" },
+  { id: "marketing", icon: "📣", label: "AI 마케팅" },
+  { id: "reminder", icon: "📢", label: "알림 자동화" },
+  { id: "tax", icon: "📄", label: "세금계산서" },
+  { id: "insight", icon: "💡", label: "AI 인사이트" },
+  { id: "sns", icon: "📸", label: "SNS 콘텐츠", badge: "NEW" },
 ];
 
-// Mobile bottom bar — 4 key tabs + AI
+// Mobile bottom bar — 4 key tabs + menu
 const MOBILE_TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "home", icon: "🏠", label: "홈" },
   { id: "calendar", icon: "📅", label: "일정" },
   { id: "ledger", icon: "💰", label: "매출" },
   { id: "report", icon: "📊", label: "리포트" },
-];
-
-// All tabs (for rendering content)
-const ALL_TABS: { id: Tab; icon: string; label: string }[] = [
-  { id: "home", icon: "🏠", label: "홈" },
-  { id: "contacts", icon: "👤", label: "연락처" },
-  { id: "calendar", icon: "📅", label: "캘린더" },
-  { id: "reservations", icon: "📋", label: "예약" },
-  { id: "notes", icon: "📝", label: "메모" },
-  { id: "todos", icon: "✅", label: "할일" },
-  { id: "files", icon: "📎", label: "문서함" },
-  { id: "ledger", icon: "💰", label: "매출" },
-  { id: "quotes", icon: "💼", label: "견적" },
-  { id: "payroll", icon: "👥", label: "급여" },
-  { id: "report", icon: "📊", label: "리포트" },
-  { id: "website", icon: "🌐", label: "홈페이지" },
 ];
 
 export default function Dashboard() {
@@ -56,7 +80,8 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("home");
   const [loading, setLoading] = useState(true);
   const [dark, setDark] = useState(false);
-  const [mobileMore, setMobileMore] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarSub, setSidebarSub] = useState<string | null>(null);
   const router = useRouter();
 
   // Modal state
@@ -244,117 +269,275 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex">
-      {/* ═══ SIDEBAR — Canva-style dark nav ═══ */}
-      <div className="hidden md:flex flex-col w-[120px] fixed top-0 left-0 bottom-0 z-40"
-        style={{ background: "#0D0D12" }}>
-        {/* Logo */}
-        <div className="flex flex-col items-center py-4 shrink-0">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold text-white"
-            style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
-          <div className="text-[9px] text-[#6B6B80] mt-1 truncate max-w-[100px] text-center">{bizName}</div>
+      {/* ═══ SIDEBAR — Vercel-style grouped nav (220px) ═══ */}
+      <div className="hidden md:flex flex-col w-[220px] fixed top-0 left-0 bottom-0 z-40"
+        style={{ background: "#0D0D12", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+        {/* Logo + settings */}
+        <div className="flex items-center justify-between px-4 py-4 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white shrink-0"
+              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+            <div className="text-[13px] font-semibold text-white truncate">{bizName}</div>
+          </div>
+          <a href="/harness" className="text-[#6B6B80] hover:text-white transition-colors shrink-0" style={{ textDecoration: "none" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </a>
         </div>
 
-        {/* AI Create Button */}
-        <div className="flex justify-center pb-3 shrink-0">
-          <button onClick={() => setTab("website")}
-            className="w-[80px] flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold text-white active:scale-[0.97] transition-all"
-            style={{ background: "#7D2AE7", boxShadow: "0 4px 12px rgba(125,42,231,0.4)" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            AI
+        {/* AI Button */}
+        <div className="px-3 pb-3 shrink-0">
+          <button onClick={() => setTab("ai")}
+            className="w-full flex items-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-bold text-white active:scale-[0.97] transition-all"
+            style={{
+              background: tab === "ai" ? "linear-gradient(135deg, #7D2AE7, #0071E3)" : "rgba(125,42,231,0.2)",
+              boxShadow: tab === "ai" ? "0 4px 12px rgba(125,42,231,0.4)" : "none",
+              color: tab === "ai" ? "white" : "#A78BFA",
+            }}>
+            <span className="text-[16px]">✨</span>
+            AI 추천
           </button>
         </div>
 
-        {/* Main nav */}
-        <div className="flex-1 overflow-y-auto px-3" style={{ scrollbarWidth: "none" }}>
-          {SIDEBAR_TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex flex-col items-center w-full py-2.5 rounded-xl transition-all duration-200 mb-0.5 active:scale-[0.97]"
-              style={{
-                background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
-                color: tab === t.id ? "#A78BFA" : "#8E8EA0",
-              }}>
-              <span className="text-[18px]">{t.icon}</span>
-              <span className="text-[10px] font-medium">{t.label}</span>
-            </button>
-          ))}
-
-          {/* Pro divider */}
-          <div className="h-px my-3 mx-4" style={{ background: "rgba(255,255,255,0.08)" }} />
-          <div className="text-center mb-1">
-            <span className="text-[8px] font-bold tracking-widest text-[#6B6B80] uppercase">Pro</span>
-          </div>
-          {SIDEBAR_PRO.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className="flex flex-col items-center w-full py-2.5 rounded-xl transition-all duration-200 mb-0.5 active:scale-[0.97]"
-              style={{
-                background: tab === t.id ? "rgba(125,42,231,0.15)" : "transparent",
-                color: tab === t.id ? "#A78BFA" : "#8E8EA0",
-              }}>
-              <span className="text-[18px]">{t.icon}</span>
-              <span className="text-[10px] font-medium">{t.label}</span>
-            </button>
-          ))}
+        {/* Scrollable nav sections */}
+        <div className="flex-1 overflow-y-auto px-2" style={{ scrollbarWidth: "none" }}>
+          {/* Sub-menu mode: Automation drill-down (Vercel Observability style) */}
+          {sidebarSub === "automation" ? (
+            <div>
+              <button onClick={() => setSidebarSub(null)}
+                className="flex items-center gap-2 w-full px-3 py-2 text-[13px] font-semibold text-white mb-1 rounded-lg hover:bg-white/5 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                자동화
+              </button>
+              {/* Overview — main automation panel */}
+              <button
+                onClick={() => { setTab("automation"); }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors"
+                style={{ background: tab === "automation" ? "rgba(125,42,231,0.15)" : "transparent", color: tab === "automation" ? "#A78BFA" : "#8E8EA0" }}>
+                <span className="text-[15px]">📋</span>
+                <span>전체 보기</span>
+              </button>
+              {AUTOMATION_SUB.map((item) => (
+                item.id === "sns" ? (
+                  <Link key={item.id} href="/sns"
+                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors"
+                    style={{ color: "#8E8EA0", textDecoration: "none" }}>
+                    <span className="text-[15px]">{item.icon}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                  </Link>
+                ) : (
+                  <button key={item.id}
+                    onClick={() => setTab("automation")}
+                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors hover:bg-white/5"
+                    style={{ color: "#8E8EA0" }}>
+                    <span className="text-[15px]">{item.icon}</span>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                  </button>
+                )
+              ))}
+            </div>
+          ) : (
+            /* Normal sidebar sections */
+            NAV_SECTIONS.map((section, si) => (
+              <div key={si}>
+                {/* Section divider */}
+                {si > 0 && <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />}
+                {/* Section header */}
+                {section.label && (
+                  <div className="flex items-center gap-2 px-3 pt-2 pb-1">
+                    <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6B6B80" }}>{section.label}</span>
+                    {section.pro && <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)", color: "white" }}>PRO</span>}
+                  </div>
+                )}
+                {/* Items */}
+                {section.items.map((item) => {
+                  const isAutomation = item.id === "automation";
+                  const isActive = tab === item.id && !isAutomation;
+                  const isAutoActive = isAutomation && tab === "automation";
+                  return (
+                    <button key={item.id + item.label}
+                      onClick={() => {
+                        if (isAutomation) { setSidebarSub("automation"); setTab("automation"); }
+                        else { setTab(item.id); }
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
+                      style={{
+                        background: (isActive || isAutoActive) ? "rgba(125,42,231,0.15)" : "transparent",
+                        color: (isActive || isAutoActive) ? "#A78BFA" : "#8E8EA0",
+                      }}>
+                      <span className="text-[15px]">{item.icon}</span>
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                      {isAutomation && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><path d="M9 18l6-6-6-6"/></svg>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))
+          )}
         </div>
 
         {/* Bottom actions */}
-        <div className="flex flex-col items-center gap-1 py-3 shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <a href="/harness"
-            className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#A78BFA", textDecoration: "none" }}>
-            <span className="text-[16px]">⚙️</span>
-            <span className="text-[9px]">하네스</span>
-          </a>
-          <button onClick={toggleDark}
-            className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
-            <span className="text-[16px]">{dark ? "☀️" : "🌙"}</span>
-            <span className="text-[9px]">{dark ? "라이트" : "다크"}</span>
-          </button>
-          {hasSample ? (
-            <button onClick={clearSample} disabled={sampleLoading}
-              className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
-              <span className="text-[16px]">{sampleLoading ? "⏳" : "📦"}</span>
-              <span className="text-[9px]">샘플</span>
+        <div className="px-2 py-3 shrink-0 space-y-0.5" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="flex gap-1">
+            <button onClick={toggleDark}
+              className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
+              style={{ color: "#8E8EA0" }}>
+              <span className="text-[14px]">{dark ? "☀️" : "🌙"}</span>
+              <span>{dark ? "라이트" : "다크"}</span>
             </button>
-          ) : (
-            <button onClick={generateSample} disabled={sampleLoading}
-              className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#A78BFA" }}>
-              <span className="text-[16px]">{sampleLoading ? "⏳" : "📦"}</span>
-              <span className="text-[9px]">샘플</span>
-            </button>
-          )}
+            {hasSample ? (
+              <button onClick={clearSample} disabled={sampleLoading}
+                className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
+                style={{ color: "#8E8EA0" }}>
+                <span className="text-[14px]">{sampleLoading ? "⏳" : "📦"}</span>
+                <span>샘플</span>
+              </button>
+            ) : (
+              <button onClick={generateSample} disabled={sampleLoading}
+                className="flex items-center gap-2 flex-1 px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
+                style={{ color: "#A78BFA" }}>
+                <span className="text-[14px]">{sampleLoading ? "⏳" : "📦"}</span>
+                <span>샘플</span>
+              </button>
+            )}
+          </div>
           <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
-            className="flex flex-col items-center w-full py-1.5 rounded-xl transition-all duration-200" style={{ color: "#8E8EA0" }}>
-            <span className="text-[16px]">🚪</span>
-            <span className="text-[9px]">나가기</span>
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
+            style={{ color: "#8E8EA0" }}>
+            <span className="text-[14px]">🚪</span>
+            <span>로그아웃</span>
           </button>
         </div>
       </div>
 
-      {/* ═══ MOBILE — bottom tab bar ═══ */}
+      {/* ═══ MOBILE — bottom tab bar + hamburger menu ═══ */}
       <div className={`md:hidden fixed bottom-0 left-0 right-0 z-50 ${tab === "website" ? "hidden" : ""}`}
         style={{ background: "#0D0D12", paddingBottom: "env(safe-area-inset-bottom, 0)" }}>
         <div className="flex h-[var(--tab-h)]">
           {MOBILE_TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button key={t.id} onClick={() => { setTab(t.id); setMobileMenuOpen(false); }}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] transition-colors duration-200"
               style={{ color: tab === t.id ? "#A78BFA" : "#5A5A6E" }}>
               <span className="text-[20px] leading-none">{t.icon}</span>
               <span className="text-[9px] font-medium">{t.label}</span>
             </button>
           ))}
-          {/* AI button in mobile bar */}
-          <button onClick={() => setTab("website")}
+          {/* Hamburger menu button */}
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px]"
-            style={{ color: tab === "website" ? "#A78BFA" : "#5A5A6E" }}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#7D2AE7" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            </div>
-            <span className="text-[9px] font-bold" style={{ color: "#A78BFA" }}>AI</span>
+            style={{ color: mobileMenuOpen ? "#A78BFA" : "#5A5A6E" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {mobileMenuOpen ? <><path d="M18 6L6 18"/><path d="M6 6l12 12"/></> : <><path d="M3 12h18"/><path d="M3 6h18"/><path d="M3 18h18"/></>}
+            </svg>
+            <span className="text-[9px] font-medium">{mobileMenuOpen ? "닫기" : "메뉴"}</span>
           </button>
         </div>
       </div>
 
+      {/* ═══ MOBILE — Full-screen menu drawer ═══ */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 animate-[fadeIn_0.2s_ease]" style={{ background: "#0D0D12" }}>
+          <div className="flex flex-col h-full overflow-y-auto pb-[calc(var(--tab-h)+env(safe-area-inset-bottom,0))]" style={{ scrollbarWidth: "none" }}>
+            {/* Mobile menu header */}
+            <div className="flex items-center gap-3 px-5 py-4">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold text-white"
+                style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+              <div>
+                <div className="text-[14px] font-bold text-white">{bizName}</div>
+                <div className="text-[11px] text-[#6B6B80]">{dateLabel}</div>
+              </div>
+            </div>
+
+            {/* AI Button (mobile) */}
+            <div className="px-4 mb-2">
+              <button onClick={() => { setTab("ai"); setMobileMenuOpen(false); }}
+                className="w-full flex items-center gap-2 py-3 px-4 rounded-xl text-[14px] font-bold text-white active:scale-[0.97] transition-all"
+                style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>
+                <span className="text-[18px]">✨</span>
+                AI 추천
+              </button>
+            </div>
+
+            {/* Menu sections */}
+            <div className="px-3 flex-1">
+              {NAV_SECTIONS.map((section, si) => (
+                <div key={si}>
+                  {si > 0 && <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />}
+                  {section.label && (
+                    <div className="flex items-center gap-2 px-3 pt-3 pb-1">
+                      <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6B6B80" }}>{section.label}</span>
+                      {section.pro && <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)", color: "white" }}>PRO</span>}
+                    </div>
+                  )}
+                  {section.items.map((item) => (
+                    <button key={item.id + item.label}
+                      onClick={() => { setTab(item.id); setMobileMenuOpen(false); }}
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-[14px] transition-colors active:scale-[0.98]"
+                      style={{
+                        background: tab === item.id ? "rgba(125,42,231,0.15)" : "transparent",
+                        color: tab === item.id ? "#A78BFA" : "#C0C0CC",
+                      }}>
+                      <span className="text-[18px]">{item.icon}</span>
+                      <span className="flex-1 text-left font-medium">{item.label}</span>
+                      {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                    </button>
+                  ))}
+                </div>
+              ))}
+
+              {/* SNS link in mobile menu */}
+              <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />
+              <Link href="/sns" onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-[14px] transition-colors active:scale-[0.98]"
+                style={{ color: "#C0C0CC", textDecoration: "none" }}>
+                <span className="text-[18px]">📸</span>
+                <span className="flex-1 text-left font-medium">SNS 콘텐츠</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">NEW</span>
+              </Link>
+            </div>
+
+            {/* Mobile menu bottom actions */}
+            <div className="px-3 py-4 space-y-1" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <div className="flex gap-2">
+                <button onClick={() => { toggleDark(); setMobileMenuOpen(false); }}
+                  className="flex items-center gap-2 flex-1 px-4 py-3 rounded-xl text-[13px] font-medium"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "#C0C0CC" }}>
+                  <span>{dark ? "☀️" : "🌙"}</span>
+                  <span>{dark ? "라이트 모드" : "다크 모드"}</span>
+                </button>
+                {hasSample ? (
+                  <button onClick={() => { clearSample(); setMobileMenuOpen(false); }} disabled={sampleLoading}
+                    className="flex items-center gap-2 flex-1 px-4 py-3 rounded-xl text-[13px] font-medium"
+                    style={{ background: "rgba(255,255,255,0.05)", color: "#C0C0CC" }}>
+                    <span>{sampleLoading ? "⏳" : "📦"}</span>
+                    <span>샘플 삭제</span>
+                  </button>
+                ) : (
+                  <button onClick={() => { generateSample(); setMobileMenuOpen(false); }} disabled={sampleLoading}
+                    className="flex items-center gap-2 flex-1 px-4 py-3 rounded-xl text-[13px] font-medium"
+                    style={{ background: "rgba(255,255,255,0.05)", color: "#A78BFA" }}>
+                    <span>{sampleLoading ? "⏳" : "📦"}</span>
+                    <span>샘플 추가</span>
+                  </button>
+                )}
+              </div>
+              <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
+                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl text-[13px] font-medium"
+                style={{ background: "rgba(255,255,255,0.05)", color: "#8E8EA0" }}>
+                <span>🚪</span>
+                <span>로그아웃</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ═══ MAIN CONTENT ═══ */}
-      <div className="flex-1 md:ml-[120px] min-h-screen" style={{ background: "var(--bg)" }}>
+      <div className="flex-1 md:ml-[220px] min-h-screen" style={{ background: "var(--bg)" }}>
         {/* Mobile header */}
         <div className={`md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between ${tab === "website" ? "hidden" : ""}`}
           style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
@@ -379,7 +562,7 @@ export default function Dashboard() {
 
         {/* Website builder — full-bleed */}
         {tab === "website" && (
-          <div className="fixed inset-0 md:left-[120px] z-20" style={{ background: "#0A1628" }}>
+          <div className="fixed inset-0 md:left-[220px] z-20" style={{ background: "#0A1628" }}>
             <WebsiteBuilderPanel userId={user.id} plan={profile?.plan || "free"} />
           </div>
         )}
@@ -397,6 +580,7 @@ export default function Dashboard() {
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
           {tab === "automation" && <AutomationPanel userId={user.id} plan={profile?.plan || "free"} />}
+          {tab === "ai" && <AIRecommendPanel userId={user.id} setTab={setTab} />}
         </div>
       </div>
 

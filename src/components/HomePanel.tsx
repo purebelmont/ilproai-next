@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 const fmt = (n: number) => "₩" + n.toLocaleString();
@@ -22,6 +23,7 @@ const TIER1_TOOLS: Tool[] = [
 const TIER2_TOOLS: Tool[] = [
   { id: "website", icon: "🌐", label: "홈페이지", color: "#0071E3", pro: true },
   { id: "automation", icon: "🤖", label: "자동화", color: "#7D2AE7", pro: true },
+  { id: "sns", icon: "📸", label: "SNS", color: "#E1306C", pro: true },
 ];
 
 const BANNERS = [
@@ -31,6 +33,7 @@ const BANNERS = [
 ];
 
 export default function HomePanel({ userId, profile, setTab }: { userId: string; profile: any; setTab: (t: any) => void }) {
+  const router = useRouter();
   const [stats, setStats] = useState<any>(null);
   const [recentItems, setRecentItems] = useState<any[]>([]);
 
@@ -123,7 +126,7 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
       <div className="mb-6">
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5" style={{ scrollbarWidth: "none" }}>
           {allTools.map((tool) => (
-            <button key={tool.id} onClick={() => setTab(tool.id)}
+            <button key={tool.id} onClick={() => tool.id === "sns" ? router.push("/sns") : setTab(tool.id)}
               className="flex flex-col items-center gap-1.5 shrink-0 active:scale-95 transition-transform" style={{ minWidth: 64 }}>
               <div className="relative">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style={{ background: tool.color + "15" }}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 interface Automation {
   id: string;
@@ -278,6 +279,13 @@ export default function AutomationPanel({ userId, plan }: { userId: string; plan
 
               {/* 버튼 */}
               <div className="flex gap-2 mt-3">
+                {auto.id === "marketing" && (
+                  <Link href="/sns"
+                    className="flex-1 py-2 text-xs font-semibold rounded-lg text-center text-white"
+                    style={{ background: "linear-gradient(135deg, #E1306C, #833AB4, #405DE6)", textDecoration: "none" }}>
+                    📣 SNS 데모 체험
+                  </Link>
+                )}
                 {auto.status === "active" ? (
                   <>
                     <button onClick={() => startSetup(auto)}
@@ -307,8 +315,25 @@ export default function AutomationPanel({ userId, plan }: { userId: string; plan
         ))}
       </div>
 
+      {/* SNS 자동화 데모 배너 */}
+      <Link href="/sns" className="block rounded-2xl p-5 mt-5 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #E1306C, #833AB4, #405DE6)", textDecoration: "none" }}>
+        <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-20" style={{ background: "white", transform: "translate(30%, -30%)" }} />
+        <div className="absolute bottom-0 left-0 w-16 h-16 rounded-full opacity-10" style={{ background: "white", transform: "translate(-30%, 30%)" }} />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">📣</span>
+            <span className="text-xs px-2 py-0.5 rounded-full font-bold bg-white/20 text-white">무료 데모</span>
+          </div>
+          <div className="text-white font-bold text-base mb-1">AI SNS 자동화 체험하기</div>
+          <div className="text-white/70 text-xs mb-3">업종만 선택하면 인스타·블로그·페이스북 게시물을 AI가 즉시 생성합니다</div>
+          <div className="inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold bg-white text-[#833AB4]">
+            지금 체험하기 →
+          </div>
+        </div>
+      </Link>
+
       {/* 하네스 시스템 링크 */}
-      <a href="/harness" className="block rounded-xl p-4 mt-5 text-center" style={{ background: "var(--bg-card)", border: "1px solid var(--border)", textDecoration: "none" }}>
+      <a href="/harness" className="block rounded-xl p-4 mt-3 text-center" style={{ background: "var(--bg-card)", border: "1px solid var(--border)", textDecoration: "none" }}>
         <div className="text-xs font-bold" style={{ color: "var(--primary)" }}>⚙️ AI 하네스 시스템 보기</div>
         <div className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>어떻게 AI가 최적 모델을 선택하는지 확인하세요</div>
       </a>

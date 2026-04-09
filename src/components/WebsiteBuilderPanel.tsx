@@ -470,12 +470,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     URL.revokeObjectURL(url);
   }
 
-  async function deleteSite() {
-    if (!site || !confirm("사이트를 삭제하시겠습니까?")) return;
-    await supabase.from("websites").delete().eq("id", site.id);
-    setSite(null); setC(EMPTY_CONTENT); setGeneratedHtml(""); setStep("template"); setTemplate(""); setBizName(""); setSlug("");
-    setMessages([{ role: "system", text: "삭제했어요. 새로 만들까요?", action: "template" }]);
-  }
 
   if (!loaded) return <div className="flex items-center justify-center h-full"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" /></div>;
 
@@ -634,13 +628,14 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           </div>
 
           {site && (
-            <div className="shrink-0 px-3 py-2 flex justify-center gap-3" style={{ borderTop: "1px solid var(--border)" }}>
-              <button onClick={() => {
-                if (!confirm("초기화하시겠습니까?")) return;
-                setC(EMPTY_CONTENT); setStep("template"); setSite(null);
-                setMessages([{ role: "system", text: "초기화했어요. 다시 시작할까요?", action: "template" }]);
+            <div className="shrink-0 px-3 py-2 flex justify-center" style={{ borderTop: "1px solid var(--border)" }}>
+              <button onClick={async () => {
+                if (!confirm("사이트를 삭제하고 처음부터 다시 시작하시겠습니까?")) return;
+                await supabase.from("websites").delete().eq("id", site.id);
+                setSite(null); setC(EMPTY_CONTENT); setGeneratedHtml(""); setStreamingCode("");
+                setStep("template"); setTemplate(""); setBizName(""); setSlug(""); setDescription(""); setContactInfo(""); setStatus("draft");
+                setMessages([{ role: "system", text: "초기화했어요. 새로 만들까요?", action: "template" }]);
               }} className="text-[10px]" style={{ color: "var(--text-muted)" }}>초기화</button>
-              <button onClick={deleteSite} className="text-[10px] text-[var(--danger)]">삭제</button>
             </div>
           )}
         </div>

@@ -110,6 +110,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     { role: "system", text: "안녕하세요! AI 홈페이지 빌더입니다.\n몇 가지 질문에 답하시면 완성된 웹사이트를 만들어 드릴게요.\n\n어떤 업종인가요?", action: "template" },
   ]);
   const [input, setInput] = useState("");
+  const [isComposing, setIsComposing] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -143,6 +144,16 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   }, [userId]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streamingCode]);
+
+  // Auto-save when HTML changes (after edits)
+  useEffect(() => {
+    if (!site || !generatedHtml || step !== "edit") return;
+    const timer = setTimeout(async () => {
+      const contentToSave = { ...c, html: generatedHtml };
+      await supabase.from("websites").update({ content: contentToSave, updated_at: new Date().toISOString() }).eq("id", site.id);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [generatedHtml]);
   useEffect(() => {
     requestAnimationFrame(() => {
       if (codeScrollRef.current) codeScrollRef.current.scrollTop = codeScrollRef.current.scrollHeight;
@@ -436,8 +447,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       parseAndApply(text);
       setMessages(prev => [...prev, { role: "system", text: "수정했어요! 미리보기를 확인하세요.", action: "sections" }]);
       setActiveSection(null);
-      // Auto-save after edit
-      setTimeout(() => save(), 500);
     } else {
       const lower = text.toLowerCase();
       if (lower.match(/제목|타이틀|이름|메인/)) handleSectionClick("hero");
@@ -613,7 +622,9 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
             {step !== "template" && step !== "generating" && (
               <div className="flex gap-1.5 items-end">
                 <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                  onCompositionStart={() => setIsComposing(true)}
+                  onCompositionEnd={() => setIsComposing(false)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !isComposing) { e.preventDefault(); handleSend(); } }}
                   placeholder={step === "name" ? "이름을 입력하세요" : step === "description" ? "한 줄 소개" : step === "contact" ? "전화, 주소 등" : "자유롭게 입력하세요"}
                   className="flex-1 resize-none rounded-lg px-3 py-2 text-[12px] outline-none min-h-[38px] max-h-[100px]"
                   style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}

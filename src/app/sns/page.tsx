@@ -7,8 +7,88 @@ import Link from 'next/link';
 import HashtagPanel from '@/components/sns/HashtagPanel';
 import VideoPanel from '@/components/sns/VideoPanel';
 
-// 업종별 Unsplash 키워드 + 카드 스타일
-const QUICK_PROMPTS = [
+// 업종 카테고리 정의
+const BIZ_CATEGORIES = [
+  { id: 'restaurant', icon: '🍕', label: '음식점/카페', keywords: ['피자', '음식', '식당', '치킨', '맛집', '카페', '커피', '라떼'] },
+  { id: 'beauty', icon: '💇', label: '미용/뷰티', keywords: ['미용', '헤어', '살롱', '네일', '뷰티'] },
+  { id: 'fitness', icon: '🏋️', label: '헬스/스포츠', keywords: ['헬스', '운동', '피트', '요가', '필라테스'] },
+  { id: 'pet', icon: '🐕', label: '반려동물', keywords: ['반려', '펫', '강아지', '고양이', '동물'] },
+  { id: 'education', icon: '📚', label: '학원/교육', keywords: ['학원', '교육', '특강', '과외'] },
+  { id: 'retail', icon: '🛍️', label: '매장/쇼핑', keywords: ['매장', '쇼핑', '편집숍', '스토어'] },
+  { id: 'medical', icon: '🏥', label: '병원/의원', keywords: ['병원', '의원', '치과', '한의원'] },
+  { id: 'lodging', icon: '🏨', label: '숙박/펜션', keywords: ['숙박', '펜션', '호텔', '민박'] },
+];
+
+// 업종별 퀵 프롬프트
+const PROMPTS_BY_CATEGORY: Record<string, { icon: string; text: string; desc: string; img: string; gradient: string }[]> = {
+  restaurant: [
+    { icon: '🍕', text: '주말 특별 메뉴 이벤트', desc: '인스타 + 블로그', img: 'pizza+restaurant', gradient: 'linear-gradient(135deg, #FF6B35, #D62828)' },
+    { icon: '☕', text: '시즌 신메뉴 출시 알림', desc: '인스타 + 페이스북', img: 'coffee+cafe+latte', gradient: 'linear-gradient(135deg, #6F4E37, #C08552)' },
+    { icon: '🎉', text: '오픈 기념 할인 이벤트', desc: '전체 플랫폼', img: 'restaurant+party', gradient: 'linear-gradient(135deg, #E63946, #F4A261)' },
+    { icon: '📸', text: '고객 후기 이벤트', desc: '인스타 + 블로그', img: 'food+review', gradient: 'linear-gradient(135deg, #264653, #2A9D8F)' },
+    { icon: '🍽️', text: '점심 특선 메뉴 홍보', desc: '인스타 + 페이스북', img: 'lunch+special', gradient: 'linear-gradient(135deg, #E76F51, #F4A261)' },
+    { icon: '🎁', text: '단골 고객 감사 이벤트', desc: '전체 플랫폼', img: 'gift+celebration', gradient: 'linear-gradient(135deg, #6A0572, #AB83A1)' },
+  ],
+  beauty: [
+    { icon: '💇', text: '신규 오픈 홍보', desc: '전체 플랫폼', img: 'hair+salon', gradient: 'linear-gradient(135deg, #C77DFF, #7B2CBF)' },
+    { icon: '✨', text: '시즌 할인 이벤트', desc: '인스타 + 블로그', img: 'beauty+salon', gradient: 'linear-gradient(135deg, #FF69B4, #C71585)' },
+    { icon: '💅', text: '신규 스타일 소개', desc: '인스타 + 페이스북', img: 'hairstyle+beauty', gradient: 'linear-gradient(135deg, #E0AAFF, #9D4EDD)' },
+    { icon: '🎀', text: '비포/애프터 후기', desc: '인스타 + 블로그', img: 'makeover+beauty', gradient: 'linear-gradient(135deg, #FF85A1, #FB6F92)' },
+    { icon: '🌸', text: '봄 시즌 트렌드 컬러', desc: '인스타 + 블로그', img: 'spring+beauty', gradient: 'linear-gradient(135deg, #FFB3C6, #FF8FAB)' },
+    { icon: '💝', text: '친구 추천 이벤트', desc: '전체 플랫폼', img: 'friends+gift', gradient: 'linear-gradient(135deg, #D63384, #E91E8C)' },
+  ],
+  fitness: [
+    { icon: '🏋️', text: '신규 회원 할인 이벤트', desc: '전체 플랫폼', img: 'gym+fitness', gradient: 'linear-gradient(135deg, #2D6A4F, #40916C)' },
+    { icon: '💪', text: '1:1 PT 프로그램 소개', desc: '인스타 + 블로그', img: 'personal+training', gradient: 'linear-gradient(135deg, #344E41, #588157)' },
+    { icon: '🏃', text: '회원 변신 후기', desc: '인스타 + 페이스북', img: 'fitness+transformation', gradient: 'linear-gradient(135deg, #06D6A0, #118AB2)' },
+    { icon: '🥗', text: '건강 식단 팁', desc: '블로그 + 인스타', img: 'healthy+food', gradient: 'linear-gradient(135deg, #52B788, #40916C)' },
+    { icon: '⏰', text: '새벽반/심야반 오픈', desc: '전체 플랫폼', img: 'morning+workout', gradient: 'linear-gradient(135deg, #1B4332, #2D6A4F)' },
+    { icon: '🎯', text: '여름 다이어트 챌린지', desc: '인스타 + 페이스북', img: 'summer+fitness', gradient: 'linear-gradient(135deg, #FF6B6B, #EE5A24)' },
+  ],
+  pet: [
+    { icon: '🐕', text: '미용 후기 이벤트', desc: '인스타 + 블로그', img: 'dog+grooming+cute', gradient: 'linear-gradient(135deg, #FF9F1C, #FFBF69)' },
+    { icon: '🐱', text: '신규 서비스 소개', desc: '전체 플랫폼', img: 'pet+care', gradient: 'linear-gradient(135deg, #F9C74F, #F8961E)' },
+    { icon: '🎁', text: '반려동물 용품 할인', desc: '인스타 + 페이스북', img: 'pet+products', gradient: 'linear-gradient(135deg, #FFBF69, #FF9F1C)' },
+    { icon: '💕', text: '귀여운 손님 자랑', desc: '인스타', img: 'cute+puppy', gradient: 'linear-gradient(135deg, #FFDDD2, #FF9F1C)' },
+    { icon: '🏥', text: '건강검진 시즌 안내', desc: '블로그 + 페이스북', img: 'vet+animal', gradient: 'linear-gradient(135deg, #48BFE3, #0077B6)' },
+    { icon: '📸', text: '포토 이벤트', desc: '인스타', img: 'pet+photo', gradient: 'linear-gradient(135deg, #E9C46A, #F4A261)' },
+  ],
+  education: [
+    { icon: '📚', text: '겨울방학 특강 안내', desc: '블로그 + 페이스북', img: 'study+classroom', gradient: 'linear-gradient(135deg, #0077B6, #00B4D8)' },
+    { icon: '🏆', text: '수강생 합격 후기', desc: '블로그 + 인스타', img: 'graduation+success', gradient: 'linear-gradient(135deg, #023E8A, #0096C7)' },
+    { icon: '📝', text: '무료 레벨 테스트 안내', desc: '전체 플랫폼', img: 'test+education', gradient: 'linear-gradient(135deg, #00B4D8, #90E0EF)' },
+    { icon: '👨‍🏫', text: '신규 강사 소개', desc: '블로그 + 페이스북', img: 'teacher+class', gradient: 'linear-gradient(135deg, #0077B6, #023E8A)' },
+    { icon: '🎯', text: '시험 대비 집중반', desc: '블로그 + 인스타', img: 'exam+study', gradient: 'linear-gradient(135deg, #48CAE4, #0096C7)' },
+    { icon: '🎉', text: '개강 할인 이벤트', desc: '전체 플랫폼', img: 'school+open', gradient: 'linear-gradient(135deg, #ADE8F4, #0077B6)' },
+  ],
+  retail: [
+    { icon: '🛍️', text: '신상품 입고 알림', desc: '인스타 + 페이스북', img: 'shopping+new', gradient: 'linear-gradient(135deg, #7209B7, #560BAD)' },
+    { icon: '🏷️', text: '시즌 세일 이벤트', desc: '전체 플랫폼', img: 'sale+discount', gradient: 'linear-gradient(135deg, #F72585, #B5179E)' },
+    { icon: '📦', text: '베스트셀러 소개', desc: '인스타 + 블로그', img: 'bestseller+product', gradient: 'linear-gradient(135deg, #480CA8, #7209B7)' },
+    { icon: '💝', text: '선물 추천 기획전', desc: '인스타 + 페이스북', img: 'gift+present', gradient: 'linear-gradient(135deg, #E63946, #F72585)' },
+    { icon: '⭐', text: '고객 리뷰 이벤트', desc: '인스타 + 블로그', img: 'review+happy', gradient: 'linear-gradient(135deg, #3A0CA3, #4361EE)' },
+    { icon: '🎁', text: '멤버십 혜택 안내', desc: '전체 플랫폼', img: 'membership+vip', gradient: 'linear-gradient(135deg, #7209B7, #B5179E)' },
+  ],
+  medical: [
+    { icon: '🏥', text: '건강검진 시즌 안내', desc: '블로그 + 페이스북', img: 'hospital+health', gradient: 'linear-gradient(135deg, #0891B2, #06D6A0)' },
+    { icon: '💉', text: '예방접종 안내', desc: '블로그 + 페이스북', img: 'vaccine+health', gradient: 'linear-gradient(135deg, #0077B6, #0891B2)' },
+    { icon: '👨‍⚕️', text: '의료진 소개', desc: '블로그', img: 'doctor+medical', gradient: 'linear-gradient(135deg, #0E7490, #06B6D4)' },
+    { icon: '📋', text: '진료 안내 / 휴진 공지', desc: '전체 플랫폼', img: 'clinic+notice', gradient: 'linear-gradient(135deg, #059669, #10B981)' },
+    { icon: '🌿', text: '건강 정보 시리즈', desc: '블로그 + 인스타', img: 'wellness+health', gradient: 'linear-gradient(135deg, #047857, #059669)' },
+    { icon: '⭐', text: '환자 후기', desc: '블로그 + 인스타', img: 'patient+review', gradient: 'linear-gradient(135deg, #0D9488, #14B8A6)' },
+  ],
+  lodging: [
+    { icon: '🏨', text: '시즌 특가 프로모션', desc: '전체 플랫폼', img: 'hotel+resort', gradient: 'linear-gradient(135deg, #059669, #34D399)' },
+    { icon: '🌅', text: '객실 뷰 소개', desc: '인스타 + 블로그', img: 'ocean+view+hotel', gradient: 'linear-gradient(135deg, #F59E0B, #F97316)' },
+    { icon: '🍳', text: '조식 메뉴 소개', desc: '인스타 + 페이스북', img: 'breakfast+hotel', gradient: 'linear-gradient(135deg, #92400E, #B45309)' },
+    { icon: '📸', text: '투숙객 후기 이벤트', desc: '인스타 + 블로그', img: 'guest+review', gradient: 'linear-gradient(135deg, #0369A1, #0284C7)' },
+    { icon: '🎉', text: '연말 패키지 안내', desc: '전체 플랫폼', img: 'holiday+celebration', gradient: 'linear-gradient(135deg, #BE185D, #EC4899)' },
+    { icon: '🏊', text: '부대시설 소개', desc: '인스타 + 블로그', img: 'pool+resort', gradient: 'linear-gradient(135deg, #0E7490, #22D3EE)' },
+  ],
+};
+
+// 기본 프롬프트 (카테고리 없을 때)
+const DEFAULT_PROMPTS = [
   { icon: '🍕', text: '피자가게 주말 이벤트 게시물', desc: '인스타 + 블로그', img: 'pizza+restaurant', gradient: 'linear-gradient(135deg, #FF6B35, #D62828)' },
   { icon: '💇', text: '미용실 신규 오픈 홍보', desc: '전체 플랫폼', img: 'hair+salon', gradient: 'linear-gradient(135deg, #C77DFF, #7B2CBF)' },
   { icon: '☕', text: '카페 시즌 메뉴 출시 알림', desc: '인스타 + 페이스북', img: 'coffee+cafe+latte', gradient: 'linear-gradient(135deg, #6F4E37, #C08552)' },
@@ -236,18 +316,37 @@ export default function SNSPage() {
   const [activeTab, setActiveTab] = useState<'generate' | 'hashtag' | 'video' | 'calendar' | 'history'>('generate');
   const [copied, setCopied] = useState('');
   const [lastPrompt, setLastPrompt] = useState('');
+  const [savedCategory, setSavedCategory] = useState<string | null>(null);
+  const [setupDone, setSetupDone] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load saved category
+  useEffect(() => {
+    const saved = localStorage.getItem('ilpro_sns_category');
+    if (saved) { setSavedCategory(saved); setSetupDone(true); }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const selectCategory = (id: string) => {
+    localStorage.setItem('ilpro_sns_category', id);
+    setSavedCategory(id);
+    setSetupDone(true);
+  };
+
+  const currentBiz = BIZ_CATEGORIES.find(c => c.id === savedCategory);
+  const quickPrompts = savedCategory ? (PROMPTS_BY_CATEGORY[savedCategory] || DEFAULT_PROMPTS) : DEFAULT_PROMPTS;
+
   const isLoading = status === 'submitted' || status === 'streaming';
+
+  const bizContext = currentBiz ? `\n\n[업종: ${currentBiz.label}]` : '';
 
   const handleQuickPrompt = (text: string) => {
     setLastPrompt(text);
     sendMessage({
-      text: `다음 업종/상황에 맞는 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${text}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`,
+      text: `다음 업종/상황에 맞는 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${text}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`,
     });
   };
 
@@ -256,7 +355,7 @@ export default function SNSPage() {
     if (input.trim() && !isLoading) {
       setLastPrompt(input);
       sendMessage({
-        text: `다음 내용으로 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${input}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`,
+        text: `다음 내용으로 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${input}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`,
       });
       setInput('');
     }
@@ -277,13 +376,38 @@ export default function SNSPage() {
             <span className="text-white/20">|</span>
             <h1 className="text-lg font-bold">📣 AI SNS 자동화</h1>
           </div>
-          <span className="text-xs px-2 py-1 rounded-full font-bold" style={{ background: 'rgba(0,113,227,0.2)', color: '#0071E3' }}>
-            DEMO
-          </span>
+          {currentBiz && (
+            <button onClick={() => { setSetupDone(false); setSavedCategory(null); localStorage.removeItem('ilpro_sns_category'); }}
+              className="text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors hover:opacity-80"
+              style={{ background: 'rgba(125,42,231,0.2)', color: '#A78BFA' }}>
+              {currentBiz.icon} {currentBiz.label}
+              <span className="text-white/30 ml-1">변경</span>
+            </button>
+          )}
         </div>
       </header>
 
       <div className="max-w-5xl mx-auto p-4">
+        {/* Business Setup Screen */}
+        {!setupDone && (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="text-4xl mb-4">📣</div>
+            <h2 className="text-2xl font-bold mb-2">어떤 업종이세요?</h2>
+            <p className="text-sm text-white/50 mb-8">한번 설정하면 모든 콘텐츠가 맞춤 생성됩니다</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl w-full">
+              {BIZ_CATEGORIES.map(cat => (
+                <button key={cat.id} onClick={() => selectCategory(cat.id)}
+                  className="flex flex-col items-center gap-2 p-5 rounded-xl transition-all hover:scale-105 active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <span className="text-3xl">{cat.icon}</span>
+                  <span className="text-sm font-medium">{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {setupDone && <>
         {/* Tab Navigation */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl overflow-x-auto" style={{ background: 'rgba(255,255,255,0.05)' }}>
           {[
@@ -315,7 +439,7 @@ export default function SNSPage() {
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-white/60 mb-3">빠른 시작 — 클릭하면 바로 생성</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {QUICK_PROMPTS.map((p, i) => (
+                  {quickPrompts.map((p, i) => (
                     <button
                       key={i}
                       onClick={() => handleQuickPrompt(p.text)}
@@ -561,6 +685,7 @@ export default function SNSPage() {
             </div>
           </div>
         )}
+        </>}
       </div>
     </div>
   );

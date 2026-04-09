@@ -115,6 +115,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const codeScrollRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLIFrameElement>(null);
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
     { id: "about", icon: "📖", label: "소개글" },
@@ -159,6 +160,23 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       if (codeScrollRef.current) codeScrollRef.current.scrollTop = codeScrollRef.current.scrollHeight;
     });
   }, [streamingCode]);
+
+  // Write HTML to iframe via document.write (no flicker, no srcDoc reload)
+  useEffect(() => {
+    const html = streamingCode || generatedHtml;
+    if (!previewRef.current || !html) return;
+    try {
+      const doc = previewRef.current.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(streamingCode
+          ? html + "<script>window.scrollTo(0,document.body.scrollHeight)<\/script>"
+          : html
+        );
+        doc.close();
+      }
+    } catch {}
+  }, [streamingCode, generatedHtml]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -675,14 +693,12 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   </div>
                 )}
               </div>
-              {/* iframe — srcDoc updates live during streaming, key forces fresh mount for final */}
+              {/* iframe — ref-based document.write for flicker-free updates */}
               <iframe
-                key={streamingCode ? "streaming" : "final"}
-                srcDoc={streamingCode ? streamingCode + '<script>window.scrollTo(0,document.body.scrollHeight)</script>' : generatedHtml}
+                ref={previewRef}
                 className="flex-1 w-full border-0"
                 style={{ background: "white" }}
                 title="Website Preview"
-                sandbox="allow-same-origin allow-scripts"
               />
             </div>
           ) : (

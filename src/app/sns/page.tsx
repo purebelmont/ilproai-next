@@ -4,9 +4,7 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import ABTestPanel from '@/components/sns/ABTestPanel';
 import HashtagPanel from '@/components/sns/HashtagPanel';
-import EditPanel from '@/components/sns/EditPanel';
 import VideoPanel from '@/components/sns/VideoPanel';
 
 // 업종별 Unsplash 키워드 + 카드 스타일
@@ -235,7 +233,7 @@ export default function SNSPage() {
   });
 
   const [input, setInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'generate' | 'abtest' | 'hashtag' | 'edit' | 'video' | 'calendar' | 'history'>('generate');
+  const [activeTab, setActiveTab] = useState<'generate' | 'hashtag' | 'video' | 'calendar' | 'history'>('generate');
   const [copied, setCopied] = useState('');
   const [lastPrompt, setLastPrompt] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -291,9 +289,7 @@ export default function SNSPage() {
           {[
             { id: 'generate' as const, label: '생성', icon: '✨' },
             { id: 'video' as const, label: '비디오', icon: '🎬' },
-            { id: 'abtest' as const, label: 'A/B', icon: '🔄' },
             { id: 'hashtag' as const, label: '해시태그', icon: '#️⃣' },
-            { id: 'edit' as const, label: '수정', icon: '✏️' },
             { id: 'calendar' as const, label: '캘린더', icon: '📅' },
             { id: 'history' as const, label: '히스토리', icon: '📊' },
           ].map(t => (
@@ -465,14 +461,11 @@ export default function SNSPage() {
         {/* Video Tab */}
         {activeTab === 'video' && <VideoPanel />}
 
-        {/* A/B Test Tab */}
-        {activeTab === 'abtest' && <ABTestPanel />}
 
         {/* Hashtag Tab */}
         {activeTab === 'hashtag' && <HashtagPanel />}
 
         {/* Edit Tab */}
-        {activeTab === 'edit' && <EditPanel />}
 
         {/* Calendar Tab */}
         {activeTab === 'calendar' && (

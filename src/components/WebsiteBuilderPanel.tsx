@@ -458,7 +458,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
               </button>
               {site && (
                 <>
-                  {status !== "published" && isPro && (
+                  {status !== "published" && (
                     <button onClick={() => save(true)} className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#30D158" }}>게시</button>
                   )}
                   <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md"

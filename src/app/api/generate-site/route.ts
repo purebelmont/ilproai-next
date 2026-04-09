@@ -30,10 +30,11 @@ REQUIREMENTS:
 9. Color scheme should match the business type.
 10. Generate realistic Korean business content — menu items, service descriptions, about text.
 11. The website should look like it cost ₩5,000,000 to build.
-12. Include subtle animations: hover effects, smooth transitions.
+12. Include subtle hover effects and smooth transitions — but keep CSS concise and minimal.
 13. Use system fonts: -apple-system, BlinkMacSystemFont, sans-serif.
 14. Hero section should be full-viewport height with a dramatic gradient.
-15. Add a floating "전화하기" button if phone number is provided.`;
+15. Add a floating "전화하기" button if phone number is provided.
+16. CRITICAL: Keep total HTML under 12,000 characters. Use shorthand CSS, minimal class names, and concise styles. Do NOT write verbose CSS with excessive properties.`;
 
   // Streaming mode
   if (useStream && apiKey) {
@@ -47,7 +48,7 @@ REQUIREMENTS:
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 8000,
+          max_tokens: 16000,
           stream: true,
           messages: [{ role: "user", content: prompt }],
         }),
@@ -112,7 +113,7 @@ REQUIREMENTS:
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 8000,
+          max_tokens: 16000,
           messages: [{ role: "user", content: prompt }],
         }),
       });

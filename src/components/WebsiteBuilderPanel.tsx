@@ -469,7 +469,10 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
               </button>
               {site && (
                 <>
-                  {status !== "published" && (
+                  {status === "published" ? (
+                    <a href={`/sites/${slug}`} target="_blank" rel="noopener noreferrer"
+                      className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#0071E3" }}>미리보기</a>
+                  ) : (
                     <button onClick={() => save(true)} className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#30D158" }}>게시</button>
                   )}
                   {generatedHtml && (

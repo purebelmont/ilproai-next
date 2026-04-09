@@ -114,7 +114,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const codeEndRef = useRef<HTMLDivElement>(null);
 
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
@@ -145,7 +144,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   }, [userId]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-  useEffect(() => { codeEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [streamingCode]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [streamingCode]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -520,6 +519,30 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                 )}
               </div>
             ))}
+            {/* Live code streaming in chat */}
+            {streamingCode && (
+              <div>
+                <div className="rounded-2xl rounded-tl-md overflow-hidden" style={{ border: "1px solid #30363d" }}>
+                  <div className="flex items-center gap-2 px-3 py-1.5" style={{ background: "#161b22", borderBottom: "1px solid #30363d" }}>
+                    <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "codePulse 1.2s ease-in-out infinite" }} />
+                    <span className="text-[10px] text-[#7D2AE7] font-medium">코드 생성 중</span>
+                    <span className="text-[9px] text-[#8b949e] font-mono ml-auto">{streamingCode.split("\n").length} lines</span>
+                  </div>
+                  <div className="overflow-y-auto max-h-[300px] p-2 font-mono text-[10px] leading-[1.5]" style={{ background: "#0d1117", scrollbarWidth: "thin", scrollbarColor: "#30363d #0d1117" }}>
+                    {streamingCode.split("\n").slice(-30).map((line, i, arr) => {
+                      const lineNum = streamingCode.split("\n").length - arr.length + i + 1;
+                      return (
+                        <div key={i} className="flex">
+                          <span className="select-none w-[32px] shrink-0 text-right pr-2" style={{ color: "#484f58" }}>{lineNum}</span>
+                          <span dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <style>{`@keyframes codePulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }`}</style>
+              </div>
+            )}
             <div ref={chatEndRef} />
           </div>
 
@@ -565,35 +588,38 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
 
         {/* ═══ RIGHT — Preview (iframe) ═══ */}
         <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
-          {streamingCode ? (
-            /* Live code streaming view */
-            <div className="flex-1 flex flex-col" style={{ background: "#0d1117" }}>
-              <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ background: "#161b22", borderBottom: "1px solid #30363d" }}>
+          {streamingCode || generatedHtml ? (
+            /* Live preview — renders partial HTML during streaming, full HTML when done */
+            <div className="flex-1 flex flex-col" style={{ background: "#1a1a2e" }}>
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ background: "#2D2D44", borderBottom: "1px solid #3D3D55" }}>
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                   <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                   <div className="w-3 h-3 rounded-full bg-[#28C840]" />
                 </div>
-                <div className="flex-1 flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "pulse 1.2s ease-in-out infinite" }} />
-                  <span className="text-[11px] text-[#7D2AE7] font-medium">AI 코드 생성 중...</span>
-                </div>
-                <span className="text-[10px] text-[#8b949e] font-mono">{streamingCode.length.toLocaleString()} chars</span>
+                {streamingCode ? (
+                  <div className="flex-1 flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "previewPulse 1.2s ease-in-out infinite" }} />
+                    <span className="text-[11px] text-[#7D2AE7] font-medium">실시간 미리보기</span>
+                    <style>{`@keyframes previewPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }`}</style>
+                  </div>
+                ) : (
+                  <div className="flex-1 text-center text-[11px] text-white/50 rounded-lg py-1.5 px-3 mx-8" style={{ background: "#1a1a2e" }}>
+                    {slug || "my-store"}.contavelo.ai
+                  </div>
+                )}
               </div>
-              <div className="flex-1 overflow-y-auto p-4 font-mono text-[11px] leading-[1.6]" style={{ scrollbarWidth: "thin", scrollbarColor: "#30363d #0d1117" }}>
-                <pre className="whitespace-pre-wrap" style={{ color: "#e6edf3" }}>
-                  {streamingCode.split("\n").map((line, i) => (
-                    <div key={i} className="flex">
-                      <span className="select-none w-[40px] shrink-0 text-right pr-3" style={{ color: "#484f58" }}>{i + 1}</span>
-                      <span dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
-                    </div>
-                  ))}
-                </pre>
-                <div ref={codeEndRef} />
-              </div>
-              <style>{`@keyframes pulse { 0%,100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }`}</style>
+              {/* iframe — shows partial HTML while streaming, full HTML when done */}
+              <iframe
+                srcDoc={streamingCode || generatedHtml}
+                className="flex-1 w-full border-0"
+                style={{ background: "white" }}
+                title="Website Preview"
+                sandbox="allow-same-origin allow-scripts"
+              />
             </div>
-          ) : !hasContent ? (
+          ) : (
             /* Empty state — ocean photo */
             <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
               <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format"
@@ -608,29 +634,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   몇 가지 질문에 답하시면{"\n"}AI가 완성된 웹사이트를 디자인합니다
                 </div>
               </div>
-            </div>
-          ) : (
-            /* Generated site — rendered in iframe */
-            <div className="flex-1 flex flex-col" style={{ background: "#1a1a2e" }}>
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ background: "#2D2D44", borderBottom: "1px solid #3D3D55" }}>
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                  <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                  <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                </div>
-                <div className="flex-1 text-center text-[11px] text-white/50 rounded-lg py-1.5 px-3 mx-8" style={{ background: "#1a1a2e" }}>
-                  {slug || "my-store"}.contavelo.ai
-                </div>
-              </div>
-              {/* iframe with generated HTML */}
-              <iframe
-                srcDoc={generatedHtml}
-                className="flex-1 w-full border-0"
-                style={{ background: "white" }}
-                title="Website Preview"
-                sandbox="allow-same-origin allow-scripts"
-              />
             </div>
           )}
         </div>

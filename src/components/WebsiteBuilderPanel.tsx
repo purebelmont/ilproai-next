@@ -355,13 +355,38 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   function parseAndApply(text: string) {
     if (!activeSection) return;
     const updated = { ...c };
+    let htmlUpdated = generatedHtml;
+
     switch (activeSection) {
       case "hero": {
         const parts = text.split(/[\/\|]/).map(s => s.trim());
-        updated.hero = { ...updated.hero, title: parts[0] || updated.hero.title, subtitle: parts[1] || updated.hero.subtitle };
+        const newTitle = parts[0] || updated.hero.title;
+        const newSub = parts[1] || updated.hero.subtitle;
+        // Update structured data
+        updated.hero = { ...updated.hero, title: newTitle, subtitle: newSub };
+        // Update AI HTML — replace <h1> content and first <p> after it
+        if (htmlUpdated) {
+          htmlUpdated = htmlUpdated.replace(/(<h1[^>]*>)([\s\S]*?)(<\/h1>)/, `$1${newTitle}$3`);
+          if (newSub && updated.hero.subtitle !== newSub) {
+            // Replace the subtitle — typically the first <p> inside hero or after h1
+            const heroMatch = htmlUpdated.match(/(<h1[^>]*>[\s\S]*?<\/h1>\s*(?:<[^>]+>\s*)*<p[^>]*>)([\s\S]*?)(<\/p>)/);
+            if (heroMatch) {
+              htmlUpdated = htmlUpdated.replace(heroMatch[0], `${heroMatch[1]}${newSub}${heroMatch[3]}`);
+            }
+          }
+        }
         break;
       }
-      case "about": updated.about = { ...updated.about, text: text.trim() }; break;
+      case "about": {
+        updated.about = { ...updated.about, text: text.trim() };
+        // Update about section text in AI HTML
+        if (htmlUpdated) {
+          const aboutRegex = /(<(?:section|div)[^>]*(?:id|class)\s*=\s*["'][^"']*about[^"']*["'][^>]*>[\s\S]*?<p[^>]*>)([\s\S]*?)(<\/p>)/i;
+          const match = htmlUpdated.match(aboutRegex);
+          if (match) htmlUpdated = htmlUpdated.replace(match[0], `${match[1]}${text.trim()}${match[3]}`);
+        }
+        break;
+      }
       case "services": {
         const svcs = text.split("\n").map(l => l.trim()).filter(Boolean).map(line => {
           const p = line.split(/[-–—,]/).map(s => s.trim());
@@ -384,6 +409,12 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       }
     }
     setC(updated);
+    if (htmlUpdated !== generatedHtml) {
+      setGeneratedHtml(htmlUpdated);
+      // Also update the html in content for DB save
+      updated.html = htmlUpdated;
+      setC({ ...updated } as any);
+    }
   }
 
   // ═══ SEND ═══
@@ -404,6 +435,8 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       parseAndApply(text);
       setMessages(prev => [...prev, { role: "system", text: "수정했어요! 미리보기를 확인하세요.", action: "sections" }]);
       setActiveSection(null);
+      // Auto-save after edit
+      setTimeout(() => save(), 500);
     } else {
       const lower = text.toLowerCase();
       if (lower.match(/제목|타이틀|이름|메인/)) handleSectionClick("hero");
@@ -420,7 +453,8 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     if (!site) return;
     setSaving(true);
     const newStatus = publish !== undefined ? (publish ? "published" : "draft") : status;
-    await supabase.from("websites").update({ content: c, status: newStatus, updated_at: new Date().toISOString() }).eq("id", site.id);
+    const contentToSave = { ...c, html: generatedHtml } as any;
+    await supabase.from("websites").update({ content: contentToSave, status: newStatus, updated_at: new Date().toISOString() }).eq("id", site.id);
     setStatus(newStatus); setSaving(false);
   }
 
@@ -477,10 +511,8 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   )}
                   {generatedHtml && (
                     <button onClick={downloadHtml} className="text-[10px] px-2 py-1 rounded-md"
-                      style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>HTML</button>
+                      style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>HTML 다운로드</button>
                   )}
-                  <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md"
-                    style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>{saving ? "..." : "저장"}</button>
                 </>
               )}
             </div>

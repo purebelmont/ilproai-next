@@ -112,8 +112,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLIFrameElement>(null);
-
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
     { id: "about", icon: "📖", label: "소개글" },
@@ -143,20 +141,6 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   }, [userId]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streamingCode]);
-
-  // Write streaming HTML directly into iframe (avoids full reload from srcDoc)
-  useEffect(() => {
-    const iframe = previewRef.current;
-    if (!iframe || !streamingCode) return;
-    try {
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (doc) {
-        doc.open();
-        doc.write(streamingCode);
-        doc.close();
-      }
-    } catch {}
-  }, [streamingCode]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -631,13 +615,14 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   </div>
                 )}
               </div>
-              {/* iframe — ref-based live updates during streaming, srcDoc for final */}
+              {/* iframe — srcDoc updates live during streaming, key forces fresh mount for final */}
               <iframe
-                ref={previewRef}
-                srcDoc={streamingCode ? undefined : generatedHtml}
+                key={streamingCode ? "streaming" : "final"}
+                srcDoc={streamingCode || generatedHtml}
                 className="flex-1 w-full border-0"
                 style={{ background: "white" }}
                 title="Website Preview"
+                sandbox="allow-same-origin allow-scripts"
               />
             </div>
           ) : (

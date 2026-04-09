@@ -79,14 +79,12 @@ function isSkipPhrase(text: string): boolean {
 type Step = "template" | "name" | "description" | "contact" | "generating" | "edit";
 
 function highlightHtml(line: string) {
-  // Simple HTML syntax highlighting using spans
   return line
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/(&lt;\/?)([\w-]+)/g, '<span style="color:#ff7b72">$1$2</span>')
-    .replace(/([\w-]+)(=)/g, '<span style="color:#79c0ff">$1</span><span style="color:#e6edf3">$2</span>')
-    .replace(/(&quot;|")(.*?)(\1)/g, '<span style="color:#a5d6ff">$1$2$3</span>')
-    .replace(/(\/\*.*?\*\/|&lt;!--.*?--&gt;)/g, '<span style="color:#8b949e">$1</span>')
-    .replace(/([{}();:,])/g, '<span style="color:#c9d1d9">$1</span>');
+    .replace(/(&lt;\/?)([\w-]+)/g, '<span style="color:#F97583">$1$2</span>')
+    .replace(/([\w-]+)(=)/g, '<span style="color:#79B8FF">$1</span><span style="color:#E1E4E8">$2</span>')
+    .replace(/(")(.*?)(")/g, '<span style="color:#9ECBFF">$1$2$3</span>')
+    .replace(/(\/\*.*?\*\/|&lt;!--.*?--&gt;)/g, '<span style="color:#6A737D">$1</span>');
 }
 
 export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; plan: string }) {
@@ -114,6 +112,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLIFrameElement>(null);
 
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
@@ -143,8 +142,21 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     })();
   }, [userId]);
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [streamingCode]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streamingCode]);
+
+  // Write streaming HTML directly into iframe (avoids full reload from srcDoc)
+  useEffect(() => {
+    const iframe = previewRef.current;
+    if (!iframe || !streamingCode) return;
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc) {
+        doc.open();
+        doc.write(streamingCode);
+        doc.close();
+      }
+    } catch {}
+  }, [streamingCode]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -239,10 +251,11 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       let source: "ai" | "template" = "ai";
 
       if (res.headers.get("content-type")?.includes("text/event-stream")) {
-        // Stream the response
+        // Stream the response — throttle UI updates for smooth preview
         const reader = res.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
+        let lastUpdate = 0;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -258,13 +271,19 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
               const parsed = JSON.parse(line.slice(6));
               if (parsed.text) {
                 html += parsed.text;
-                setStreamingCode(html);
+                const now = Date.now();
+                if (now - lastUpdate > 300) {
+                  setStreamingCode(html);
+                  lastUpdate = now;
+                }
               }
               if (parsed.done) break;
               if (parsed.error) throw new Error("Stream error");
             } catch {}
           }
         }
+        // Final update with complete HTML
+        setStreamingCode(html);
       } else {
         // Fallback: non-streaming JSON response
         const data = await res.json();
@@ -522,19 +541,19 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
             {/* Live code streaming in chat */}
             {streamingCode && (
               <div>
-                <div className="rounded-2xl rounded-tl-md overflow-hidden" style={{ border: "1px solid #30363d" }}>
-                  <div className="flex items-center gap-2 px-3 py-1.5" style={{ background: "#161b22", borderBottom: "1px solid #30363d" }}>
+                <div className="rounded-2xl rounded-tl-md overflow-hidden" style={{ border: "1px solid var(--border)" }}>
+                  <div className="flex items-center gap-2 px-3 py-1.5" style={{ background: "#1e1e2e", borderBottom: "1px solid #333" }}>
                     <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "codePulse 1.2s ease-in-out infinite" }} />
-                    <span className="text-[10px] text-[#7D2AE7] font-medium">코드 생성 중</span>
-                    <span className="text-[9px] text-[#8b949e] font-mono ml-auto">{streamingCode.split("\n").length} lines</span>
+                    <span className="text-[10px] text-[#b388ff] font-medium">코드 생성 중</span>
+                    <span className="text-[9px] text-[#aaa] font-mono ml-auto">{streamingCode.split("\n").length} lines</span>
                   </div>
-                  <div className="overflow-y-auto max-h-[300px] p-2 font-mono text-[10px] leading-[1.5]" style={{ background: "#0d1117", scrollbarWidth: "thin", scrollbarColor: "#30363d #0d1117" }}>
+                  <div className="overflow-y-auto max-h-[300px] p-2 font-mono text-[10px] leading-[1.6]" style={{ background: "#1e1e2e" }}>
                     {streamingCode.split("\n").slice(-30).map((line, i, arr) => {
                       const lineNum = streamingCode.split("\n").length - arr.length + i + 1;
                       return (
                         <div key={i} className="flex">
-                          <span className="select-none w-[32px] shrink-0 text-right pr-2" style={{ color: "#484f58" }}>{lineNum}</span>
-                          <span dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
+                          <span className="select-none w-[32px] shrink-0 text-right pr-2" style={{ color: "#666" }}>{lineNum}</span>
+                          <span style={{ color: "#ddd" }} dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
                         </div>
                       );
                     })}
@@ -610,13 +629,13 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   </div>
                 )}
               </div>
-              {/* iframe — shows partial HTML while streaming, full HTML when done */}
+              {/* iframe — ref-based live updates during streaming, srcDoc for final */}
               <iframe
-                srcDoc={streamingCode || generatedHtml}
+                ref={previewRef}
+                srcDoc={streamingCode ? undefined : generatedHtml}
                 className="flex-1 w-full border-0"
                 style={{ background: "white" }}
                 title="Website Preview"
-                sandbox="allow-same-origin allow-scripts"
               />
             </div>
           ) : (

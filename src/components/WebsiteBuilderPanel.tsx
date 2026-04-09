@@ -162,20 +162,11 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     });
   }, [streamingCode]);
 
-  // Write HTML to iframe — use srcdoc blob URL to avoid flicker
-  const prevBlobUrl = useRef<string>("");
+  // Only render final HTML in iframe (no streaming updates = no flicker)
   useEffect(() => {
-    const html = streamingCode || generatedHtml;
-    if (!previewRef.current || !html) return;
-    const content = streamingCode
-      ? html + "<script>window.scrollTo(0,document.body.scrollHeight)<\/script>"
-      : html;
-    const blob = new Blob([content], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    previewRef.current.src = url;
-    if (prevBlobUrl.current) URL.revokeObjectURL(prevBlobUrl.current);
-    prevBlobUrl.current = url;
-  }, [streamingCode, generatedHtml]);
+    if (!previewRef.current || !generatedHtml) return;
+    previewRef.current.srcdoc = generatedHtml;
+  }, [generatedHtml]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -674,35 +665,49 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
 
         {/* ═══ RIGHT — Preview (iframe) ═══ */}
         <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
-          {streamingCode || generatedHtml ? (
-            /* Live preview — renders partial HTML during streaming, full HTML when done */
+          {generatedHtml ? (
+            /* Final preview — rendered once, no flicker */
             <div className="flex-1 flex flex-col" style={{ background: "#1a1a2e" }}>
-              {/* Browser chrome */}
               <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ background: "#2D2D44", borderBottom: "1px solid #3D3D55" }}>
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
                   <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
                   <div className="w-3 h-3 rounded-full bg-[#28C840]" />
                 </div>
-                {streamingCode ? (
-                  <div className="flex-1 flex items-center justify-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "previewPulse 1.2s ease-in-out infinite" }} />
-                    <span className="text-[11px] text-[#7D2AE7] font-medium">실시간 미리보기</span>
-                    <style>{`@keyframes previewPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }`}</style>
-                  </div>
-                ) : (
-                  <div className="flex-1 text-center text-[11px] text-white/50 rounded-lg py-1.5 px-3 mx-8" style={{ background: "#1a1a2e" }}>
-                    {slug || "my-store"}.contavelo.ai
-                  </div>
-                )}
+                <div className="flex-1 text-center text-[11px] text-white/50 rounded-lg py-1.5 px-3 mx-8" style={{ background: "#1a1a2e" }}>
+                  {slug || "my-store"}.contavelo.ai
+                </div>
               </div>
-              {/* iframe — ref-based document.write for flicker-free updates */}
               <iframe
                 ref={previewRef}
                 className="flex-1 w-full border-0"
                 style={{ background: "white" }}
                 title="Website Preview"
               />
+            </div>
+          ) : streamingCode ? (
+            /* Building animation during streaming */
+            <div className="flex-1 flex flex-col items-center justify-center" style={{ background: "#0d1117" }}>
+              <div className="relative mb-8">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #7D2AE7, #EC4899)" }}>
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <div className="absolute -inset-3 rounded-3xl" style={{ border: "2px solid #7D2AE7", opacity: 0.3, animation: "buildPulse 2s ease-in-out infinite" }} />
+              </div>
+              <div className="text-[18px] font-bold text-white mb-2">웹사이트 생성 중</div>
+              <div className="text-[13px] text-white/50 mb-6">AI가 코드를 작성하고 있어요</div>
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full" style={{ background: "rgba(125,42,231,0.15)", border: "1px solid rgba(125,42,231,0.3)" }}>
+                <div className="w-2 h-2 rounded-full bg-[#7D2AE7]" style={{ animation: "buildDot 1s ease-in-out infinite" }} />
+                <span className="text-[12px] text-[#b388ff] font-mono">{streamingCode.split("\n").length} lines</span>
+                <span className="text-[11px] text-white/30">|</span>
+                <span className="text-[12px] text-[#b388ff] font-mono">{(streamingCode.length / 1000).toFixed(1)}KB</span>
+              </div>
+              <style>{`
+                @keyframes buildPulse { 0%,100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.15); opacity: 0; } }
+                @keyframes buildDot { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+              `}</style>
             </div>
           ) : (
             /* Empty state — ocean photo */

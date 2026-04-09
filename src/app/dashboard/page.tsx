@@ -281,8 +281,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* AI Button */}
-        <div className="px-3 pb-3 shrink-0">
+        {/* AI Button + Blog */}
+        <div className="px-3 pb-3 shrink-0 space-y-1.5">
           <button onClick={() => setTab("ai")}
             className="w-full flex items-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-bold text-white active:scale-[0.97] transition-all"
             style={{
@@ -293,6 +293,12 @@ export default function Dashboard() {
             <span className="text-[16px]">✨</span>
             AI 추천
           </button>
+          <Link href="/blog"
+            className="w-full flex items-center gap-2 py-2 px-3 rounded-xl text-[13px] font-medium active:scale-[0.97] transition-all hover:bg-white/5"
+            style={{ color: "#8E8EA0", textDecoration: "none" }}>
+            <span className="text-[15px]">📝</span>
+            블로그
+          </Link>
         </div>
 
         {/* Scrollable nav sections */}
@@ -441,14 +447,20 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* AI Button (mobile) */}
-            <div className="px-4 mb-2">
+            {/* AI Button + Blog (mobile) */}
+            <div className="px-4 mb-2 space-y-2">
               <button onClick={() => { setTab("ai"); setMobileMenuOpen(false); }}
                 className="w-full flex items-center gap-2 py-3 px-4 rounded-xl text-[14px] font-bold text-white active:scale-[0.97] transition-all"
                 style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>
                 <span className="text-[18px]">✨</span>
                 AI 추천
               </button>
+              <Link href="/blog" onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center gap-2 py-3 px-4 rounded-xl text-[14px] font-medium active:scale-[0.97] transition-all"
+                style={{ background: "rgba(255,255,255,0.05)", color: "#C0C0CC", textDecoration: "none" }}>
+                <span className="text-[18px]">📝</span>
+                블로그
+              </Link>
             </div>
 
             {/* Menu sections */}

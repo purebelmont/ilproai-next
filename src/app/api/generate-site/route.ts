@@ -4,6 +4,91 @@ export async function POST(req: NextRequest) {
   const { template, bizName, description, contact, features, stream: useStream } = await req.json();
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
+  // Unsplash images matched to business type
+  const imageMap: Record<string, { hero: string; about: string; gallery: string[] }> = {
+    restaurant: {
+      hero: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80", "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=600&q=80"],
+    },
+    service: {
+      hero: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=600&q=80", "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80"],
+    },
+    retail: {
+      hero: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80", "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600&q=80"],
+    },
+    office: {
+      hero: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&q=80"],
+    },
+    medical: {
+      hero: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=600&q=80"],
+    },
+    education: {
+      hero: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&q=80"],
+    },
+    fitness: {
+      hero: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80"],
+    },
+    lodging: {
+      hero: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80"],
+    },
+    repair: {
+      hero: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80",
+      gallery: [],
+    },
+    legal: {
+      hero: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
+      gallery: [],
+    },
+    realestate: {
+      hero: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&q=80"],
+    },
+    pet: {
+      hero: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=600&q=80"],
+    },
+    wedding: {
+      hero: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&q=80",
+      gallery: ["https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&q=80"],
+    },
+    manufacturing: {
+      hero: "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80",
+      gallery: [],
+    },
+    logistics: {
+      hero: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&q=80",
+      gallery: [],
+    },
+    freelance: {
+      hero: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1920&q=80",
+      about: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
+      gallery: [],
+    },
+  };
+  const images = imageMap[template] || imageMap.office;
+
   const prompt = `You are an elite web designer. Generate a complete, single-file HTML website for this Korean business.
 
 Business info:
@@ -13,28 +98,34 @@ Business info:
 - 연락처: ${contact}
 - 특징: ${features || "없음"}
 
+USE THESE IMAGES (Unsplash, free to use):
+- Hero background: ${images.hero}
+- About section: ${images.about}
+${images.gallery.length ? `- Gallery/additional: ${images.gallery.join(", ")}` : ""}
+
 REQUIREMENTS:
 1. Return ONLY raw HTML. No markdown, no code blocks, no explanation.
-2. The HTML must be a complete document with <!DOCTYPE html>, <html>, <head>, <body>.
-3. All CSS must be inline in a <style> tag. No external CSS or JS.
-4. Design must be STUNNING — modern, premium, Apple/Stripe-level quality.
+2. Complete document: <!DOCTYPE html>, <html>, <head>, <body>, </body>, </html>.
+3. All CSS inline in <style> tag. No external CSS/JS.
+4. STUNNING design — Apple/Stripe-level quality. Premium feel.
 5. All text in Korean.
-6. Mobile responsive.
-7. Include these sections:
-   - Hero with gradient background, business name, tagline, CTA button
-   - About section with compelling story
-   - Services/Menu (4-8 realistic items with prices if applicable)
-   - Contact info with phone, address, email
-   - Footer with "Powered by 콘타벨로AI"
-8. Use modern CSS: gradients, backdrop-filter, border-radius, smooth shadows, CSS grid/flexbox.
-9. Color scheme should match the business type.
-10. Generate realistic Korean business content — menu items, service descriptions, about text.
-11. The website should look like it cost ₩5,000,000 to build.
-12. Include subtle hover effects and smooth transitions — but keep CSS concise and minimal.
-13. Use system fonts: -apple-system, BlinkMacSystemFont, sans-serif.
-14. Hero section should be full-viewport height with a dramatic gradient.
-15. Add a floating "전화하기" button if phone number is provided.
-16. CRITICAL: Keep total HTML under 12,000 characters. Use shorthand CSS, minimal class names, and concise styles. Do NOT write verbose CSS with excessive properties.`;
+6. Mobile responsive (use @media queries).
+7. Sections:
+   - Hero: full-viewport, use hero image as background with dark overlay, business name, tagline, CTA
+   - About: split layout with image on one side, text on other
+   - Services/Menu: 4-6 items in card grid with prices
+   - Gallery: if images provided, show in masonry/grid layout
+   - Contact: phone, address, map-like card design
+   - Footer: "Powered by 콘타벨로AI"
+8. Use the provided Unsplash images with object-fit:cover for professional look.
+9. Hero image: background-image with linear-gradient overlay for text readability.
+10. Color scheme matching business type. Use CSS variables.
+11. Realistic Korean content — menus, services, compelling about text.
+12. Smooth hover effects, transitions, subtle animations (fadeIn on scroll via CSS).
+13. System fonts: -apple-system, BlinkMacSystemFont, sans-serif.
+14. Floating "전화하기" button if phone provided.
+15. CRITICAL: Keep HTML under 15,000 characters. Concise CSS, short class names.
+16. MUST end with </body></html> — never truncate.`;
 
   // Streaming mode
   if (useStream && apiKey) {

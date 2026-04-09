@@ -112,6 +112,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const codeScrollRef = useRef<HTMLDivElement>(null);
   const sections = [
     { id: "hero", icon: "🎯", label: "메인 타이틀" },
     { id: "about", icon: "📖", label: "소개글" },
@@ -141,6 +142,9 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   }, [userId]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streamingCode]);
+  useEffect(() => {
+    if (codeScrollRef.current) codeScrollRef.current.scrollTop = codeScrollRef.current.scrollHeight;
+  }, [streamingCode]);
 
   // ═══ STEP HANDLERS ═══
 
@@ -533,16 +537,13 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                     <span className="text-[10px] text-[#b388ff] font-medium">코드 생성 중</span>
                     <span className="text-[9px] text-[#aaa] font-mono ml-auto">{streamingCode.split("\n").length} lines</span>
                   </div>
-                  <div className="overflow-y-auto max-h-[300px] p-2 font-mono text-[10px] leading-[1.6]" style={{ background: "#1e1e2e" }}>
-                    {streamingCode.split("\n").slice(-30).map((line, i, arr) => {
-                      const lineNum = streamingCode.split("\n").length - arr.length + i + 1;
-                      return (
-                        <div key={i} className="flex">
-                          <span className="select-none w-[32px] shrink-0 text-right pr-2" style={{ color: "#666" }}>{lineNum}</span>
-                          <span style={{ color: "#ddd" }} dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
-                        </div>
-                      );
-                    })}
+                  <div ref={codeScrollRef} className="overflow-y-auto max-h-[300px] p-2 font-mono text-[10px] leading-[1.6]" style={{ background: "#1e1e2e", scrollBehavior: "smooth" }}>
+                    {streamingCode.split("\n").map((line, i) => (
+                      <div key={i} className="flex">
+                        <span className="select-none w-[32px] shrink-0 text-right pr-2" style={{ color: "#666" }}>{i + 1}</span>
+                        <span style={{ color: "#ddd" }} dangerouslySetInnerHTML={{ __html: highlightHtml(line) }} />
+                      </div>
+                    ))}
                   </div>
                 </div>
                 <style>{`@keyframes codePulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }`}</style>

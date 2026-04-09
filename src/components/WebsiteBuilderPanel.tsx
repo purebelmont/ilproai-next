@@ -52,6 +52,30 @@ const TEMPLATES = [
 
 const COLORS = ["#0071E3", "#FF6B35", "#30D158", "#5856D6", "#FF2D55", "#FF9500", "#000000", "#E53935", "#7D2AE7", "#00B4D8", "#2D6A4F", "#E85D04"];
 
+const SAMPLE_DATA: Record<string, { name: string; description: string; contact: string }> = {
+  restaurant: { name: "맛있는 식당", description: "정성 가득한 한식 전문점", contact: "02-1234-5678, 서울 강남구 역삼동 123" },
+  service: { name: "뷰티살롱 아름", description: "프리미엄 헤어 & 뷰티 케어", contact: "010-1234-5678, 서울 마포구 합정동 45" },
+  retail: { name: "트렌디 스토어", description: "감각적인 라이프스타일 편집숍", contact: "02-9876-5432, 서울 성동구 성수동 78" },
+  office: { name: "스마트 솔루션즈", description: "비즈니스 성장을 위한 IT 컨설팅", contact: "02-555-1234, 서울 서초구 서초동 200" },
+  medical: { name: "미소 의원", description: "가족 모두를 위한 건강 주치의", contact: "02-777-8888, 서울 송파구 잠실동 50" },
+  education: { name: "밝은미래 학원", description: "1:1 맞춤 교육 전문 학원", contact: "02-333-4444, 서울 노원구 중계동 100" },
+  fitness: { name: "파워짐 피트니스", description: "체계적인 1:1 PT 전문 헬스장", contact: "010-5555-6666, 서울 용산구 이태원동 30" },
+  lodging: { name: "바다펜션", description: "오션뷰 프리미엄 숙소", contact: "033-123-4567, 강원도 양양군 현북면 해변길 15" },
+  repair: { name: "든든 수리센터", description: "전자제품 수리 전문점", contact: "031-888-9999, 경기도 수원시 팔달구 100" },
+  legal: { name: "정의 법률사무소", description: "20년 경력 민사·형사 전문 변호사", contact: "02-111-2222, 서울 서초구 법원로 10" },
+  realestate: { name: "행복 공인중개사", description: "지역 1등 부동산 전문가", contact: "02-444-5555, 서울 강남구 대치동 300" },
+  pet: { name: "해피펫 동물병원", description: "반려동물 건강을 책임지는 곳", contact: "02-666-7777, 서울 마포구 연남동 55" },
+  wedding: { name: "로맨틱 웨딩홀", description: "특별한 하루를 만드는 웨딩 플래너", contact: "02-222-3333, 서울 강남구 논현동 80" },
+  manufacturing: { name: "대한정밀 산업", description: "고품질 정밀 부품 제조 전문", contact: "032-999-1111, 인천 남동구 논현동 공단 5" },
+  logistics: { name: "빠른배송 물류", description: "전국 당일 배송 물류 서비스", contact: "031-777-8888, 경기도 이천시 물류단지 20" },
+  freelance: { name: "크리에이티브 스튜디오", description: "브랜딩 & 웹디자인 프리랜서", contact: "010-9999-0000, hello@creative.kr" },
+};
+
+function isSkipPhrase(text: string): boolean {
+  const skip = text.trim().toLowerCase();
+  return /^(그냥|걍)\s*(만들어|만들어줘|해줘|해|시작|고|ㄱ)|^(만들어|만들어줘|건너뛰기|넘어가|패스|skip|스킵|몰라|없어|됐어|빨리)/.test(skip);
+}
+
 type Step = "template" | "name" | "description" | "contact" | "generating" | "edit";
 
 export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; plan: string }) {
@@ -117,76 +141,95 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     setMessages(prev => [
       ...prev,
       { role: "user", text: `${t?.icon} ${t?.name}` },
-      { role: "system", text: "가게(회사) 이름이 뭔가요?" },
+      { role: "system", text: `${t?.icon} ${t?.name} 업종이시군요!\n가게(회사) 이름이 뭔가요?` },
     ]);
     setStep("name");
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
   function submitName() {
-    const name = input.trim();
-    if (!name) return;
-    setBizName(name);
+    const raw = input.trim();
+    if (!raw) return;
+    setInput("");
+
+    if (isSkipPhrase(raw)) {
+      const sample = SAMPLE_DATA[template] || SAMPLE_DATA.service;
+      setBizName(sample.name);
+      setDescription(sample.description);
+      setContactInfo(sample.contact);
+      setMessages(prev => [
+        ...prev,
+        { role: "user", text: raw },
+        { role: "system", text: `샘플로 만들어 드릴게요!\n\"${sample.name}\" — ${sample.description}` },
+      ]);
+      triggerGenerate(sample.name, sample.description, sample.contact);
+      return;
+    }
+
+    setBizName(raw);
+    const t = TEMPLATES.find(t => t.id === template);
     setMessages(prev => [
       ...prev,
-      { role: "user", text: name },
-      { role: "system", text: "어떤 곳인지 한 줄로 설명해 주세요.\n예: \"20년 전통 한식당\", \"울산 최고의 네일샵\"" },
+      { role: "user", text: raw },
+      { role: "system", text: `\"${raw}\" — 좋은 이름이네요!\n어떤 ${t?.name || "곳"}인지 한 줄로 설명해 주세요.\n예: \"20년 전통 한식당\", \"울산 최고의 네일샵\"` },
     ]);
-    setInput("");
     setStep("description");
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
   function submitDescription() {
-    const desc = input.trim();
-    if (!desc) return;
-    setDescription(desc);
+    const raw = input.trim();
+    if (!raw) return;
+    setInput("");
+
+    if (isSkipPhrase(raw)) {
+      const sample = SAMPLE_DATA[template] || SAMPLE_DATA.service;
+      const desc = sample.description;
+      setDescription(desc);
+      setContactInfo(sample.contact);
+      setMessages(prev => [
+        ...prev,
+        { role: "user", text: raw },
+        { role: "system", text: `\"${bizName}\" 샘플 설명으로 만들게요!` },
+      ]);
+      triggerGenerate(bizName, desc, sample.contact);
+      return;
+    }
+
+    setDescription(raw);
     setMessages(prev => [
       ...prev,
-      { role: "user", text: desc },
-      { role: "system", text: "연락처를 알려주세요.\n전화번호, 주소, 이메일 등 아는 만큼 입력하시면 돼요.\n\n예: 052-123-4567, 울산 남구 삼산동 123" },
+      { role: "user", text: raw },
+      { role: "system", text: `\"${bizName}\" — ${raw}\n멋져요! 마지막으로 연락처를 알려주세요.\n전화번호, 주소, 이메일 등 아는 만큼 입력하시면 돼요.\n\n예: 052-123-4567, 울산 남구 삼산동 123` },
     ]);
-    setInput("");
     setStep("contact");
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
-  async function submitContact() {
-    const contact = input.trim();
-    setContactInfo(contact);
-    setMessages(prev => [...prev, { role: "user", text: contact || "(건너뛰기)" }]);
-    setInput("");
-
-    // Generate slug
-    const autoSlug = bizName.toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 30) || "my-site";
+  async function triggerGenerate(name: string, desc: string, contact: string) {
+    const autoSlug = name.toLowerCase().replace(/[^a-z0-9가-힣]/g, "").substring(0, 30) || "my-site";
     setSlug(autoSlug);
-
-    // Show generating state
     setStep("generating");
-    setMessages(prev => [...prev, { role: "system", text: "AI가 웹사이트를 만들고 있어요... ✨", action: "loading" }]);
+    setMessages(prev => [...prev, { role: "system", text: `\"${name}\" 웹사이트를 만들고 있어요... ✨`, action: "loading" }]);
 
-    // Call AI API — generates full HTML website
     try {
       const res = await fetch("/api/generate-site", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template, bizName, description, contact, features: "" }),
+        body: JSON.stringify({ template, bizName: name, description: desc, contact, features: "" }),
       });
       const { html, source } = await res.json();
 
       setGeneratedHtml(html);
-
-      // Store HTML in content for DB
-      const contentWithHtml = { ...EMPTY_CONTENT, html, hero: { title: bizName, subtitle: description, image: "" } };
+      const contentWithHtml = { ...EMPTY_CONTENT, html, hero: { title: name, subtitle: desc, image: "" } };
       setC(contentWithHtml as any);
 
-      // Save to DB
       const { data: existing } = await supabase.from("websites").select("id").eq("slug", autoSlug).maybeSingle();
       const finalSlug = existing ? autoSlug + Math.floor(Math.random() * 100) : autoSlug;
       setSlug(finalSlug);
 
       const { data, error } = await supabase.from("websites").insert({
-        user_id: userId, slug: finalSlug, business_name: bizName, template, status: "draft", content: contentWithHtml,
+        user_id: userId, slug: finalSlug, business_name: name, template, status: "draft", content: contentWithHtml,
       }).select().single();
 
       if (error) {
@@ -209,6 +252,24 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       ]);
       setStep("contact");
     }
+  }
+
+  async function submitContact() {
+    const raw = input.trim();
+    setInput("");
+
+    if (isSkipPhrase(raw) || !raw) {
+      const sample = SAMPLE_DATA[template] || SAMPLE_DATA.service;
+      const contact = sample.contact;
+      setContactInfo(contact);
+      setMessages(prev => [...prev, { role: "user", text: raw || "(건너뛰기)" }]);
+      triggerGenerate(bizName, description, contact);
+      return;
+    }
+
+    setContactInfo(raw);
+    setMessages(prev => [...prev, { role: "user", text: raw }]);
+    triggerGenerate(bizName, description, raw);
   }
 
   // ═══ EDIT MODE — section editing ═══

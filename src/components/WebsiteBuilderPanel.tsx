@@ -111,6 +111,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   ]);
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
+  const justSentRef = useRef(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -161,21 +162,19 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     });
   }, [streamingCode]);
 
-  // Write HTML to iframe via document.write (no flicker, no srcDoc reload)
+  // Write HTML to iframe — use srcdoc blob URL to avoid flicker
+  const prevBlobUrl = useRef<string>("");
   useEffect(() => {
     const html = streamingCode || generatedHtml;
     if (!previewRef.current || !html) return;
-    try {
-      const doc = previewRef.current.contentDocument;
-      if (doc) {
-        doc.open();
-        doc.write(streamingCode
-          ? html + "<script>window.scrollTo(0,document.body.scrollHeight)<\/script>"
-          : html
-        );
-        doc.close();
-      }
-    } catch {}
+    const content = streamingCode
+      ? html + "<script>window.scrollTo(0,document.body.scrollHeight)<\/script>"
+      : html;
+    const blob = new Blob([content], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    previewRef.current.src = url;
+    if (prevBlobUrl.current) URL.revokeObjectURL(prevBlobUrl.current);
+    prevBlobUrl.current = url;
   }, [streamingCode, generatedHtml]);
 
   // ═══ STEP HANDLERS ═══
@@ -452,6 +451,9 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   function handleSend() {
     if (!input.trim()) return;
     const text = input.trim();
+    // Guard against IME ghost characters after clearing input
+    justSentRef.current = true;
+    setTimeout(() => { justSentRef.current = false; }, 100);
 
     if (step === "name") { submitName(); return; }
     if (step === "description") { submitDescription(); return; }
@@ -639,10 +641,11 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
             )}
             {step !== "template" && step !== "generating" && (
               <div className="flex gap-1.5 items-end">
-                <textarea ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)}
+                <textarea ref={inputRef} value={input}
+                  onChange={(e) => { if (!justSentRef.current) setInput(e.target.value); }}
                   onCompositionStart={() => setIsComposing(true)}
-                  onCompositionEnd={() => setIsComposing(false)}
-                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !isComposing) { e.preventDefault(); handleSend(); } }}
+                  onCompositionEnd={(e) => { setIsComposing(false); if (justSentRef.current) e.preventDefault(); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !isComposing && e.keyCode !== 229) { e.preventDefault(); handleSend(); } }}
                   placeholder={step === "name" ? "이름을 입력하세요" : step === "description" ? "한 줄 소개" : step === "contact" ? "전화, 주소 등" : "자유롭게 입력하세요"}
                   className="flex-1 resize-none rounded-lg px-3 py-2 text-[12px] outline-none min-h-[38px] max-h-[100px]"
                   style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text)" }}

@@ -10,7 +10,6 @@ import QuotesPanel from "@/components/QuotesPanel";
 import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
 import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
-import AutomationPanel from "@/components/AutomationPanel";
 import AIRecommendPanel from "@/components/AIRecommendPanel";
 
 type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai";
@@ -50,21 +49,11 @@ const NAV_SECTIONS: NavSection[] = [
     pro: true,
     items: [
       { id: "website", icon: "🌐", label: "홈페이지" },
-      { id: "automation", icon: "🤖", label: "자동화" },
+      { id: "automation", icon: "📸", label: "SNS 콘텐츠", badge: "NEW", href: "/sns" },
     ],
   },
 ];
 
-// Automation sub-menu items (Vercel Observability-style drill-down)
-const AUTOMATION_SUB: { id: string; icon: string; label: string; badge?: string }[] = [
-  { id: "review", icon: "⭐", label: "AI 리뷰 답글" },
-  { id: "chatbot", icon: "💬", label: "AI 챗봇" },
-  { id: "marketing", icon: "📣", label: "AI 마케팅" },
-  { id: "reminder", icon: "📢", label: "알림 자동화" },
-  { id: "tax", icon: "📄", label: "세금계산서" },
-  { id: "insight", icon: "💡", label: "AI 인사이트" },
-  { id: "sns", icon: "📸", label: "SNS 콘텐츠", badge: "NEW" },
-];
 
 // Mobile bottom bar — 4 key tabs + menu
 const MOBILE_TABS: { id: Tab; icon: string; label: string }[] = [
@@ -81,7 +70,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [dark, setDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [sidebarSub, setSidebarSub] = useState<string | null>(null);
   const router = useRouter();
 
   // Modal state
@@ -297,46 +285,7 @@ export default function Dashboard() {
 
         {/* Scrollable nav sections */}
         <div className="flex-1 overflow-y-auto px-2" style={{ scrollbarWidth: "none" }}>
-          {/* Sub-menu mode: Automation drill-down (Vercel Observability style) */}
-          {sidebarSub === "automation" ? (
-            <div>
-              <button onClick={() => setSidebarSub(null)}
-                className="flex items-center gap-2 w-full px-3 py-2 text-[13px] font-semibold text-white mb-1 rounded-lg hover:bg-white/5 transition-colors">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                자동화
-              </button>
-              {/* Overview — main automation panel */}
-              <button
-                onClick={() => { setTab("automation"); }}
-                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors"
-                style={{ background: tab === "automation" ? "rgba(125,42,231,0.15)" : "transparent", color: tab === "automation" ? "#A78BFA" : "#8E8EA0" }}>
-                <span className="text-[15px]">📋</span>
-                <span>전체 보기</span>
-              </button>
-              {AUTOMATION_SUB.map((item) => (
-                item.id === "sns" ? (
-                  <Link key={item.id} href="/sns"
-                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors"
-                    style={{ color: "#8E8EA0", textDecoration: "none" }}>
-                    <span className="text-[15px]">{item.icon}</span>
-                    <span className="flex-1">{item.label}</span>
-                    {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
-                  </Link>
-                ) : (
-                  <button key={item.id}
-                    onClick={() => setTab("automation")}
-                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors hover:bg-white/5"
-                    style={{ color: "#8E8EA0" }}>
-                    <span className="text-[15px]">{item.icon}</span>
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
-                  </button>
-                )
-              ))}
-            </div>
-          ) : (
-            /* Normal sidebar sections */
-            NAV_SECTIONS.map((section, si) => (
+          {NAV_SECTIONS.map((section, si) => (
               <div key={si}>
                 {/* Section divider */}
                 {si > 0 && <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />}
@@ -349,32 +298,37 @@ export default function Dashboard() {
                 )}
                 {/* Items */}
                 {section.items.map((item) => {
-                  const isAutomation = item.id === "automation";
-                  const isActive = tab === item.id && !isAutomation;
-                  const isAutoActive = isAutomation && tab === "automation";
+                  const isActive = tab === item.id;
+                  if (item.href) {
+                    return (
+                      <Link key={item.id} href={item.href}
+                        className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
+                        style={{ color: "#8E8EA0", textDecoration: "none" }}>
+                        <span className="text-[15px]">{item.icon}</span>
+                        <span className="flex-1 text-left">{item.label}</span>
+                        {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                      </Link>
+                    );
+                  }
                   return (
                     <button key={item.id + item.label}
-                      onClick={() => {
-                        if (isAutomation) { setSidebarSub("automation"); setTab("automation"); }
-                        else { setTab(item.id); }
-                      }}
+                      onClick={() => setTab(item.id)}
                       className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
                       style={{
-                        background: (isActive || isAutoActive) ? "rgba(125,42,231,0.15)" : "transparent",
-                        color: (isActive || isAutoActive) ? "#A78BFA" : "#8E8EA0",
+                        background: isActive ? "rgba(125,42,231,0.15)" : "transparent",
+                        color: isActive ? "#A78BFA" : "#8E8EA0",
                       }}>
                       <span className="text-[15px]">{item.icon}</span>
                       <span className="flex-1 text-left">{item.label}</span>
                       {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
-                      {isAutomation && (
+                      {false && (
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><path d="M9 18l6-6-6-6"/></svg>
                       )}
                     </button>
                   );
                 })}
               </div>
-            ))
-          )}
+            ))}
         </div>
 
         {/* Bottom actions */}
@@ -576,7 +530,6 @@ export default function Dashboard() {
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
-          {tab === "automation" && <AutomationPanel userId={user.id} plan={profile?.plan || "free"} />}
           {tab === "ai" && <AIRecommendPanel userId={user.id} setTab={setTab} />}
         </div>
       </div>

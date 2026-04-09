@@ -17,6 +17,25 @@ export default function Home() {
       <div className="absolute inset-0 opacity-[0.03]"
         style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
+      {/* Top navigation bar */}
+      <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
+            style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+          <span className="text-sm font-bold text-white/80">일프로AI</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors" style={{ textDecoration: "none" }}>
+            블로그
+          </Link>
+          <Link href="/auth"
+            className="px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:scale-105"
+            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", textDecoration: "none" }}>
+            로그인
+          </Link>
+        </div>
+      </nav>
+
       {/* Content */}
       <div className="relative z-10">
         {/* Logo */}

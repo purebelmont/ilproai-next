@@ -70,6 +70,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [dark, setDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarSub, setSidebarSub] = useState<string | null>(null);
   const router = useRouter();
 
   // Modal state
@@ -285,34 +286,59 @@ export default function Dashboard() {
 
         {/* Scrollable nav sections */}
         <div className="flex-1 overflow-y-auto px-2" style={{ scrollbarWidth: "none" }}>
-          {NAV_SECTIONS.map((section, si) => (
+          {sidebarSub === "automation" ? (
+            <div>
+              <button onClick={() => setSidebarSub(null)}
+                className="flex items-center gap-2 w-full px-3 py-2 text-[13px] font-semibold text-white mb-1 rounded-lg hover:bg-white/5 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                자동화
+              </button>
+              <button onClick={() => setTab("automation")}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors"
+                style={{ background: tab === "automation" ? "rgba(125,42,231,0.15)" : "transparent", color: tab === "automation" ? "#A78BFA" : "#8E8EA0" }}>
+                <span className="text-[15px]">📋</span>
+                <span>전체 보기</span>
+              </button>
+              {AUTOMATION_SUB.map((item) => (
+                item.id === "sns" ? (
+                  <Link key={item.id} href="/sns"
+                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors"
+                    style={{ color: "#8E8EA0", textDecoration: "none" }}>
+                    <span className="text-[15px]">{item.icon}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                  </Link>
+                ) : (
+                  <button key={item.id}
+                    onClick={() => setTab("automation")}
+                    className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors hover:bg-white/5"
+                    style={{ color: "#8E8EA0" }}>
+                    <span className="text-[15px]">{item.icon}</span>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
+                  </button>
+                )
+              ))}
+            </div>
+          ) : (
+            NAV_SECTIONS.map((section, si) => (
               <div key={si}>
-                {/* Section divider */}
                 {si > 0 && <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />}
-                {/* Section header */}
                 {section.label && (
                   <div className="flex items-center gap-2 px-3 pt-2 pb-1">
                     <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6B6B80" }}>{section.label}</span>
                     {section.pro && <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)", color: "white" }}>PRO</span>}
                   </div>
                 )}
-                {/* Items */}
                 {section.items.map((item) => {
+                  const isAutomation = item.id === "automation";
                   const isActive = tab === item.id;
-                  if (item.href) {
-                    return (
-                      <Link key={item.id} href={item.href}
-                        className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
-                        style={{ color: "#8E8EA0", textDecoration: "none" }}>
-                        <span className="text-[15px]">{item.icon}</span>
-                        <span className="flex-1 text-left">{item.label}</span>
-                        {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
-                      </Link>
-                    );
-                  }
                   return (
                     <button key={item.id + item.label}
-                      onClick={() => setTab(item.id)}
+                      onClick={() => {
+                        if (isAutomation) { setSidebarSub("automation"); setTab("automation"); }
+                        else { setTab(item.id); }
+                      }}
                       className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
                       style={{
                         background: isActive ? "rgba(125,42,231,0.15)" : "transparent",
@@ -321,14 +347,15 @@ export default function Dashboard() {
                       <span className="text-[15px]">{item.icon}</span>
                       <span className="flex-1 text-left">{item.label}</span>
                       {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
-                      {false && (
+                      {isAutomation && (
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><path d="M9 18l6-6-6-6"/></svg>
                       )}
                     </button>
                   );
                 })}
               </div>
-            ))}
+            ))
+          )}
         </div>
 
         {/* Bottom actions */}

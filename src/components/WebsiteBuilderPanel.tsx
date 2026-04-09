@@ -62,6 +62,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   const [status, setStatus] = useState("draft");
   const [mobileView, setMobileView] = useState<"chat" | "preview">("chat");
   const [loaded, setLoaded] = useState(false);
+  const [generatedHtml, setGeneratedHtml] = useState("");
 
   const [step, setStep] = useState<Step>("template");
   const [template, setTemplate] = useState("");
@@ -95,6 +96,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           const s = data[0] as Website;
           setSite(s); setC(s.content || EMPTY_CONTENT); setStatus(s.status);
           setTemplate(s.template); setBizName(s.business_name); setSlug(s.slug);
+          if ((s.content as any)?.html) setGeneratedHtml((s.content as any).html);
           setStep("edit");
           setMessages([
             { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n수정할 항목을 선택하거나, 자유롭게 입력하세요.`, action: "sections" },
@@ -163,27 +165,20 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     setStep("generating");
     setMessages(prev => [...prev, { role: "system", text: "AI가 웹사이트를 만들고 있어요... ✨", action: "loading" }]);
 
-    // Call AI API
+    // Call AI API — generates full HTML website
     try {
       const res = await fetch("/api/generate-site", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ template, bizName, description, contact, features: "" }),
       });
-      const { content } = await res.json();
+      const { html, source } = await res.json();
 
-      // Ensure proper structure
-      const generated: WebsiteContent = {
-        hero: { title: content.hero?.title || bizName, subtitle: content.hero?.subtitle || description, image: "" },
-        about: { text: content.about?.text || "", image: "" },
-        services: (content.services || []).filter((s: any) => s.name),
-        hours: { mon: "", tue: "", wed: "", thu: "", fri: "", sat: "", sun: "" },
-        contact: { phone: content.contact?.phone || "", email: content.contact?.email || "", address: content.contact?.address || "", kakao: content.contact?.kakao || "" },
-        gallery: [],
-        theme: { color: content.theme?.color || "#7D2AE7", font: "default" },
-      };
+      setGeneratedHtml(html);
 
-      setC(generated);
+      // Store HTML in content for DB
+      const contentWithHtml = { ...EMPTY_CONTENT, html, hero: { title: bizName, subtitle: description, image: "" } };
+      setC(contentWithHtml as any);
 
       // Save to DB
       const { data: existing } = await supabase.from("websites").select("id").eq("slug", autoSlug).maybeSingle();
@@ -191,7 +186,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       setSlug(finalSlug);
 
       const { data, error } = await supabase.from("websites").insert({
-        user_id: userId, slug: finalSlug, business_name: bizName, template, status: "draft", content: generated,
+        user_id: userId, slug: finalSlug, business_name: bizName, template, status: "draft", content: contentWithHtml,
       }).select().single();
 
       if (error) {
@@ -205,7 +200,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       setMobileView("preview");
       setMessages(prev => [
         ...prev.filter(m => m.action !== "loading"),
-        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n📍 ${finalSlug}.ilpro.ai\n\n오른쪽 미리보기를 확인하세요.\n수정하고 싶은 부분이 있으면 아래에서 선택하세요.`, action: "sections" },
+        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n${source === "ai" ? "🧠 Claude AI가 디자인했습니다." : "📐 템플릿으로 생성했습니다."}\n📍 ${finalSlug}.contavelo.ai\n\n오른쪽 미리보기를 확인하세요.\n수정하려면 아래에서 요청하세요.`, action: "sections" },
       ]);
     } catch (e) {
       setMessages(prev => [
@@ -306,13 +301,13 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
   async function deleteSite() {
     if (!site || !confirm("사이트를 삭제하시겠습니까?")) return;
     await supabase.from("websites").delete().eq("id", site.id);
-    setSite(null); setC(EMPTY_CONTENT); setStep("template"); setTemplate(""); setBizName(""); setSlug("");
+    setSite(null); setC(EMPTY_CONTENT); setGeneratedHtml(""); setStep("template"); setTemplate(""); setBizName(""); setSlug("");
     setMessages([{ role: "system", text: "삭제했어요. 새로 만들까요?", action: "template" }]);
   }
 
   if (!loaded) return <div className="flex items-center justify-center h-full"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full" /></div>;
 
-  const hasContent = c.hero.title || c.about.text || c.services.some(s => s.name) || c.contact.phone;
+  const hasContent = generatedHtml || c.hero.title || c.about.text || c.services.some(s => s.name) || c.contact.phone;
 
   // ═══ RENDER ═══
   return (
@@ -452,9 +447,10 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           )}
         </div>
 
-        {/* ═══ RIGHT — Preview ═══ */}
+        {/* ═══ RIGHT — Preview (iframe) ═══ */}
         <div className={`${mobileView === "preview" ? "flex" : "hidden"} md:flex flex-col flex-1 overflow-hidden relative`}>
           {!hasContent ? (
+            /* Empty state — ocean photo */
             <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
               <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format"
                 alt="" className="absolute inset-0 w-full h-full object-cover" />
@@ -465,7 +461,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                   당신의 상상력을<br/>펼쳐 보세요
                 </div>
                 <div className="text-[15px] text-white/70 leading-relaxed" style={{ textShadow: "0 1px 20px rgba(0,0,0,0.5)" }}>
-                  {step === "generating" ? "AI가 웹사이트를 만들고 있어요..." : "몇 가지 질문에 답하시면\n완성된 웹사이트를 만들어 드립니다"}
+                  {step === "generating" ? "AI가 멋진 웹사이트를 만들고 있어요..." : "몇 가지 질문에 답하시면\nAI가 완성된 웹사이트를 디자인합니다"}
                 </div>
                 {step === "generating" && (
                   <div className="mt-8 flex justify-center gap-1.5">
@@ -478,90 +474,27 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center overflow-y-auto"
-              style={{ background: "linear-gradient(160deg, #0F0F1A 0%, #1A1A2E 50%, #16213E 100%)" }}>
-              <div className="py-6 px-6 w-full max-w-[560px]">
-                {/* Browser chrome */}
-                <div className="flex items-center gap-2 rounded-t-2xl px-4 py-2.5"
-                  style={{ background: "rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-                    <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
-                    <div className="w-3 h-3 rounded-full bg-[#28C840]" />
-                  </div>
-                  <div className="flex-1 text-center text-[11px] text-white/40 rounded-lg py-1 px-3" style={{ background: "rgba(255,255,255,0.06)" }}>
-                    {slug}.ilpro.ai
-                  </div>
+            /* Generated site — rendered in iframe */
+            <div className="flex-1 flex flex-col" style={{ background: "#1a1a2e" }}>
+              {/* Browser chrome */}
+              <div className="flex items-center gap-2 px-4 py-2 shrink-0" style={{ background: "#2D2D44", borderBottom: "1px solid #3D3D55" }}>
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28C840]" />
                 </div>
-
-                <div className="rounded-b-2xl overflow-hidden" style={{ background: "#0A0A0F", boxShadow: "0 25px 60px rgba(0,0,0,0.5)" }}>
-                  {/* Hero */}
-                  <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
-                    <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${c.theme.color}CC 0%, ${c.theme.color}44 50%, #0A0A0F 100%)` }} />
-                    <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-30" style={{ background: c.theme.color, filter: "blur(60px)" }} />
-                    <div className="relative px-6 pt-12 pb-8">
-                      <div className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>
-                        {TEMPLATES.find(t => t.id === template)?.name || "WEBSITE"}
-                      </div>
-                      <div className="text-[26px] font-extrabold text-white leading-tight">{c.hero.title || bizName}</div>
-                      {c.hero.subtitle && <div className="text-[13px] text-white/50 mt-2">{c.hero.subtitle}</div>}
-                      <div className="flex gap-2 mt-5">
-                        <div className="px-5 py-2 rounded-full text-[11px] font-semibold text-white" style={{ background: c.theme.color }}>
-                          {c.contact.phone ? `📞 ${c.contact.phone}` : "연락하기"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {c.about.text && (
-                    <div className="px-5 py-5">
-                      <div className="rounded-2xl p-5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <div className="text-[10px] font-bold tracking-widest uppercase mb-3" style={{ color: c.theme.color }}>소개</div>
-                        <div className="text-[12px] leading-[1.8] text-white/60 whitespace-pre-wrap">{c.about.text}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {c.services.some(s => s.name) && (
-                    <div className="px-5 pb-5">
-                      <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>
-                        {template === "restaurant" ? "MENU" : "SERVICES"}
-                      </div>
-                      <div className="space-y-2">
-                        {c.services.filter(s => s.name).map((svc, i) => (
-                          <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl"
-                            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold"
-                                style={{ background: `${c.theme.color}15`, color: c.theme.color }}>{String(i + 1).padStart(2, "0")}</div>
-                              <div>
-                                <div className="text-[12px] font-semibold text-white/90">{svc.name}</div>
-                                {svc.description && <div className="text-[10px] text-white/35 mt-0.5">{svc.description}</div>}
-                              </div>
-                            </div>
-                            {svc.price && <div className="text-[13px] font-bold ml-3 shrink-0" style={{ color: c.theme.color }}>₩{svc.price}</div>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {(c.contact.phone || c.contact.address || c.contact.email) && (
-                    <div className="px-5 pb-5">
-                      <div className="text-[10px] font-bold tracking-widest uppercase mb-4" style={{ color: c.theme.color }}>CONTACT</div>
-                      <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        {c.contact.phone && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📞</span></div><div className="text-[12px] text-white/70">{c.contact.phone}</div></div>}
-                        {c.contact.email && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📧</span></div><div className="text-[12px] text-white/70">{c.contact.email}</div></div>}
-                        {c.contact.address && <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${c.theme.color}15` }}><span className="text-[13px]">📍</span></div><div className="text-[12px] text-white/70">{c.contact.address}</div></div>}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="py-4 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                    <div className="text-[9px] text-white/15">Powered by <span style={{ color: `${c.theme.color}88` }}>일프로AI</span></div>
-                  </div>
+                <div className="flex-1 text-center text-[11px] text-white/50 rounded-lg py-1.5 px-3 mx-8" style={{ background: "#1a1a2e" }}>
+                  {slug || "my-store"}.contavelo.ai
                 </div>
               </div>
+              {/* iframe with generated HTML */}
+              <iframe
+                srcDoc={generatedHtml}
+                className="flex-1 w-full border-0"
+                style={{ background: "white" }}
+                title="Website Preview"
+                sandbox="allow-same-origin"
+              />
             </div>
           )}
         </div>

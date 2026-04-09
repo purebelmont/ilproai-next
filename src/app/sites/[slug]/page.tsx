@@ -19,6 +19,31 @@ export default async function SitePage({ params }: { params: Promise<{ slug: str
   if (!site) notFound();
 
   const c = site.content || {};
+
+  // If AI-generated HTML exists, serve it directly
+  if (c.html) {
+    return (
+      <html lang="ko">
+        <head>
+          <title>{site.business_name} | ilpro.ai</title>
+          <meta name="description" content={c.hero?.subtitle || `${site.business_name} - ilpro.ai`} />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <meta property="og:title" content={site.business_name} />
+          <meta property="og:description" content={c.hero?.subtitle || ""} />
+        </head>
+        <body>
+          <iframe
+            srcDoc={c.html}
+            style={{ position: "fixed", inset: 0, width: "100%", height: "100%", border: "none" }}
+            title={site.business_name}
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+          />
+        </body>
+      </html>
+    );
+  }
+
+  // Fallback: structured content rendering
   const color = c.theme?.color || "#0071E3";
   const hero = c.hero || {};
   const about = c.about || {};

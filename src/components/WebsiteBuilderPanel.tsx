@@ -307,7 +307,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       setMobileView("preview");
       setMessages(prev => [
         ...prev.filter(m => m.action !== "loading"),
-        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n${source === "ai" ? "🧠 Claude AI가 디자인했습니다." : "📐 템플릿으로 생성했습니다."}\n📍 ${finalSlug}.contavelo.ai\n\n오른쪽 미리보기를 확인하세요.\n수정하려면 아래에서 요청하세요.`, action: "sections" },
+        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n${source === "ai" ? "🧠 Claude AI가 디자인했습니다." : "📐 템플릿으로 생성했습니다."}\n\n"게시" 버튼을 누르면 아래 주소에서 확인 가능:\n🔗 /sites/${finalSlug}\n\n수정하려면 아래에서 요청하세요.`, action: "sections" },
       ]);
     } catch (e) {
       setStreamingCode("");
@@ -424,6 +424,17 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     setStatus(newStatus); setSaving(false);
   }
 
+  function downloadHtml() {
+    if (!generatedHtml) return;
+    const blob = new Blob([generatedHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${slug || bizName || "website"}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function deleteSite() {
     if (!site || !confirm("사이트를 삭제하시겠습니까?")) return;
     await supabase.from("websites").delete().eq("id", site.id);
@@ -460,6 +471,10 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                 <>
                   {status !== "published" && (
                     <button onClick={() => save(true)} className="text-[10px] px-2 py-1 rounded-md text-white font-medium" style={{ background: "#30D158" }}>게시</button>
+                  )}
+                  {generatedHtml && (
+                    <button onClick={downloadHtml} className="text-[10px] px-2 py-1 rounded-md"
+                      style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>HTML</button>
                   )}
                   <button onClick={() => save()} disabled={saving} className="text-[10px] px-2 py-1 rounded-md"
                     style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>{saving ? "..." : "저장"}</button>

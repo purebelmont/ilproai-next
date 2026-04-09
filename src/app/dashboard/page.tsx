@@ -55,6 +55,17 @@ const NAV_SECTIONS: NavSection[] = [
 ];
 
 
+// Automation sub-menu items (Vercel Observability-style drill-down)
+const AUTOMATION_SUB: { id: string; icon: string; label: string; badge?: string }[] = [
+  { id: "review", icon: "⭐", label: "AI 리뷰 답글" },
+  { id: "chatbot", icon: "💬", label: "AI 챗봇" },
+  { id: "marketing", icon: "📣", label: "AI 마케팅" },
+  { id: "reminder", icon: "📢", label: "알림 자동화" },
+  { id: "tax", icon: "📄", label: "세금계산서" },
+  { id: "insight", icon: "💡", label: "AI 인사이트" },
+  { id: "sns", icon: "📸", label: "SNS 콘텐츠", badge: "NEW" },
+];
+
 // Mobile bottom bar — 4 key tabs + menu
 const MOBILE_TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "home", icon: "🏠", label: "홈" },

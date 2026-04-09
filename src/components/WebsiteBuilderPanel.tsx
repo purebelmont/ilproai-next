@@ -17,6 +17,7 @@ interface WebsiteContent {
   contact: { phone: string; email: string; address: string; kakao: string };
   gallery: string[];
   theme: { color: string; font: string };
+  html?: string;
 }
 
 interface ChatMessage { role: "system" | "user"; text: string; action?: string }
@@ -413,7 +414,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       setGeneratedHtml(htmlUpdated);
       // Also update the html in content for DB save
       updated.html = htmlUpdated;
-      setC({ ...updated } as any);
+      setC({ ...updated });
     }
   }
 

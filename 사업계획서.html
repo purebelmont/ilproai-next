@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>콘타벨로AI 사업계획서 — contavelo.ai</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; color: #1a1a2e; background: #f8f9fc; line-height: 1.7; }
+  .cover { background: linear-gradient(135deg, #0A0F2C 0%, #1a1a3e 40%, #2d1b69 100%); color: white; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; overflow: hidden; padding: 40px 20px; }
+  .cover::before { content: ''; position: absolute; top: -20%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(125,42,231,0.3), transparent 70%); border-radius: 50%; }
+  .cover::after { content: ''; position: absolute; bottom: -15%; left: -5%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(0,113,227,0.2), transparent 70%); border-radius: 50%; }
+  .cover-content { position: relative; z-index: 1; }
+  .cover-badge { display: inline-block; padding: 6px 20px; border-radius: 30px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); margin-bottom: 30px; letter-spacing: 2px; }
+  .cover h1 { font-size: 38px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; }
+  .cover h1 span { background: linear-gradient(135deg, #A78BFA, #60A5FA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .cover h2 { font-size: 18px; font-weight: 400; color: rgba(255,255,255,0.6); margin-bottom: 40px; line-height: 1.6; }
+  .cover-info { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin-top: 20px; }
+  .cover-info-item { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 24px; min-width: 160px; }
+  .cover-info-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+  .cover-info-value { font-size: 15px; font-weight: 600; margin-top: 4px; }
+  .container { max-width: 900px; margin: 0 auto; padding: 60px 40px; }
+  .s { background: white; border-radius: 20px; padding: 40px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #eef0f5; }
+  .sn { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #7D2AE7, #0071E3); color: white; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .s h2 { font-size: 22px; font-weight: 800; color: #0A0F2C; margin-bottom: 6px; }
+  .s-sub { font-size: 13px; color: #8892a6; margin-bottom: 28px; }
+  .s h3 { font-size: 16px; font-weight: 700; color: #2d1b69; margin: 28px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #f0f0f5; }
+  .s p { font-size: 14px; color: #4a5568; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 20px; font-size: 13px; }
+  thead th { background: #f7f8fc; color: #4a5568; font-weight: 600; padding: 10px 14px; text-align: left; border-bottom: 2px solid #e2e5ee; font-size: 12px; }
+  tbody td { padding: 10px 14px; border-bottom: 1px solid #f0f1f5; color: #4a5568; }
+  tbody td:first-child { font-weight: 600; color: #1a1a2e; }
+  .ib { border-radius: 12px; padding: 20px; margin: 16px 0; }
+  .ib-p { background: #f3e8ff; border-left: 4px solid #7D2AE7; }
+  .ib-b { background: #e0f2fe; border-left: 4px solid #0071E3; }
+  .ib-g { background: #dcfce7; border-left: 4px solid #30D158; }
+  .ib-o { background: #fff7ed; border-left: 4px solid #F59E0B; }
+  .ib h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+  .ib p, .ib li { font-size: 13px; color: #4a5568; }
+  .ib ul { padding-left: 18px; }
+  .ib li { margin-bottom: 4px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
+  .t-p { background: #f3e8ff; color: #7D2AE7; }
+  .t-b { background: #e0f2fe; color: #0071E3; }
+  .t-g { background: #dcfce7; color: #15803d; }
+  .sg { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 16px 0; }
+  .sc { background: #f7f8fc; border-radius: 12px; padding: 18px; text-align: center; }
+  .sv { font-size: 26px; font-weight: 800; background: linear-gradient(135deg, #7D2AE7, #0071E3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sl { font-size: 11px; color: #8892a6; margin-top: 4px; }
+  .tl { position: relative; padding-left: 28px; margin: 20px 0; }
+  .tl::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, #7D2AE7, #0071E3); border-radius: 2px; }
+  .ti { position: relative; margin-bottom: 20px; }
+  .ti::before { content: ''; position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: white; border: 3px solid #7D2AE7; }
+  .tm { font-size: 13px; font-weight: 700; color: #7D2AE7; }
+  .tt { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-top: 2px; }
+  .td { font-size: 12px; color: #8892a6; margin-top: 2px; }
+  .fw { background: linear-gradient(135deg, #0A0F2C, #1a1a3e); border-radius: 16px; padding: 32px; color: white; text-align: center; margin: 20px 0; }
+  .fw h4 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .fw-s { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .fw-i { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 16px; font-size: 12px; }
+  .fw-a { color: rgba(255,255,255,0.3); font-size: 18px; }
+  .cm { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .cm-c { border-radius: 12px; padding: 20px; }
+  .cm-b { background: #fef2f2; border: 1px solid #fecaca; }
+  .cm-a { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .cm-c h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .cm-b h4 { color: #dc2626; }
+  .cm-a h4 { color: #15803d; }
+  .cm-c p { font-size: 12px; margin-bottom: 4px; }
+  .footer { text-align: center; padding: 40px; color: #8892a6; font-size: 12px; }
+  .footer a { color: #7D2AE7; text-decoration: none; font-weight: 600; }
+  @media (max-width: 768px) {
+    .cover h1 { font-size: 26px; }
+    .cover h2 { font-size: 14px; }
+    .cover-info { flex-direction: column; align-items: center; }
+    .container { padding: 20px 12px; }
+    .s { padding: 24px 18px; }
+    .s h2 { font-size: 18px; }
+    table { display: block; overflow-x: auto; white-space: nowrap; font-size: 11px; }
+    .sg { grid-template-columns: 1fr 1fr; }
+    .cm { grid-template-columns: 1fr; }
+    .fw-s { flex-direction: column; }
+    .fw-a { transform: rotate(90deg); }
+  }
+  @media print { body { background: white; } .cover { min-height: auto; padding: 60px 40px; page-break-after: always; } .s { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<!-- ═══ 표지 ═══ -->
+<div class="cover">
+  <div class="cover-content">
+    <div class="cover-badge">BUSINESS PLAN 2026</div>
+    <h1 style="font-size:32px;margin-bottom:24px;line-height:1.4;">당신이 잠든 사이에도<br><span style="font-size:42px;">가게는 돌아갑니다</span></h1>
+    <h2>콘타벨로<span style="background:linear-gradient(135deg,#A78BFA,#60A5FA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">AI</span> — 소상공인·중소기업을 위한 AI 업무자동화 플랫폼</h2>
+    <div class="cover-info">
+      <div class="cover-info-item"><div class="cover-info-label">기업명</div><div class="cover-info-value">콘타벨로</div></div>
+      <div class="cover-info-item"><div class="cover-info-label">대표자</div><div class="cover-info-value">주현진</div></div>
+      <div class="cover-info-item"><div class="cover-info-label">서비스</div><div class="cover-info-value">contavelo.ai</div></div>
+      <div class="cover-info-item"><div class="cover-info-label">소재지</div><div class="cover-info-value">울산광역시</div></div>
+      <div class="cover-info-item"><div class="cover-info-label">설립</div><div class="cover-info-value">2026</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 1. 왜 이 사업인가 (was section 3) -->
+<div class="s">
+  <div class="sn">1</div>
+  <h2>왜 이 사업인가</h2>
+  <div class="s-sub">700만 소상공인과 중소기업이 겪는 현실, 그리고 AI가 줄 수 있는 답</div>
+
+  <div class="cm">
+    <div class="cm-c cm-b">
+      <h4>현재 소상공인·중소기업의 문제</h4>
+      <p>매일 반복되는 단순 업무에 시간 소모 (리뷰 답글, 견적서, 예약 관리)</p>
+      <p>IT 도구가 분산되어 있음 (캐시노트+알밤+네이버+엑셀)</p>
+      <p>AI를 쓰고 싶지만 어떻게 적용할지 모름</p>
+      <p>각 도구의 데이터가 연결되지 않음</p>
+    </div>
+    <div class="cm-c cm-a">
+      <h4>콘타벨로AI의 해결</h4>
+      <p><strong>올인원 플랫폼</strong> — 12개 업무 도구를 하나에</p>
+      <p><strong>AI 자동화</strong> — 리뷰 답글, 챗봇, 마케팅을 AI가 대신</p>
+      <p><strong>데이터 연결</strong> — 모든 업무 데이터가 자동으로 연결</p>
+      <p><strong>자동화 추천</strong> — AI가 "이걸 자동화하면 이만큼 절약" 안내</p>
+    </div>
+  </div>
+
+  <h3>경쟁사 현황 — 무엇이 빠져있는가</h3>
+
+  <table>
+    <thead><tr><th>회사</th><th>잘하는 것</th><th>못하는 것</th><th>AI</th></tr></thead>
+    <tbody>
+      <tr><td><strong>캐시노트</strong></td><td>매출 기록, 사업장 다수 확보</td><td>AI 자동화 없음, 유료 전환 어려움</td><td style="color:#dc2626">없음</td></tr>
+      <tr><td><strong>알밤</strong></td><td>급여 자동화</td><td>급여만 됨. 견적, 리뷰, 마케팅 불가</td><td style="color:#dc2626">없음</td></tr>
+      <tr><td><strong>채널톡</strong></td><td>고객 상담 (CS)</td><td>CS만 됨. 장부, 예약, 급여 불가</td><td style="color:#F59E0B">일부</td></tr>
+      <tr><td><strong>네이버 스마트플레이스</strong></td><td>예약 관리, 검색 노출</td><td>네이버 종속. AI 자동화 없음</td><td style="color:#dc2626">없음</td></tr>
+      <tr><td><strong>뤼튼</strong></td><td>AI 콘텐츠 생성</td><td>범용 AI. 소상공인·중소기업 업무를 모름</td><td style="color:#15803d">있음</td></tr>
+      <tr><td><strong>ChatGPT / Claude</strong></td><td>범용 AI 최강</td><td>한국 소상공인·중소기업 특화 아님. 업무 통합 안 됨</td><td style="color:#15803d">있음</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ib ib-o">
+    <h4>핵심: 아무도 하지 않는 것</h4>
+    <ul>
+      <li>매출 기록하는 앱은 있지만, <strong>AI가 분석해서 자동화를 추천하는 서비스는 없음</strong></li>
+      <li>급여 앱, CS 앱, 예약 앱은 각각 있지만, <strong>하나로 연결된 올인원 플랫폼은 없음</strong></li>
+      <li>AI는 있지만, <strong>한국 소상공인·중소기업 업무에 특화된 AI 서비스는 없음</strong></li>
+      <li>데이터는 쌓이지만, <strong>업종 간 데이터를 연결하여 인사이트를 주는 곳은 없음</strong></li>
+      <li><strong>"올인원 + AI + 소상공인·중소기업 특화" — 이 조합을 아무도 하지 않고 있음</strong></li>
+    </ul>
+  </div>
+
+  <h3>콘타벨로AI의 기회</h3>
+  <div class="cm">
+    <div class="cm-c cm-b">
+      <h4>경쟁사들의 한계</h4>
+      <p>각자 <strong>한 가지 기능만</strong> 잘함</p>
+      <p>캐시노트 = 매출 기록만</p>
+      <p>알밤 = 급여만</p>
+      <p>채널톡 = CS만</p>
+      <p>뤼튼 = 범용 AI (업무 모름)</p>
+      <p>→ <strong>데이터가 각각 분리됨</strong></p>
+    </div>
+    <div class="cm-c cm-a">
+      <h4>콘타벨로AI가 채울 빈 자리</h4>
+      <p><strong>올인원</strong> — 12개 업무를 하나에</p>
+      <p><strong>AI 특화</strong> — 소상공인·중소기업 업종별 맞춤 AI</p>
+      <p><strong>데이터 연결</strong> — 모든 데이터가 하나로</p>
+      <p><strong>자동화 추천</strong> — 데이터 기반 인사이트</p>
+      <p>→ <strong>뤼튼의 AI + 캐시노트의 사업장 = 콘타벨로AI</strong></p>
+    </div>
+  </div>
+
+  <div class="ib ib-p">
+    <h4>왜 지금이 기회인가</h4>
+    <ul>
+      <li><strong>AI 유료화 시대가 열림:</strong> 소비자와 사업자 모두 AI 서비스에 비용을 지불하는 것에 익숙해지고 있음</li>
+      <li><strong>소상공인·중소기업 디지털 전환 가속:</strong> 수백만 사업장이 이미 디지털 도구를 사용 중이나, AI 자동화까지는 못 가고 있음</li>
+      <li><strong>SaaS 구독 모델 검증 완료:</strong> 한국 B2B SaaS 시장이 성장하며 소상공인·중소기업도 월 구독에 익숙해짐</li>
+      <li><strong>빈 자리가 존재:</strong> "올인원 + AI + 소상공인·중소기업 특화"는 <strong>아직 아무도 하지 않고 있음</strong></li>
+      <li>콘타벨로AI는 이 빈 자리를 <strong>가장 먼저 차지하는 기업</strong>이 될 것</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 2. 우리의 비전 (was part of section 2) -->
+<div class="s">
+  <div class="sn">2</div>
+  <h2>우리의 비전 — 인간과 AI가 함께하는 세상</h2>
+  <div class="s-sub">AI가 사람을 대체하는 것이 아니라, 사람과 AI가 함께 일할 때 더 큰 가치가 만들어진다</div>
+
+  <div class="fw" style="text-align:left;padding:32px 36px;">
+    <h4 style="font-size:20px;margin-bottom:16px;text-align:center;">콘타벨로AI 핵심 철학</h4>
+    <p style="font-size:16px;color:rgba(255,255,255,0.9);text-align:center;line-height:1.8;margin-bottom:20px;">
+      <strong>"AI가 사람을 대체하는 것이 아니라,<br>사람과 AI가 함께 일할 때 더 큰 가치가 만들어진다."</strong>
+    </p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.5);text-align:center;line-height:1.7;">
+      AI 전환에도 사람이 필요합니다.<br>
+      AI는 반복 업무를 처리하고, 사람은 판단하고 관계를 맺습니다.<br>
+      인간과 AI의 조화로운 협동 — 이것이 콘타벨로AI가 추구하는 미래입니다.
+    </p>
+  </div>
+
+  <div class="ib ib-p">
+    <h4>궁극적 목표</h4>
+    <p>한국 소상공인·중소기업의 업무 데이터를 수집·연결하여, 한국 비즈니스 운영 방식을 가장 잘 이해하는 AI 플랫폼을 구축하고, <strong>인간과 AI가 협동하는 새로운 업무 방식</strong>으로 시장을 선도한다.</p>
+    <p><strong>대상:</strong> 1인 사장님부터 50인 기업까지, 모든 규모의 사업자</p>
+  </div>
+
+  <div class="sg">
+    <div class="sc"><div class="sv">700만+</div><div class="sl">한국 소상공인·중소기업</div></div>
+    <div class="sc"><div class="sv">16</div><div class="sl">지원 업종</div></div>
+    <div class="sc"><div class="sv">12</div><div class="sl">대시보드 모듈</div></div>
+    <div class="sc"><div class="sv">6</div><div class="sl">AI 자동화 서비스</div></div>
+  </div>
+
+  <h3>데이터 플라이휠 전략</h3>
+  <div class="fw">
+    <h4>경쟁사가 따라올 수 없는 선순환 구조</h4>
+    <div class="fw-s">
+      <div class="fw-i">사업자 유입<br><small style="opacity:0.5">무료 도구 제공</small></div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">데이터 축적<br><small style="opacity:0.5">견적, 매출, 리뷰...</small></div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">AI가 학습<br><small style="opacity:0.5">업종별 패턴 분석</small></div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">더 나은 서비스<br><small style="opacity:0.5">자동화 추천</small></div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">더 많은 유입<br><small style="opacity:0.5">데이터 해자 형성</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. 회사 소개 및 팀 (merge old section 1 + old section 9) -->
+<div class="s">
+  <div class="sn">3</div>
+  <h2>회사 소개 및 팀</h2>
+  <div class="s-sub">콘타벨로 · 대표 주현진 · contavelo.ai</div>
+  <table>
+    <tbody>
+      <tr><td>기업명</td><td><strong>콘타벨로</strong></td></tr>
+      <tr><td>대표자</td><td>주현진</td></tr>
+      <tr><td>소재지</td><td>울산광역시</td></tr>
+      <tr><td>서비스</td><td>contavelo.ai — AI 기반 소상공인·중소기업 업무자동화 SaaS</td></tr>
+      <tr><td>기술 스택</td><td>Next.js, Supabase, Claude API, Vercel</td></tr>
+      <tr><td>현재 단계</td><td>MVP 개발 완료, 서비스 운영 중</td></tr>
+    </tbody>
+  </table>
+
+  <h3>현재 팀</h3>
+  <table>
+    <thead><tr><th>역할</th><th>담당</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td>대표/기획</td><td>사업 방향, 고객 발굴, 파트너십</td><td>주현진</td></tr>
+      <tr><td>AI/백엔드 개발</td><td>Claude API, 서비스 개발</td><td>AI 에이전트 (Claude Code)</td></tr>
+      <tr><td>프론트엔드</td><td>UI/UX, 반응형 디자인</td><td>AI 에이전트</td></tr>
+    </tbody>
+  </table>
+
+  <h3>채용 계획</h3>
+  <div class="tl">
+    <div class="ti"><div class="tm">즉시 (2026.Q2)</div><div class="tt">공동창업자/CTO + 마케팅 매니저</div><div class="td">기술 리드 + 울산 소상공인·중소기업 직접 영업</div></div>
+    <div class="ti"><div class="tm">2026.Q4</div><div class="tt">풀스택 개발자 + 고객 성공 매니저</div><div class="td">서비스 안정화 + 온보딩 지원</div></div>
+    <div class="ti"><div class="tm">2027</div><div class="tt">데이터 엔지니어 + 디자이너</div><div class="td">빅데이터 파이프라인 + 브랜딩</div></div>
+  </div>
+</div>
+
+<!-- 4. 서비스 모델 (was section 4) -->
+<div class="s">
+  <div class="sn">4</div>
+  <h2>서비스 모델 (3-Tier)</h2>
+  <div class="s-sub">무료로 시작 → 데이터 축적 → AI 추천 → 자연스러운 유료 전환</div>
+
+  <h3>지원 업종 — 16개 업종 대응</h3>
+  <p>콘타벨로AI는 업종에 관계없이 모든 소상공인·중소기업이 사용할 수 있으며, 특히 아래 16개 업종에 최적화된 AI를 제공합니다.</p>
+  <table>
+    <thead><tr><th>업종</th><th>시장 규모</th><th>업종</th><th>시장 규모</th></tr></thead>
+    <tbody>
+      <tr><td>🍽️ 음식점/카페</td><td>85만 사업체</td><td>🔧 수리/정비</td><td>10만+</td></tr>
+      <tr><td>🛍️ 매장/쇼핑 (도소매)</td><td>161만 사업체</td><td>⚖️ 법률/세무</td><td>3만+</td></tr>
+      <tr><td>💇 서비스/뷰티</td><td>55만+</td><td>🏠 부동산</td><td>27만 사업체</td></tr>
+      <tr><td>🏢 사무실/B2B</td><td>다수</td><td>🐾 반려동물</td><td>3만+</td></tr>
+      <tr><td>🏥 병원/의원</td><td>28만 사업체</td><td>💐 웨딩/이벤트</td><td>2만+</td></tr>
+      <tr><td>📚 학원/교육</td><td>18만 사업체</td><td>🏭 제조/공장</td><td>51만 사업체</td></tr>
+      <tr><td>💪 헬스/스포츠</td><td>5만+</td><td>🚚 물류/운송</td><td>67만 사업체</td></tr>
+      <tr><td>🏨 숙박/펜션</td><td>숙박업 일부</td><td>💻 프리랜서</td><td>증가 추세</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:#8892a6">* 시장 규모: 2024년 전국사업체조사 기준 (국가데이터처)</p>
+
+  <div class="ib ib-b">
+    <h4>같은 12개 도구, 다른 AI</h4>
+    <p>모든 업종이 같은 대시보드 도구를 쓰되, <strong>AI가 업종에 맞게 자동 조정</strong>합니다.<br>
+    한식당 사장님이 "AI 리뷰"를 쓰면 → 맛집 톤으로 답글 생성.<br>
+    제조업 사장님이 "AI 리뷰"를 쓰면 → 전문적 톤으로 답글 생성.<br>
+    같은 버튼, 같은 화면. <strong>AI 프롬프트만 업종에 맞게 달라집니다.</strong></p>
+  </div>
+
+  <h3>Tier 1: 무료 — 데이터 수집 + AI 추천 <span class="tag t-g">구축 완료</span></h3>
+  <div class="ib ib-g">
+    <h4>전략: 무료 도구로 사용자 확보 → 데이터 축적 → AI가 자동화 추천</h4>
+    <p>사장님이 무료로 도구를 쓰다 보면, AI가 데이터를 분석해서<br>"이 부분을 자동화하면 월 40만원 절약할 수 있어요" 라고 추천합니다.</p>
+  </div>
+  <table>
+    <thead><tr><th>기능</th><th>설명</th><th>수집되는 데이터</th></tr></thead>
+    <tbody>
+      <tr><td>대시보드</td><td>현황 요약 + 도구 모음</td><td>사용 패턴</td></tr>
+      <tr><td>연락처 관리</td><td>고객/거래처 DB + CSV 가져오기</td><td>고객 수, 거래 빈도</td></tr>
+      <tr><td>캘린더</td><td>일정/예약 관리</td><td>업무 패턴</td></tr>
+      <tr><td>장부</td><td>매입매출 기록</td><td>매출 패턴, 비용 구조</td></tr>
+      <tr><td>예약 관리</td><td>예약 접수 + 관리</td><td>노쇼율, 피크 시간</td></tr>
+      <tr><td>견적서</td><td>견적서 작성</td><td>거래 규모, 전환율</td></tr>
+      <tr><td>급여 관리</td><td>직원 급여 계산</td><td>인건비 비율</td></tr>
+      <tr><td>메모/할일/파일</td><td>업무 관리 도구</td><td>업무 카테고리</td></tr>
+      <tr><td>리포트</td><td>월별 통합 리포트</td><td>전체 트렌드</td></tr>
+      <tr><td><strong>AI 추천</strong></td><td><strong>자동화 추천 카드</strong></td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tier 2: 프로 — AI 자동화 + 웹사이트 <span class="tag t-p">구축 중</span></h3>
+  <table>
+    <thead><tr><th>기능</th><th>설명</th><th>가격</th></tr></thead>
+    <tbody>
+      <tr><td>🌐 AI 웹사이트 빌더</td><td>대화형 AI로 가게 홈페이지 자동 생성</td><td rowspan="6">프로: ₩29,900/월<br>팀: ₩59,900/월</td></tr>
+      <tr><td>⭐ AI 리뷰 답글</td><td>네이버/구글 리뷰 AI 자동 답글</td></tr>
+      <tr><td>💬 AI 챗봇</td><td>카카오톡 24시간 자동 응대</td></tr>
+      <tr><td>📣 AI 마케팅</td><td>SNS 콘텐츠 자동 생성 + 게시</td></tr>
+      <tr><td>📢 알림 자동화</td><td>예약 확인/리마인더 알림톡 자동 발송</td></tr>
+      <tr><td>📄 세금계산서</td><td>전자세금계산서 자동 발행</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Tier 3: 맞춤 AI 솔루션 <span class="tag t-b">핵심 수익원</span></h3>
+  <p>Tier 2로 부족한 중소기업·프랜차이즈를 위한 <strong>업종 맞춤 AI 시스템 개발</strong>. 콘타벨로AI의 핵심 고수익 사업.</p>
+  <table>
+    <thead><tr><th>규모</th><th>대상 고객</th><th>개발 내용</th><th>가격</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-g">소규모</span></td><td>소상공인·중소기업 (1~5인)</td><td>업종 맞춤 자동화 1~2개 + 3개월 유지보수</td><td>200~500만원</td></tr>
+      <tr><td><span class="tag t-b">중규모</span></td><td>중소기업 (5~30인)</td><td>통합 업무 자동화 + 맞춤 대시보드 + 6개월 유지보수</td><td>500~2,000만원</td></tr>
+      <tr><td><span class="tag t-p">대규모</span></td><td>프랜차이즈·다매장</td><td>본사 통합 관리 + 가맹점별 AI + 12개월 유지보수</td><td>2,000~5,000만원</td></tr>
+      <tr><td><span class="tag t-p">엔터프라이즈</span></td><td>지자체·협회·공공</td><td>지역 소상공인·중소기업 AI 전환 프로젝트 (100개사+ 일괄 도입)</td><td>5,000만~2억원</td></tr>
+    </tbody>
+  </table>
+  <div class="ib ib-b">
+    <h4>맞춤 개발 예시</h4>
+    <ul>
+      <li><strong>프랜차이즈 50개 매장 통합:</strong> 본사 대시보드 + 가맹점별 매출/리뷰/직원 자동 관리 → <strong>3,000만원</strong></li>
+      <li><strong>제조업 발주 자동화:</strong> 발주→생산→납품 전 과정 AI 자동화 + 거래처 연동 → <strong>1,500만원</strong></li>
+      <li><strong>울산시 소상공인·중소기업 AI 전환:</strong> 200개 가맹점 일괄 도입 + 교육 + 6개월 관리 → <strong>1억원</strong></li>
+      <li><strong>월 유지보수:</strong> 개발 완료 후 운영/수정/업데이트 → <strong>월 50~200만원</strong></li>
+    </ul>
+  </div>
+</div>
+
+<!-- 5. 기술 현황 (was section 10) -->
+<div class="s">
+  <div class="sn">5</div>
+  <h2>기술 현황</h2>
+  <div class="s-sub">MVP 개발 완료, 서비스 운영 중</div>
+
+  <h3>서비스 스택</h3>
+  <table>
+    <thead><tr><th>영역</th><th>기술</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>프론트엔드</td><td>Next.js + Tailwind CSS</td><td>사용자가 보는 대시보드, 웹사이트 빌더</td></tr>
+      <tr><td>백엔드/DB</td><td>Supabase (PostgreSQL)</td><td>모든 데이터 저장, 사용자 인증</td></tr>
+      <tr><td>AI 엔진</td><td>Claude API + 하네스 시스템</td><td>스마트 라우팅, 프롬프트 관리, 폴백 체인</td></tr>
+      <tr><td>호스팅</td><td>Vercel</td><td>글로벌 CDN, 자동 배포</td></tr>
+      <tr><td>향후</td><td>자체 파인튜닝 모델 (GPU)</td><td>Qwen/EXAONE 7B 기반, API 비용 90% 절감</td></tr>
+    </tbody>
+  </table>
+
+  <h3>AI 하네스 시스템</h3>
+  <div class="ib ib-p">
+    <h4>AI 모델을 제어하는 핵심 엔진</h4>
+    <ul>
+      <li><strong>스마트 라우터:</strong> 작업 종류에 따라 최적 AI 모델 자동 선택</li>
+      <li><strong>프롬프트 관리:</strong> 업종별 맞춤 프롬프트 템플릿</li>
+      <li><strong>폴백 체인:</strong> 실패 시 자동으로 다른 모델로 전환</li>
+      <li><strong>가드레일:</strong> 입력 검증, 출력 필터링, 안전 검사</li>
+      <li><strong>비용 최적화:</strong> 단순 작업은 무료 모델, 복잡한 작업만 유료 API</li>
+    </ul>
+  </div>
+
+  <h3>데이터 수집 구조</h3>
+  <p>모든 기능이 자동으로 데이터를 축적하는 구조:</p>
+  <table>
+    <thead><tr><th>기능</th><th>수집 데이터</th><th>미래 가치</th></tr></thead>
+    <tbody>
+      <tr><td>견적서</td><td>품목별 단가, 거래 규모</td><td>시장 가격 동향</td></tr>
+      <tr><td>리뷰 답글</td><td>고객 만족/불만 요인</td><td>서비스 품질 벤치마크</td></tr>
+      <tr><td>챗봇</td><td>고객 문의 유형</td><td>최적 응대 전략</td></tr>
+      <tr><td>장부</td><td>매출/매입, 현금 흐름</td><td>매출 예측, 자금 최적화</td></tr>
+      <tr><td>예약</td><td>예약 패턴, 노쇼율</td><td>수요 예측</td></tr>
+      <tr><td>거래처 CRM</td><td>거래 관계, 이탈 패턴</td><td>거래처 매칭, 이탈 방지</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 6. 성장 전략 (merge old sections 5+6+7+8) -->
+<div class="s">
+  <div class="sn">6</div>
+  <h2>성장 전략</h2>
+  <div class="s-sub">4단계 성장 로드맵 + 수익 모델 + 자금 조달</div>
+
+  <h3>성장 로드맵</h3>
+  <div class="tl">
+    <div class="ti"><div class="tm">Phase 1: CAPTURE (2026)</div><div class="tt">사업자 1,000개 확보</div><div class="td">울산 중심 무료 도구로 진입장벽 제거. "쓰기 시작하면 데이터가 쌓인다"</div></div>
+    <div class="ti"><div class="tm">Phase 2: CONNECT (2027)</div><div class="tt">전국 10,000개 + 데이터 네트워크</div><div class="td">사업자 간 거래 연결, 업종 간 데이터 교차 분석, 거래처 매칭</div></div>
+    <div class="ti"><div class="tm">Phase 3: INTELLIGENCE (2028)</div><div class="tt">50,000개 + AI 예측/추천</div><div class="td">"이 가격이면 거래 성사율 78%", "다음 달 매출 예측: 3,200만원"</div></div>
+    <div class="ti"><div class="tm">Phase 4: DOMINATE (2029~)</div><div class="tt">한국 소상공인·중소기업 운영의 OS</div><div class="td">5년치 데이터 + 50,000개 네트워크 = 경쟁자가 넘을 수 없는 벽</div></div>
+  </div>
+
+  <h3>수익 모델</h3>
+  <table>
+    <thead><tr><th>수익원</th><th>내용</th><th>단계</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag t-g">Tier 1 무료</span></td><td>대시보드 업무 도구 전체 무료 제공</td><td>사용자 확보 + 데이터 축적</td></tr>
+      <tr><td><span class="tag t-p">Tier 2 구독</span></td><td>AI 자동화 + 웹사이트 빌더 (월 구독)</td><td>핵심 매출원</td></tr>
+      <tr><td><span class="tag t-b">Tier 3 맞춤</span></td><td>업종 맞춤 AI 솔루션 개발</td><td>팀 구성 후 추진</td></tr>
+      <tr><td><span class="tag t-g">데이터 서비스</span></td><td>업종별 인사이트 · 시장 리포트</td><td>데이터 축적 후 추진</td></tr>
+    </tbody>
+  </table>
+
+  <h3>성장 전략</h3>
+  <div class="tl">
+    <div class="ti"><div class="tm">2026</div><div class="tt">기반 구축</div><div class="td">Tier 1 무료 사용자 확보 → 데이터 축적 → Tier 2 유료 전환 시작</div></div>
+    <div class="ti"><div class="tm">2027</div><div class="tt">매출 성장</div><div class="td">Tier 2 구독자 확대 + Tier 3 맞춤 개발 시작 → 안정적 MRR 확보</div></div>
+    <div class="ti"><div class="tm">2028</div><div class="tt">스케일업</div><div class="td">전국 확장 + 데이터 서비스 론칭 + 해외영업 지원 서비스 추가</div></div>
+  </div>
+
+  <h3>SaaS 모델의 강점</h3>
+  <div class="ib ib-b">
+    <h4>규모가 커질수록 마진이 올라가는 구조</h4>
+    <ul>
+      <li><strong>초기 비용이 낮음</strong> — AI API + 클라우드 인프라 모두 사용량 기반 과금</li>
+      <li><strong>한계 비용이 거의 0</strong> — 사용자가 1명이든 10,000명이든 서버 비용 차이 미미</li>
+      <li><strong>반복 매출 (MRR)</strong> — 월 구독 모델로 예측 가능한 안정적 수익</li>
+      <li><strong>데이터 해자</strong> — 사용자가 많을수록 AI가 똑똑해져서 이탈이 어려워짐</li>
+    </ul>
+  </div>
+
+  <h3>핵심 성과 지표 (KPI)</h3>
+
+  <h3>Phase 1: 2026년</h3>
+  <table>
+    <thead><tr><th>지표</th><th>목표</th></tr></thead>
+    <tbody>
+      <tr><td>가입 사업장</td><td><strong>1,000개</strong></td></tr>
+      <tr><td>월간 활성 사용자 (MAU)</td><td>300+</td></tr>
+      <tr><td>유료 전환율</td><td>10%+</td></tr>
+      <tr><td>MRR (월 반복 매출)</td><td>₩200만+</td></tr>
+      <tr><td>NPS (고객 추천 지수)</td><td>40+</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Phase 2: 2027년</h3>
+  <table>
+    <thead><tr><th>지표</th><th>목표</th></tr></thead>
+    <tbody>
+      <tr><td>가입 사업장</td><td><strong>10,000개</strong></td></tr>
+      <tr><td>거래처 연결</td><td>5,000+ 쌍</td></tr>
+      <tr><td>MRR</td><td>₩2,000만+</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Phase 3~4: 2028년~</h3>
+  <div class="sg">
+    <div class="sc"><div class="sv">50,000+</div><div class="sl">가입 사업장</div></div>
+    <div class="sc"><div class="sv">80%+</div><div class="sl">AI 예측 정확도</div></div>
+    <div class="sc"><div class="sv">₩1억+</div><div class="sl">월 매출</div></div>
+  </div>
+
+  <h3>자금 조달 계획</h3>
+  <div class="tl">
+    <div class="ti"><div class="tm">2026.Q2</div><div class="tt">고성능컴퓨팅 지원사업 (GPU)</div><div class="td">H100 GPU 서버 8개월 지원. 자체 AI 모델 파인튜닝용</div></div>
+    <div class="ti"><div class="tm">2026.Q2~Q4</div><div class="tt">울산 CCEI + 지역 프로그램</div><div class="td">사무공간 + 멘토링. 울산 테크노파크 최대 5천만원</div></div>
+    <div class="ti"><div class="tm">2027.Q1</div><div class="tt">초기창업패키지</div><div class="td">평균 0.7억, 최대 1.5억</div></div>
+    <div class="ti"><div class="tm">2027.Q3</div><div class="tt">TIPS</div><div class="td">VC 2억 선투자 → 정부 8억 매칭 = 총 10억</div></div>
+    <div class="ti"><div class="tm">2028+</div><div class="tt">시리즈 A</div><div class="td">50억+ 투자 유치. 전국 확장 + 해외 진출</div></div>
+  </div>
+</div>
+
+<!-- 7. 사회적 가치 (merge old sections 11+12+13) -->
+<div class="s">
+  <div class="sn">7</div>
+  <h2>사회적 가치 — AI로 대한민국을 더 부유하게</h2>
+  <div class="s-sub">소상공인·중소기업 자동화 → 생산성 향상 → 고용 창출 → 경제 성장</div>
+
+  <div class="ib ib-p">
+    <h4>우리의 믿음</h4>
+    <p>한국 소상공인·중소기업 700만이 매일 <strong>반복적인 단순 업무에 3~4시간</strong>을 소비하고 있습니다.<br>
+    AI 자동화로 이 시간을 돌려주면, 사장님은 <strong>본업에 집중</strong>할 수 있고,<br>
+    매출이 오르고, 고용이 늘고, <strong>대한민국 경제 전체가 성장</strong>합니다.</p>
+    <p style="margin-top:12px">그리고 이 AI 전환 과정에도 <strong>사람이 필요합니다.</strong><br>
+    AI를 설정하고, 교육하고, 소상공인·중소기업 곁에서 도와주는 사람.<br>
+    콘타벨로AI는 <strong>AI와 인간이 함께 일하는 회사</strong>이며, AI 전환을 돕는 과정에서 <strong>새로운 일자리를 만듭니다.</strong></p>
+  </div>
+
+  <div class="cm">
+    <div class="cm-c cm-b">
+      <h4>현재: AI 없는 소상공인·중소기업</h4>
+      <p>리뷰 답글 쓰는 데 30분/일</p>
+      <p>견적서 작성 1시간/건</p>
+      <p>예약 노쇼 관리에 매출 25% 손실</p>
+      <p>마케팅 할 시간이 없음</p>
+      <p>→ <strong>시간 부족 → 성장 정체</strong></p>
+    </div>
+    <div class="cm-c cm-a">
+      <h4>미래: AI 자동화 도입 후</h4>
+      <p>리뷰 답글 AI가 2초만에 완료</p>
+      <p>견적서 AI가 2분만에 완성</p>
+      <p>알림톡으로 노쇼율 60% 감소</p>
+      <p>AI가 SNS 마케팅 자동 게시</p>
+      <p>→ <strong>매출 증가 → 직원 채용 → 경제 성장</strong></p>
+    </div>
+  </div>
+
+  <div class="fw">
+    <h4>AI 자동화가 만드는 선순환</h4>
+    <div class="fw-s">
+      <div class="fw-i">소상공인·중소기업<br>AI 도입</div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">업무 시간<br>50% 절약</div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">본업 집중<br>매출 증가</div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">직원 채용<br>고용 창출</div>
+      <span class="fw-a">→</span>
+      <div class="fw-i">지역 경제<br>활성화</div>
+    </div>
+  </div>
+
+  <h3>경제적 파급 효과 (추정)</h3>
+  <table>
+    <thead><tr><th>지표</th><th>현재</th><th>AI 자동화 후</th><th>효과</th></tr></thead>
+    <tbody>
+      <tr><td>소상공인·중소기업 1인당 업무 시간</td><td>12시간/일</td><td>8시간/일</td><td><strong>4시간 절약/일</strong></td></tr>
+      <tr><td>700만 소상공인·중소기업 기준</td><td>—</td><td>—</td><td><strong>연 1조 시간+ 절약</strong></td></tr>
+      <tr><td>노쇼율</td><td>25%</td><td>10%</td><td><strong>매출 손실 60% 회복</strong></td></tr>
+      <tr><td>리뷰 응답률</td><td>30%</td><td>95%</td><td><strong>고객 재방문율 20% 증가</strong></td></tr>
+      <tr><td>마케팅 활동</td><td>못함 (시간 부족)</td><td>AI가 자동 게시</td><td><strong>신규 고객 유입 증가</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="ib ib-g">
+    <h4>콘타벨로AI의 사회적 미션</h4>
+    <ul>
+      <li><strong>AI가 사람의 일자리를 뺏는 게 아니라, 사장님이 더 많은 직원을 고용할 수 있게 돕는 것</strong></li>
+      <li>AI로 절약한 시간과 비용 → 사업 확장 → 신규 채용</li>
+      <li>특히 <strong>비수도권 소상공인·중소기업</strong>의 디지털 격차 해소에 기여</li>
+      <li>울산에서 시작하여 전국 소상공인·중소기업의 생산성을 높이는 것이 목표</li>
+    </ul>
+  </div>
+
+  <h3>고용 창출 계획</h3>
+
+  <h3>단계별 채용 로드맵</h3>
+
+  <div class="ib ib-o">
+    <h4>Phase 1: 초기 팀 — 2026년 (3→8명)</h4>
+    <p>MVP에서 PMF(제품-시장 적합성)를 찾는 단계. 울산 소상공인·중소기업 1,000개사 확보 목표.</p>
+  </div>
+  <table>
+    <thead><tr><th>포지션</th><th>인원</th><th>역할</th><th>시기</th></tr></thead>
+    <tbody>
+      <tr><td>대표 (현재)</td><td>1명</td><td>사업 전략, 파트너십, 자금 조달</td><td>현재</td></tr>
+      <tr><td>AI 개발 (현재)</td><td>1명</td><td>AI 에이전트 기반 개발 (Claude Code)</td><td>현재</td></tr>
+      <tr><td><strong>공동창업자/CTO</strong></td><td><strong>1명</strong></td><td>기술 총괄, 아키텍처 설계, AI 서비스 고도화</td><td><strong>즉시</strong></td></tr>
+      <tr><td><strong>현장 영업 매니저</strong></td><td><strong>2명</strong></td><td>울산 소상공인·중소기업 방문 영업, 온보딩 지원, 피드백 수집</td><td><strong>즉시</strong></td></tr>
+      <tr><td><strong>마케팅 매니저</strong></td><td><strong>1명</strong></td><td>SNS 마케팅, 콘텐츠 제작, 사용자 확보</td><td><strong>Q3</strong></td></tr>
+      <tr><td><strong>풀스택 개발자</strong></td><td><strong>1명</strong></td><td>서비스 안정화, 신규 기능 개발</td><td><strong>Q4</strong></td></tr>
+      <tr><td><strong>고객 성공 매니저</strong></td><td><strong>1명</strong></td><td>온보딩 지원, CS, 이탈 방지</td><td><strong>Q4</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="ib ib-b">
+    <h4>Phase 2: 성장 팀 — 2027년 (8→25명)</h4>
+    <p>전국 확장 + 10,000개사 달성. 지역별 영업팀 + 기술팀 강화.</p>
+  </div>
+  <table>
+    <thead><tr><th>부서</th><th>인원</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td><strong>영업팀</strong></td><td><strong>8명</strong></td><td>주요 도시별 2명씩 (울산, 부산, 대구, 서울). 소상공인·중소기업 직접 방문 + 온보딩</td></tr>
+      <tr><td><strong>개발팀</strong></td><td><strong>5명</strong></td><td>백엔드 2 + 프론트 2 + AI/ML 엔지니어 1. 서비스 고도화 + 자체 모델 운영</td></tr>
+      <tr><td><strong>고객 성공팀</strong></td><td><strong>4명</strong></td><td>온보딩 전문가 2 + CS 2. 사용자 1만명 대응</td></tr>
+      <tr><td><strong>마케팅팀</strong></td><td><strong>3명</strong></td><td>콘텐츠 1 + 퍼포먼스 1 + 파트너십 1</td></tr>
+      <tr><td><strong>데이터팀</strong></td><td><strong>2명</strong></td><td>데이터 엔지니어 + 데이터 분석가</td></tr>
+      <tr><td><strong>경영지원</strong></td><td><strong>1명</strong></td><td>인사, 재무, 법무</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ib ib-p">
+    <h4>Phase 3: 스케일업 — 2028년 (25→80명)</h4>
+    <p>50,000개사 + 데이터 인텔리전스 서비스 본격화. 조직의 전문화.</p>
+  </div>
+  <table>
+    <thead><tr><th>부서</th><th>인원</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td><strong>영업/파트너십</strong></td><td><strong>20명</strong></td><td>전국 16개 시도 커버. 지역 파트너 관리. B2B 대형 고객 전담</td></tr>
+      <tr><td><strong>개발/엔지니어링</strong></td><td><strong>20명</strong></td><td>백엔드 5 + 프론트 5 + AI/ML 5 + 인프라/DevOps 3 + QA 2</td></tr>
+      <tr><td><strong>고객 성공/CS</strong></td><td><strong>15명</strong></td><td>온보딩 5 + CS 5 + 교육/컨설팅 5. 사용자 5만명 대응</td></tr>
+      <tr><td><strong>마케팅/브랜딩</strong></td><td><strong>8명</strong></td><td>콘텐츠 3 + 퍼포먼스 2 + 브랜드 1 + 영상 1 + PR 1</td></tr>
+      <tr><td><strong>데이터/AI 연구</strong></td><td><strong>8명</strong></td><td>ML 엔지니어 3 + 데이터 엔지니어 3 + 연구원 2. 자체 모델 고도화</td></tr>
+      <tr><td><strong>Tier 3 맞춤개발</strong></td><td><strong>5명</strong></td><td>맞춤 솔루션 개발 전담팀. 월 5~10건 프로젝트</td></tr>
+      <tr><td><strong>경영지원</strong></td><td><strong>4명</strong></td><td>인사 1 + 재무 1 + 법무 1 + 총무 1</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ib ib-g">
+    <h4>Phase 4: 시장 지배 + 해외 수출 — 2029년~ (80→250명+)</h4>
+    <p>한국 소상공인·중소기업 운영의 OS + K-AI SaaS 해외 수출. 대한민국 수출 경쟁력 강화.</p>
+  </div>
+  <table>
+    <thead><tr><th>부서</th><th>인원</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td><strong>국내 영업</strong></td><td><strong>40명</strong></td><td>전국 영업 + 프랜차이즈/상권 단위 대형 계약</td></tr>
+      <tr><td><strong>해외영업지원팀</strong></td><td><strong>15명</strong></td><td>중소기업 해외영업 AI 자동화 컨설팅 + 다국어 서비스 운영 + KOTRA 연계</td></tr>
+      <tr><td><strong>개발/엔지니어링</strong></td><td><strong>50명</strong></td><td>코어 플랫폼 + 모바일 앱 + AI 연구 + 인프라 + 보안 + 다국어</td></tr>
+      <tr><td><strong>고객 성공</strong></td><td><strong>40명</strong></td><td>국내 CS + 해외 CS + 온보딩 + 교육. AI 챗봇이 1차 대응</td></tr>
+      <tr><td><strong>마케팅/브랜딩</strong></td><td><strong>20명</strong></td><td>국내 캠페인 + 해외 마케팅 + 파트너 마케팅</td></tr>
+      <tr><td><strong>데이터/AI</strong></td><td><strong>25명</strong></td><td>자체 LLM 운영 + 다국어 모델 + 데이터 인텔리전스</td></tr>
+      <tr><td><strong>맞춤개발/컨설팅</strong></td><td><strong>15명</strong></td><td>Tier 3 대형 프로젝트 + 해외 커스텀 프로젝트</td></tr>
+      <tr><td><strong>수출컨설팅</strong></td><td><strong>10명</strong></td><td>중소기업 수출 진입 지원 + 해외 바이어 매칭 + 수출 서류 AI화 컨설팅</td></tr>
+      <tr><td><strong>경영지원</strong></td><td><strong>10명</strong></td><td>인사, 재무, 법무, IR, 총무</td></tr>
+    </tbody>
+  </table>
+
+  <div class="fw" style="text-align:left;padding:36px;">
+    <h4 style="font-size:18px;margin-bottom:20px;text-align:center;">인간 + AI = 더 밝은 미래</h4>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:24px;">
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🧑</div>
+        <div style="font-size:13px;font-weight:600;">사람이 잘하는 것</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:8px;line-height:1.6;">
+          고객과 관계 맺기<br>
+          상황 판단과 결정<br>
+          창의적 문제 해결<br>
+          신뢰 구축과 영업
+        </div>
+      </div>
+      <div style="font-size:24px;color:rgba(255,255,255,0.3);">+</div>
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🤖</div>
+        <div style="font-size:13px;font-weight:600;">AI가 잘하는 것</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:8px;line-height:1.6;">
+          반복 업무 자동 처리<br>
+          대량 데이터 분석<br>
+          24시간 고객 응대<br>
+          패턴 인식과 예측
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;background:rgba(125,42,231,0.15);border:1px solid rgba(125,42,231,0.3);border-radius:12px;padding:20px;">
+      <div style="font-size:28px;margin-bottom:8px;">🤝</div>
+      <div style="font-size:14px;font-weight:700;">함께하면</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.7;">
+        사장님은 본업에 집중하고, AI는 나머지를 처리합니다.<br>
+        AI 전환에도 사람이 필요합니다 — 교육하고, 설정하고, 관리하는 사람.<br>
+        <strong>인간과 AI가 조화롭게 협동할 때, 더 밝은 미래가 열립니다.</strong>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:15px;font-weight:700;color:rgba(255,255,255,0.9);">
+      이것이 콘타벨로AI의 핵심입니다.
+    </p>
+  </div>
+
+  <div class="ib ib-o">
+    <h4>해외영업 지원 — 대한민국 중소기업의 수출을 돕는다</h4>
+    <p>대한민국은 <strong>수출 의존도가 높은 국가</strong>입니다. 그런데 중소기업·소상공인의 해외 영업은 여전히 어렵습니다.</p>
+    <p>외국어 장벽, 해외 바이어 발굴, 수출 서류 작성, 해외 고객 응대 — 이 모든 것에 <strong>AI가 도움</strong>을 줄 수 있습니다.</p>
+  </div>
+
+  <div class="cm">
+    <div class="cm-c cm-b">
+      <h4>중소기업 해외영업의 현실</h4>
+      <p>영어/일본어 이메일 작성에 1시간+</p>
+      <p>해외 바이어 찾기가 막막함</p>
+      <p>수출 견적서·인보이스 양식을 모름</p>
+      <p>시차 때문에 실시간 응대 불가</p>
+      <p>번역 비용만 월 수백만원</p>
+    </div>
+    <div class="cm-c cm-a">
+      <h4>콘타벨로AI의 해외영업 자동화</h4>
+      <p>AI가 영어/일본어/중국어 비즈니스 이메일 <strong>2분만에 작성</strong></p>
+      <p>AI가 해외 바이어 데이터 분석 + <strong>맞춤 추천</strong></p>
+      <p>수출 견적서·인보이스 <strong>AI 자동 생성</strong> (다국어)</p>
+      <p>AI 챗봇이 <strong>24시간 다국어 고객 응대</strong></p>
+      <p>번역 비용 <strong>₩0</strong> (AI 자동 번역)</p>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;font-size:15px;font-weight:700;color:#2d1b69;">해외영업 AI 자동화 서비스</h4>
+  <table>
+    <thead><tr><th>서비스</th><th>설명</th><th>대상</th></tr></thead>
+    <tbody>
+      <tr><td><strong>🌐 다국어 견적서</strong></td><td>한국어 입력 → 영어/일본어/중국어 견적서·인보이스 자동 생성 + PDF</td><td>수출 중소기업</td></tr>
+      <tr><td><strong>📧 AI 해외 이메일</strong></td><td>바이어 발굴 이메일, 거래 제안서, 후속 메일을 AI가 현지 비즈니스 톤으로 작성</td><td>해외 거래처 관리</td></tr>
+      <tr><td><strong>💬 다국어 챗봇</strong></td><td>해외 바이어가 문의하면 AI가 영어/일본어/중국어로 24시간 자동 응대</td><td>해외 고객 응대</td></tr>
+      <tr><td><strong>📊 수출 컨설팅</strong></td><td>해외 시장 분석, 경쟁사 조사, 가격 전략, 통관 서류 가이드를 AI가 제공</td><td>수출 초보 기업</td></tr>
+      <tr><td><strong>🌍 해외용 웹사이트</strong></td><td>AI가 다국어 회사 소개 웹사이트 자동 생성 ({company}.contavelo.ai)</td><td>해외 홍보 필요 기업</td></tr>
+      <tr><td><strong>📋 수출 서류 자동화</strong></td><td>Commercial Invoice, Packing List, B/L 등 수출 필수 서류 AI 작성</td><td>수출 실무</td></tr>
+    </tbody>
+  </table>
+
+  <div class="ib ib-g">
+    <h4>기대 효과</h4>
+    <ul>
+      <li>중소기업 해외영업 진입장벽 <strong>대폭 낮춤</strong> — "영어 못해도 수출할 수 있다"</li>
+      <li>해외영업 인건비 <strong>70% 절감</strong> — AI가 번역, 서류, 이메일, 응대 처리</li>
+      <li>대한민국 중소기업 수출 경쟁력 <strong>강화</strong> — 대기업만 하던 해외영업을 중소기업도</li>
+      <li>정부 수출 지원 프로그램과 연계 — KOTRA, 무역협회, 중소벤처기업부</li>
+    </ul>
+  </div>
+
+  <h3>고용 성장 요약</h3>
+  <div class="sg">
+    <div class="sc"><div class="sv">3명</div><div class="sl">2026 현재</div></div>
+    <div class="sc"><div class="sv">8명</div><div class="sl">2026 말</div></div>
+    <div class="sc"><div class="sv">25명</div><div class="sl">2027 말</div></div>
+    <div class="sc"><div class="sv">80명</div><div class="sl">2028 말</div></div>
+    <div class="sc"><div class="sv">250명+</div><div class="sl">2029~ (해외 포함)</div></div>
+  </div>
+
+  <h3>왜 이 인력이 필요한가?</h3>
+  <div class="ib ib-o">
+    <h4>700만 소상공인·중소기업을 상대하려면</h4>
+    <ul>
+      <li><strong>영업:</strong> 소상공인·중소기업은 온라인 광고만으로 가입하지 않음. <strong>직접 방문해서 설명하고, 셋업해주고, 교육해야</strong> 함. 16개 시도 × 2~3명 = 영업만 50명</li>
+      <li><strong>고객 성공:</strong> IT에 익숙하지 않은 사장님들이 대부분. <strong>전화로 물어보고, 직접 도와달라고 함.</strong> 사용자 10만명이면 CS만 40명</li>
+      <li><strong>개발:</strong> 16개 업종 × 6개 자동화 = 96가지 시나리오. 이걸 다 만들고 유지하려면 개발자 50명</li>
+      <li><strong>데이터/AI:</strong> 데이터 플라이휠의 핵심. 업종별 AI 모델을 학습하고 개선하는 전문 인력 20명</li>
+      <li><strong>결론:</strong> SaaS는 만드는 건 적은 인원으로 가능하지만, <strong>소상공인·중소기업 시장은 "손이 많이 가는" 시장</strong>. 기술만으로 안 되고 사람이 필요</li>
+    </ul>
+  </div>
+
+  <h3>고용의 사회적 효과</h3>
+  <table>
+    <thead><tr><th>구분</th><th>직접 고용</th><th>간접 효과</th></tr></thead>
+    <tbody>
+      <tr><td><strong>콘타벨로AI 자체</strong></td><td>200명+ 정규직</td><td>울산 중심 양질의 AI/IT 일자리 창출</td></tr>
+      <tr><td><strong>소상공인·중소기업 (AI 도입 효과)</strong></td><td>—</td><td>매출 증가 → 직원 채용 여력 확보<br>소상공인·중소기업 1만개 × 0.5명 = <strong>5,000개 일자리 간접 창출</strong></td></tr>
+      <tr><td><strong>파트너/생태계</strong></td><td>—</td><td>카카오/네이버 API 연동 파트너, 지역 IT 교육기관 협력</td></tr>
+    </tbody>
+  </table>
+
+  <h3>지역 경제 기여</h3>
+  <div class="ib ib-g">
+    <ul>
+      <li>울산 소상공인·중소기업 대상 AI 자동화 서비스 <strong>우선 제공</strong></li>
+      <li>울산 창조경제혁신센터(CCEI) 연계 <strong>소상공인·중소기업 디지털 전환 지원</strong></li>
+      <li>울산 지역 <strong>AI 인재 채용 200명+</strong> (비수도권 양질의 일자리)</li>
+      <li>비수도권 AI 스타트업 생태계 <strong>활성화 기여</strong></li>
+      <li>소상공인·중소기업 매출 증가 → 지역 소비 증가 → <strong>지역 경제 선순환</strong></li>
+    </ul>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══ 마지막 — 대한민국의 미래 ═══ -->
+<div class="cover" style="min-height:auto;padding:60px 20px;">
+  <div class="cover-content" style="max-width:700px;">
+    <div style="font-size:40px;margin-bottom:24px;">🇰🇷</div>
+    <h1 style="font-size:28px;margin-bottom:24px;line-height:1.5;">
+      진정한 AI 시대란<br>
+      인간이 더욱더 <span>인간답게</span><br>
+      사는 것입니다
+    </h1>
+    <div style="font-size:15px;color:rgba(255,255,255,0.6);line-height:2;margin-bottom:32px;">
+      인간과 AI가 분업하여,<br>
+      AI는 반복적인 업무를 맡고,<br>
+      인간은 창의성과 관계에 집중하며<br>
+      <strong style="color:rgba(255,255,255,0.9);">풍요와 풍족을 누리며 사는 세상.</strong>
+    </div>
+
+    <div style="width:60px;height:1px;background:rgba(255,255,255,0.15);margin:0 auto 32px;"></div>
+
+    <div style="font-size:14px;color:rgba(255,255,255,0.7);line-height:2;margin-bottom:32px;">
+      이것을 이루기 위해서는<br>
+      대한민국 경제의 밑거름이 되는<br>
+      <strong style="color:rgba(255,255,255,0.95);">소상공인과 중소기업에 적극적인 투자</strong>가 필요합니다.<br><br>
+      700만 소상공인·중소기업이 AI와 함께 성장할 때,<br>
+      대한민국은 <strong style="color:rgba(255,255,255,0.95);">AI 시대의 세계 중심</strong>이 됩니다.
+    </div>
+
+    <div style="width:60px;height:1px;background:rgba(255,255,255,0.15);margin:0 auto 32px;"></div>
+
+    <div style="font-size:14px;color:rgba(255,255,255,0.5);line-height:2;margin-bottom:40px;">
+      이 사업은 단순한 기업의 성장이 아닌,<br>
+      <strong style="color:rgba(255,255,255,0.8);">대한민국이 세계의 중심이 되기 위해 꼭 필요한 일</strong>입니다.<br><br>
+      우리는 이를 위해<br>
+      <strong style="color:#A78BFA;">국가</strong>와 <strong style="color:#60A5FA;">정부</strong>,
+      <strong style="color:#34D399;">협력기관</strong> 그리고 <strong style="color:#F59E0B;">국민의 지지</strong>가 필요합니다.
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px;">
+      <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:14px 20px;text-align:center;min-width:100px;">
+        <div style="font-size:20px;margin-bottom:4px;">🏛️</div>
+        <div style="font-size:11px;color:#A78BFA;font-weight:600;">국가</div>
+      </div>
+      <div style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);border-radius:10px;padding:14px 20px;text-align:center;min-width:100px;">
+        <div style="font-size:20px;margin-bottom:4px;">📋</div>
+        <div style="font-size:11px;color:#60A5FA;font-weight:600;">정부</div>
+      </div>
+      <div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:14px 20px;text-align:center;min-width:100px;">
+        <div style="font-size:20px;margin-bottom:4px;">🤝</div>
+        <div style="font-size:11px;color:#34D399;font-weight:600;">협력기관</div>
+      </div>
+      <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px 20px;text-align:center;min-width:100px;">
+        <div style="font-size:20px;margin-bottom:4px;">👥</div>
+        <div style="font-size:11px;color:#F59E0B;font-weight:600;">국민</div>
+      </div>
+    </div>
+
+    <div style="font-size:18px;font-weight:800;color:white;line-height:1.6;">
+      콘타벨로AI와 함께<br>
+      <span style="background:linear-gradient(135deg,#A78BFA,#60A5FA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">더 밝은 대한민국</span>을 만들겠습니다.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>콘타벨로AI — <a href="https://contavelo.ai">contavelo.ai</a></p>
+  <p style="margin-top:8px">사업계획서 · 2026</p>
+</div>
+
+</body>
+</html>

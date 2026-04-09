@@ -332,11 +332,6 @@ export default function AutomationPanel({ userId, plan }: { userId: string; plan
         </div>
       </Link>
 
-      {/* 하네스 시스템 링크 */}
-      <a href="/harness" className="block rounded-xl p-4 mt-3 text-center" style={{ background: "var(--bg-card)", border: "1px solid var(--border)", textDecoration: "none" }}>
-        <div className="text-xs font-bold" style={{ color: "var(--primary)" }}>⚙️ AI 하네스 시스템 보기</div>
-        <div className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>어떻게 AI가 최적 모델을 선택하는지 확인하세요</div>
-      </a>
     </div>
   );
 }

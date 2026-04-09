@@ -279,9 +279,6 @@ export default function Dashboard() {
               style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
             <div className="text-[13px] font-semibold text-white truncate">{bizName}</div>
           </div>
-          <a href="/harness" className="text-[#6B6B80] hover:text-white transition-colors shrink-0" style={{ textDecoration: "none" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          </a>
         </div>
 
         {/* AI Button */}

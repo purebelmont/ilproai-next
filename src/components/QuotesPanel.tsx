@@ -589,47 +589,180 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
     onClose();
   }
 
+  const totals = calcTotals(items);
+
   return (
-    <div className="p-5 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-5">
+    <div className="p-3">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between mb-3">
         <button onClick={onClose} className="text-[var(--primary)] text-sm">← 목록</button>
-        <div className="flex gap-3">
-          <button onClick={() => printEl(printId.current)} className="text-sm font-medium" style={{ color: "var(--text-muted)", minHeight: 0 }}>PDF</button>
-          <button
-            onClick={() => { buildDoc(); setStatus("confirmed"); }}
-            className="text-sm font-medium"
-            style={{ color: status === "confirmed" ? "var(--success)" : "var(--text-muted)", minHeight: 0 }}
-          >
+        <div className="flex gap-2">
+          <button onClick={() => printEl(printId.current)} className="px-3 py-1.5 text-xs rounded-lg" style={{ background: "var(--bg-hover)", color: "var(--text-muted)", minHeight: 0 }}>🖨️ PDF</button>
+          <button onClick={() => { setStatus(status === "confirmed" ? "draft" : "confirmed"); }}
+            className="px-3 py-1.5 text-xs rounded-lg font-medium" style={{ background: status === "confirmed" ? "rgba(48,209,88,0.15)" : "var(--bg-hover)", color: status === "confirmed" ? "#30D158" : "var(--text-muted)", minHeight: 0 }}>
             {status === "confirmed" ? "✓ 확정됨" : "확정"}
           </button>
-          <button onClick={save} className="text-sm font-bold" style={{ color: "var(--primary)", minHeight: 0 }}>저장</button>
+          <button onClick={save} className="px-3 py-1.5 text-xs rounded-lg font-semibold text-white" style={{ background: "var(--primary)", minHeight: 0 }}>저장</button>
         </div>
       </div>
 
-      <div className="rounded-xl border p-3 mb-4 text-xs" style={{ borderColor: "var(--border)", background: "var(--bg-card)", color: "var(--text-secondary)" }}>
-        <span className="font-semibold">견적번호:</span> {docNumber}
-        {biz.companyName && <span className="ml-3"><span className="font-semibold">공급자:</span> {biz.companyName}</span>}
+      {/* Paper-style form */}
+      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
+        <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif", fontSize: "12px" }}>
+
+          {/* Title */}
+          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+            <div style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "12px", color: "#111" }}>견 적 서</div>
+          </div>
+
+          {/* Grand total */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "20%", fontSize: "13px" }}>합계금액</td>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", fontSize: "18px", fontWeight: 900, color: "#0071E3" }}>₩{won(totals.grand)}</td>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "15%" }}>견적번호</td>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", width: "25%", fontSize: "11px" }}>{docNumber}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Doc info */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>견적일자</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ border: "none", outline: "none", width: "100%", fontSize: "12px", padding: "2px 4px" }} />
+                </td>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>유효기간</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}>
+                  <input type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)} style={{ border: "none", outline: "none", width: "100%", fontSize: "12px", padding: "2px 4px" }} />
+                </td>
+              </tr>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>결제조건</td>
+                <td colSpan={3} style={{ border: "1px solid #999", padding: "3px 4px" }}>
+                  <input value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="현금, 30일 후 지급 등" style={{ border: "none", outline: "none", width: "100%", fontSize: "12px", padding: "2px 4px" }} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Supplier / Buyer */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <thead>
+              <tr>
+                <th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>공급자</th>
+                <th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>공급받는자</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: "상호", left: biz.companyName, right: buyerName, setRight: setBuyerName },
+                { label: "사업자번호", left: biz.regNumber, right: buyerReg, setRight: setBuyerReg },
+                { label: "대표자", left: biz.ceoName, right: buyerCeo, setRight: setBuyerCeo },
+                { label: "주소", left: biz.address, right: buyerAddr, setRight: setBuyerAddr },
+              ].map(({ label, left, right, setRight }) => (
+                <tr key={label}>
+                  <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{label}</td>
+                  <td style={{ border: "1px solid #999", padding: "4px 8px", width: "35%", color: left ? "#000" : "#ccc" }}>{left || "사업자 정보를 설정하세요"}</td>
+                  <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{label}</td>
+                  <td style={{ border: "1px solid #999", padding: "2px 4px", width: "35%" }}>
+                    <input value={right} onChange={e => setRight(e.target.value)} placeholder={`거래처 ${label}`} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px 4px" }} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Items table */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "4px" }}>
+            <thead>
+              <tr style={{ background: "#f0f0f0" }}>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "5%" }}>No</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600 }}>품명</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "12%" }}>규격</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "8%" }}>수량</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "13%", textAlign: "right" }}>단가</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "15%", textAlign: "right" }}>공급가액</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "13%", textAlign: "right" }}>세액</th>
+                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "5%" }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((it, i) => {
+                const { supply, vat } = calcItem(it);
+                return (
+                  <tr key={i}>
+                    <td style={{ border: "1px solid #999", padding: "3px 4px", textAlign: "center", color: "#999" }}>{i + 1}</td>
+                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                      <input value={it.name} onChange={e => { const n = [...items]; n[i] = { ...it, name: e.target.value }; setItems(n); }} placeholder="품목명" style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px" }} />
+                    </td>
+                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                      <input value={it.spec} onChange={e => { const n = [...items]; n[i] = { ...it, spec: e.target.value }; setItems(n); }} placeholder="규격" style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px" }} />
+                    </td>
+                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                      <input type="number" value={it.qty} onChange={e => { const n = [...items]; n[i] = { ...it, qty: Number(e.target.value) }; setItems(n); }} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px", textAlign: "center" }} />
+                    </td>
+                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                      <input type="number" value={it.unitPrice} onChange={e => { const n = [...items]; n[i] = { ...it, unitPrice: Number(e.target.value) }; setItems(n); }} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px", textAlign: "right" }} />
+                    </td>
+                    <td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right", fontWeight: 500 }}>{won(supply)}</td>
+                    <td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right", color: "#666" }}>{won(vat)}</td>
+                    <td style={{ border: "1px solid #999", padding: "2px", textAlign: "center" }}>
+                      {items.length > 1 && <button onClick={() => setItems(items.filter((_, idx) => idx !== i))} style={{ color: "#ccc", fontSize: "11px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])} style={{ fontSize: "11px", color: "#0071E3", background: "none", border: "none", cursor: "pointer", padding: "4px 0", fontWeight: 600 }}>+ 품목 추가</button>
+
+          {/* Totals */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", marginBottom: "14px" }}>
+            <tbody>
+              <tr style={{ background: "#f8f8f8" }}>
+                <td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>공급가액 합계</td>
+                <td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.supply)}</td>
+                <td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>세액 (VAT 10%)</td>
+                <td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.vat)}</td>
+              </tr>
+              <tr>
+                <td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", fontWeight: 800, fontSize: "14px" }}>합 계</td>
+                <td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", textAlign: "right", fontWeight: 900, fontSize: "16px", color: "#0071E3" }}>₩{won(totals.grand)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Notes */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%", verticalAlign: "top" }}>특기사항</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px" }}>
+                  <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="납기, 운송비 별도 등" rows={2} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "4px", resize: "none" }} />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Stamp area */}
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "11px", color: "#666" }}>{biz.companyName || "공급자"}</div>
+              <div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#ccc", marginTop: "4px", borderRadius: "50%" }}>직인</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="ios-fields mb-4">
-        <div className="ios-field"><label>견적일자</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-        <div className="ios-field"><label>유효기간</label><input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} /></div>
-        <div className="ios-field"><label>결제조건</label><input value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} placeholder="현금, 30일 후 지급 등" /></div>
+      {/* Bottom actions */}
+      <div className="flex gap-2 mt-3">
+        <button onClick={save} className="flex-1 p-3 rounded-xl font-semibold text-sm text-white" style={{ background: "var(--primary)" }}>저장</button>
+        {doc.id && <button onClick={del} className="px-4 py-3 rounded-xl text-sm" style={{ background: "rgba(255,59,48,0.1)", color: "#FF3B30" }}>삭제</button>}
       </div>
-
-      <div className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>공급받는자</div>
-      <BuyerFields name={buyerName} regNum={buyerReg} ceo={buyerCeo} addr={buyerAddr}
-        setName={setBuyerName} setRegNum={setBuyerReg} setCeo={setBuyerCeo} setAddr={setBuyerAddr} />
-
-      <ItemTable items={items} setItems={setItems} />
-      <TotalsBox items={items} />
-
-      <div className="ios-fields mb-5">
-        <div className="ios-field"><label>특기사항</label><textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="납기, 운송비 별도 등" /></div>
-      </div>
-
-      <button onClick={save} className="w-full p-3 rounded-xl font-semibold text-sm text-white" style={{ background: "var(--primary)" }}>저장</button>
-      {doc.id && <div className="ios-danger mt-2" onClick={del}>견적서 삭제</div>}
 
       {/* Hidden print area */}
       <div id={printId.current} style={{ display: "none" }}>

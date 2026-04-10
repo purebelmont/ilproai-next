@@ -622,136 +622,95 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
           ))}
         </div>
 
-        {/* Generate Tab */}
+        {/* Generate Tab — minimal, focused */}
         {activeTab === 'generate' && (
           <div>
-            {/* Quick Prompts */}
-            {messages.length === 0 && (
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-white/60 mb-3">빠른 시작 — 클릭하면 바로 생성</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {quickPrompts.map((p, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleQuickPrompt(p.text)}
-                      disabled={isLoading}
-                      className="relative overflow-hidden rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-                      style={{ border: '1px solid rgba(255,255,255,0.1)' }}
-                    >
-                      {/* 배경 이미지 */}
-                      <div className="absolute inset-0">
-                        <img src={getPhoto(p.img)} alt="" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} />
-                      </div>
-                      <div className="relative p-4">
-                        <span className="text-2xl">{p.icon}</span>
-                        <div className="text-sm font-bold mt-2">{p.text}</div>
-                        <div className="text-xs text-white/70 mt-1">{p.desc}</div>
-                      </div>
+            {/* Input first — always visible at top */}
+            <div className="mb-6">
+              {messages.length === 0 && (
+                <div className="text-center mb-6">
+                  <div className="text-2xl mb-2">{currentBiz?.icon || '📣'}</div>
+                  <h2 className="text-lg font-bold mb-1">오늘 뭐 올릴까요?</h2>
+                  <p className="text-xs text-white/40">한 줄만 적어주세요. 나머지는 AI가 알아서 해요.</p>
+                </div>
+              )}
+              <form onSubmit={handleSubmit} className="flex gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  disabled={isLoading}
+                  placeholder={currentBiz ? `예: ${quickPrompts[0]?.text || '이벤트 홍보'}` : '어떤 내용을 올릴까요?'}
+                  className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none disabled:opacity-50"
+                  style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
+                />
+                <button type="submit" disabled={isLoading || !input.trim()}
+                  className="px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
+                  style={{ background: '#0071E3' }}>
+                  {isLoading ? '...' : '생성'}
+                </button>
+              </form>
+
+              {/* Quick suggestions — 2 pills only */}
+              {messages.length === 0 && (
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {quickPrompts.slice(0, 3).map((p, i) => (
+                    <button key={i} onClick={() => handleQuickPrompt(p.text)} disabled={isLoading}
+                      className="px-3 py-1.5 rounded-full text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
+                      {p.icon} {p.text}
                     </button>
                   ))}
                 </div>
+              )}
+            </div>
+
+            {/* Loading */}
+            {isLoading && (
+              <div className="rounded-xl p-6 text-center mb-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <div className="w-8 h-8 rounded-full mx-auto mb-3" style={{ border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#0071E3', animation: 'spin 1s linear infinite' }} />
+                <p className="text-sm text-white/50">게시물을 만들고 있어요...</p>
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
             )}
 
-            {/* Generated Content */}
-            <div className="space-y-6 mb-4">
-              {messages.map((message) => (
-                <div key={message.id}>
-                  {message.role === 'user' ? (
-                    <div className="flex justify-end">
-                      <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm" style={{ background: '#0071E3' }}>
-                        <p className="whitespace-pre-wrap">{message.text}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      {/* 이미지 미리보기 */}
-                      {message.text.length > 100 && (
-                        <div className="mb-3">
-                          <div className="w-full aspect-[16/9] rounded-xl overflow-hidden relative max-w-md">
-                            <img src={getPhoto(category.key, 0)} alt="" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 flex items-end p-4">
-                              <div className="text-white font-bold text-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{category.title}</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 생성된 콘텐츠 */}
-                      <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
-                          {message.text}
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                          <button
-                            onClick={() => copyToClipboard(message.text, setCopied, message.id)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                            style={{
-                              background: copied === message.id ? 'rgba(48,209,88,0.2)' : 'rgba(255,255,255,0.1)',
-                              color: copied === message.id ? '#30D158' : 'rgba(255,255,255,0.6)',
-                            }}>
-                            {copied === message.id ? '✓ 복사됨' : '📋 복사'}
-                          </button>
-                          <button
-                            onClick={() => postToSns('instagram', message.text)}
-                            disabled={posting === 'instagram'}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                            style={{ background: apiKeys.instagram ? 'rgba(225,48,108,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.instagram ? '#E1306C' : 'rgba(255,255,255,0.3)' }}>
-                            {posting === 'instagram' ? '...' : '📸 인스타'} {!apiKeys.instagram && '🔒'}
-                          </button>
-                          <button
-                            onClick={() => postToSns('facebook', message.text)}
-                            disabled={posting === 'facebook'}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                            style={{ background: apiKeys.facebook ? 'rgba(24,119,242,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.facebook ? '#1877F2' : 'rgba(255,255,255,0.3)' }}>
-                            {posting === 'facebook' ? '...' : '👥 페이스북'} {!apiKeys.facebook && '🔒'}
-                          </button>
-                          <button onClick={() => setShowApiSettings(true)}
-                            className="ml-auto text-xs text-white/30 hover:text-white/60 transition-colors">⚙️</button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+            {/* Generated Content — latest first */}
+            <div className="space-y-4">
+              {[...messages].reverse().filter(m => m.role === 'assistant' && m.text).map((message) => (
+                <div key={message.id} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  {/* Image */}
+                  <div className="aspect-[2/1] relative overflow-hidden">
+                    <img src={getPhoto(category.key, 0)} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-3 left-4 text-white font-bold" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{category.title}</div>
+                  </div>
+                  {/* Text */}
+                  <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed max-h-[300px] overflow-y-auto">
+                    {message.text}
+                  </div>
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <button
+                      onClick={() => copyToClipboard(message.text, setCopied, message.id)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                      style={{ background: copied === message.id ? 'rgba(48,209,88,0.2)' : 'rgba(255,255,255,0.1)', color: copied === message.id ? '#30D158' : 'rgba(255,255,255,0.6)' }}>
+                      {copied === message.id ? '✓ 복사됨' : '📋 복사'}
+                    </button>
+                    <button onClick={() => postToSns('instagram', message.text)} disabled={posting === 'instagram'}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                      style={{ background: apiKeys.instagram ? 'rgba(225,48,108,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.instagram ? '#E1306C' : 'rgba(255,255,255,0.3)' }}>
+                      📸 인스타 {!apiKeys.instagram && '🔒'}
+                    </button>
+                    <button onClick={() => postToSns('facebook', message.text)} disabled={posting === 'facebook'}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                      style={{ background: apiKeys.facebook ? 'rgba(24,119,242,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.facebook ? '#1877F2' : 'rgba(255,255,255,0.3)' }}>
+                      👥 페이스북 {!apiKeys.facebook && '🔒'}
+                    </button>
+                    <button onClick={() => setShowApiSettings(true)} className="ml-auto text-xs text-white/30 hover:text-white/60">⚙️</button>
+                  </div>
                 </div>
               ))}
-
-              {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-                <div className="space-y-3">
-                  {/* 로딩 카드 */}
-                  <div className="flex gap-3 overflow-x-auto pb-3">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="w-[300px] aspect-square rounded-xl animate-pulse shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }} />
-                    ))}
-                  </div>
-                  <div className="rounded-2xl px-4 py-3 text-sm animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                    <span className="text-white/50">AI가 콘텐츠와 카드를 생성하고 있습니다...</span>
-                  </div>
-                </div>
-              )}
-
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Input */}
-            <form onSubmit={handleSubmit} className="flex gap-2" style={{ position: 'sticky', bottom: 16 }}>
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                disabled={isLoading}
-                placeholder="어떤 콘텐츠를 만들까요? (예: 카페 신메뉴 출시)"
-                className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none disabled:opacity-50"
-                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className="px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
-                style={{ background: '#0071E3' }}
-              >
-                생성
-              </button>
-            </form>
           </div>
         )}
 

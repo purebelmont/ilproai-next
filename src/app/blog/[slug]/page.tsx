@@ -38,10 +38,10 @@ export default function BlogPostPage() {
         </div>
       </header>
 
-      {/* Hero thumbnail — full width */}
-      <div className="w-full flex items-center justify-center relative" style={{ background: post.thumbnail.bg, height: 320 }}>
-        <span className="text-[120px] opacity-20">{post.thumbnail.emoji}</span>
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "radial-gradient(circle at 40% 50%, rgba(255,255,255,0.3), transparent 60%)" }} />
+      {/* Hero image */}
+      <div className="w-full relative overflow-hidden" style={{ height: 360 }}>
+        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.3))" }} />
       </div>
 
       {/* Article */}

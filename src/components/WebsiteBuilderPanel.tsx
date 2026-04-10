@@ -137,7 +137,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
           if ((s.content as any)?.html) setGeneratedHtml((s.content as any).html);
           setStep("edit");
           setMessages([
-            { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n수정할 항목을 선택하거나, 자유롭게 입력하세요.`, action: "sections" },
+            { role: "system", text: `"${s.business_name}" 사이트를 불러왔어요!\n수정하고 싶은 내용을 자유롭게 입력하세요.` },
           ]);
         }
       } catch {}
@@ -327,7 +327,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
       setMobileView("preview");
       setMessages(prev => [
         ...prev.filter(m => m.action !== "loading"),
-        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n${source === "ai" ? "🧠 Claude AI가 디자인했습니다." : "📐 템플릿으로 생성했습니다."}\n\n"게시" 버튼을 누르면 아래 주소에서 확인 가능:\n🔗 /sites/${finalSlug}\n\n수정하려면 아래에서 요청하세요.`, action: "sections" },
+        { role: "system", text: `웹사이트가 완성됐어요! 🎉\n\n${source === "ai" ? "🧠 Claude AI가 디자인했습니다." : "📐 템플릿으로 생성했습니다."}\n\n"게시" 버튼을 누르면 공개돼요.\n수정하고 싶으면 자유롭게 입력하세요.` },
       ]);
     } catch (e) {
       setStreamingCode("");
@@ -450,22 +450,39 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
     if (step === "description") { submitDescription(); return; }
     if (step === "contact") { submitContact(); return; }
 
-    // Edit mode
+    // Edit mode — AI auto-detects what to change
     setMessages(prev => [...prev, { role: "user", text }]);
     setInput("");
 
     if (activeSection) {
       parseAndApply(text);
-      setMessages(prev => [...prev, { role: "system", text: "수정했어요! 미리보기를 확인하세요.", action: "sections" }]);
+      setMessages(prev => [...prev, { role: "system", text: "수정했어요!" }]);
       setActiveSection(null);
     } else {
+      // Auto-detect section from user input
       const lower = text.toLowerCase();
-      if (lower.match(/제목|타이틀|이름|메인/)) handleSectionClick("hero");
-      else if (lower.match(/소개|설명|about/)) handleSectionClick("about");
-      else if (lower.match(/메뉴|서비스|가격|목록/)) handleSectionClick("services");
-      else if (lower.match(/연락|전화|주소|이메일/)) handleSectionClick("contact");
-      else if (lower.match(/색|컬러|디자인|테마/)) handleSectionClick("theme");
-      else setMessages(prev => [...prev, { role: "system", text: "아래에서 수정할 항목을 선택해주세요.", action: "sections" }]);
+      let detected = "";
+      if (lower.match(/제목|타이틀|이름|메인|헤더|상호/)) detected = "hero";
+      else if (lower.match(/소개|설명|about|스토리/)) detected = "about";
+      else if (lower.match(/메뉴|서비스|가격|목록|상품/)) detected = "services";
+      else if (lower.match(/연락|전화|주소|이메일|위치|찾아/)) detected = "contact";
+      else if (lower.match(/색|컬러|디자인|테마|분위기/)) detected = "theme";
+
+      if (detected === "theme") {
+        handleSectionClick("theme");
+      } else if (detected) {
+        // Detected section — apply the text directly
+        setActiveSection(detected);
+        parseAndApply(text.replace(/제목|타이틀|이름|메인|헤더|상호|소개|설명|스토리|메뉴|서비스|가격|목록|상품|연락|전화|주소|이메일|위치|찾아|을|를|으로|로|변경|수정|바꿔|바꾸기|해줘|해주세요|좀/g, "").trim() || text);
+        setMessages(prev => [...prev, { role: "system", text: "수정했어요!" }]);
+        setActiveSection(null);
+      } else {
+        // Can't detect — assume it's a title change (most common)
+        setActiveSection("hero");
+        parseAndApply(text);
+        setMessages(prev => [...prev, { role: "system", text: `"${text}" — 타이틀을 수정했어요!` }]);
+        setActiveSection(null);
+      }
     }
     setTimeout(() => inputRef.current?.focus(), 100);
   }
@@ -554,23 +571,12 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                         ))}
                       </div>
                     )}
-                    {msg.action === "sections" && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {sections.map(s => (
-                          <button key={s.id} onClick={() => handleSectionClick(s.id)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-medium active:scale-[0.97]"
-                            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
-                            <span>{s.icon}</span> {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                     {msg.action === "colors" && (
                       <div className="flex flex-wrap gap-2 mt-2">
                         {COLORS.map(color => (
                           <button key={color} onClick={() => {
                             setC(prev => ({ ...prev, theme: { ...prev.theme, color } }));
-                            setMessages(prev => [...prev, { role: "user", text: color }, { role: "system", text: "적용했어요!", action: "sections" }]);
+                            setMessages(prev => [...prev, { role: "user", text: color }, { role: "system", text: "적용했어요!" }]);
                             setActiveSection(null);
                           }} className="w-7 h-7 rounded-full border-2 transition-all active:scale-90"
                             style={{ background: color, borderColor: c.theme.color === color ? "var(--text)" : "transparent" }} />
@@ -626,7 +632,7 @@ export default function WebsiteBuilderPanel({ userId, plan }: { userId: string; 
                 <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: "var(--primary-light)", color: "var(--primary)" }}>
                   {sections.find(s => s.id === activeSection)?.icon} {sections.find(s => s.id === activeSection)?.label}
                 </span>
-                <button onClick={() => { setActiveSection(null); setMessages(prev => [...prev, { role: "system", text: "취소했어요.", action: "sections" }]); }}
+                <button onClick={() => { setActiveSection(null); setMessages(prev => [...prev, { role: "system", text: "취소했어요." }]); }}
                   className="text-[10px]" style={{ color: "var(--text-muted)" }}>취소</button>
               </div>
             )}

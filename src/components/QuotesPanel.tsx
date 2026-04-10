@@ -261,32 +261,32 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
   const docNumLabel = isPO ? "발주번호" : "견적번호";
 
   return (
-    <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px", lineHeight: 1.5 }}>
+    <div style={{ background: "var(--bg-card)", color: "var(--text)", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px", lineHeight: 1.5 }}>
       <h2 style={{ textAlign: "center", fontSize: "22px", fontWeight: 700, letterSpacing: "12px", marginBottom: "20px" }}>{title}</h2>
 
       {/* Header info */}
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "16px" }}>
         <tbody>
           <tr>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", width: "20%", background: "#f5f5f5", fontWeight: 600 }}>{docNumLabel}</td>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", width: "30%" }}>{doc.docNumber}</td>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", width: "20%", background: "#f5f5f5", fontWeight: 600 }}>견적일자</td>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", width: "30%" }}>{doc.date}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", width: "20%", background: "var(--bg-hover)", fontWeight: 600 }}>{docNumLabel}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", width: "30%" }}>{doc.docNumber}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", width: "20%", background: "var(--bg-hover)", fontWeight: 600 }}>견적일자</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", width: "30%" }}>{doc.date}</td>
           </tr>
           {!isPO && (
             <tr>
-              <td style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 600 }}>유효기간</td>
-              <td style={{ border: "1px solid #000", padding: "6px 10px" }}>{doc.validUntil}</td>
-              <td style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 600 }}>결제조건</td>
-              <td style={{ border: "1px solid #000", padding: "6px 10px" }}>{doc.paymentTerms}</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 600 }}>유효기간</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px" }}>{doc.validUntil}</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 600 }}>결제조건</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px" }}>{doc.paymentTerms}</td>
             </tr>
           )}
           {isPO && (
             <tr>
-              <td style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 600 }}>납기일</td>
-              <td style={{ border: "1px solid #000", padding: "6px 10px" }}>{(doc as PODoc).deliveryDate}</td>
-              <td style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 600 }}>납품장소</td>
-              <td style={{ border: "1px solid #000", padding: "6px 10px" }}>{(doc as PODoc).deliveryPlace}</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 600 }}>납기일</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px" }}>{(doc as PODoc).deliveryDate}</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 600 }}>납품장소</td>
+              <td style={{ border: "1px solid var(--border)", padding: "6px 10px" }}>{(doc as PODoc).deliveryPlace}</td>
             </tr>
           )}
         </tbody>
@@ -296,8 +296,8 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "16px" }}>
         <thead>
           <tr>
-            <th style={{ border: "1px solid #000", padding: "6px", background: "#f5f5f5", width: "50%" }}>공급자</th>
-            <th style={{ border: "1px solid #000", padding: "6px", background: "#f5f5f5", width: "50%" }}>공급받는자</th>
+            <th style={{ border: "1px solid var(--border)", padding: "6px", background: "var(--bg-hover)", width: "50%" }}>공급자</th>
+            <th style={{ border: "1px solid var(--border)", padding: "6px", background: "var(--bg-hover)", width: "50%" }}>공급받는자</th>
           </tr>
         </thead>
         <tbody>
@@ -310,8 +310,8 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
             ["연락처", doc.supplier.phone, ""],
           ].map(([label, sup, buy], i) => (
             <tr key={i}>
-              <td style={{ border: "1px solid #000", padding: "5px 8px" }}><strong>{label}:</strong> {sup}</td>
-              <td style={{ border: "1px solid #000", padding: "5px 8px" }}>{buy && <><strong>{label}:</strong> {buy}</>}</td>
+              <td style={{ border: "1px solid var(--border)", padding: "5px 8px" }}><strong>{label}:</strong> {sup}</td>
+              <td style={{ border: "1px solid var(--border)", padding: "5px 8px" }}>{buy && <><strong>{label}:</strong> {buy}</>}</td>
             </tr>
           ))}
         </tbody>
@@ -320,9 +320,9 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
       {/* Items */}
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "12px" }}>
         <thead>
-          <tr style={{ background: "#f5f5f5" }}>
+          <tr style={{ background: "var(--bg-hover)" }}>
             {["No.", "품명", "규격", "수량", "단위", "단가", "공급가액", "세액", "비고"].map((h) => (
-              <th key={h} style={{ border: "1px solid #000", padding: "5px 4px", textAlign: "center", fontSize: "11px" }}>{h}</th>
+              <th key={h} style={{ border: "1px solid var(--border)", padding: "5px 4px", textAlign: "center", fontSize: "11px" }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -331,22 +331,22 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
             const { supply: s, vat: v } = calcItem(it);
             return (
               <tr key={i}>
-                <td style={{ border: "1px solid #000", padding: "4px", textAlign: "center" }}>{i + 1}</td>
-                <td style={{ border: "1px solid #000", padding: "4px" }}>{it.name}</td>
-                <td style={{ border: "1px solid #000", padding: "4px" }}>{it.spec}</td>
-                <td style={{ border: "1px solid #000", padding: "4px", textAlign: "right" }}>{won(it.qty)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px", textAlign: "center" }}>{it.unit}</td>
-                <td style={{ border: "1px solid #000", padding: "4px", textAlign: "right" }}>{won(it.unitPrice)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px", textAlign: "right" }}>{won(s)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px", textAlign: "right" }}>{won(v)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px" }}>{it.remark}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "center" }}>{i + 1}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px" }}>{it.name}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px" }}>{it.spec}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "right" }}>{won(it.qty)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "center" }}>{it.unit}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "right" }}>{won(it.unitPrice)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "right" }}>{won(s)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "right" }}>{won(v)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px" }}>{it.remark}</td>
               </tr>
             );
           })}
           {Array.from({ length: Math.max(0, 5 - doc.items.filter((it) => it.name).length) }).map((_, i) => (
             <tr key={"empty" + i}>
               {Array.from({ length: 9 }).map((__, j) => (
-                <td key={j} style={{ border: "1px solid #000", padding: "4px", height: "22px" }}></td>
+                <td key={j} style={{ border: "1px solid var(--border)", padding: "4px", height: "22px" }}></td>
               ))}
             </tr>
           ))}
@@ -357,20 +357,20 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "16px" }}>
         <tbody>
           <tr>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 600, width: "20%" }}>공급가액 합계</td>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", width: "30%", textAlign: "right" }}>{won(supply)}원</td>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 600, width: "20%" }}>세액 합계</td>
-            <td style={{ border: "1px solid #000", padding: "6px 10px", width: "30%", textAlign: "right" }}>{won(vat)}원</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 600, width: "20%" }}>공급가액 합계</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", width: "30%", textAlign: "right" }}>{won(supply)}원</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 600, width: "20%" }}>세액 합계</td>
+            <td style={{ border: "1px solid var(--border)", padding: "6px 10px", width: "30%", textAlign: "right" }}>{won(vat)}원</td>
           </tr>
           <tr>
-            <td colSpan={2} style={{ border: "1px solid #000", padding: "6px 10px", background: "#f5f5f5", fontWeight: 700, fontSize: "14px" }}>총 합계</td>
-            <td colSpan={2} style={{ border: "1px solid #000", padding: "6px 10px", textAlign: "right", fontWeight: 700, fontSize: "14px" }}>₩{won(grand)}</td>
+            <td colSpan={2} style={{ border: "1px solid var(--border)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 700, fontSize: "14px" }}>총 합계</td>
+            <td colSpan={2} style={{ border: "1px solid var(--border)", padding: "6px 10px", textAlign: "right", fontWeight: 700, fontSize: "14px" }}>₩{won(grand)}</td>
           </tr>
         </tbody>
       </table>
 
       {doc.notes && (
-        <div style={{ border: "1px solid #000", padding: "8px 12px", marginBottom: "12px" }}>
+        <div style={{ border: "1px solid var(--border)", padding: "8px 12px", marginBottom: "12px" }}>
           <strong>특기사항 / 결제조건:</strong> {doc.notes}
         </div>
       )}
@@ -382,7 +382,7 @@ function QuotePrintTemplate({ doc, isPO }: { doc: QuoteDoc & Partial<PODoc>; isP
           {doc.supplier.stampUrl ? (
             <img src={doc.supplier.stampUrl} alt="직인" style={{ width: 60, height: 60, objectFit: "contain" }} />
           ) : (
-            <div style={{ width: 60, height: 60, border: "1px dashed #999", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#999" }}>직인</div>
+            <div style={{ width: 60, height: 60, border: "1px dashed #999", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "var(--text-faint)" }}>직인</div>
           )}
         </div>
       </div>
@@ -395,13 +395,13 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
   const { supply, vat, grand } = calcTotals(doc.items);
 
   return (
-    <div style={{ background: "#fff", color: "#000", padding: "16px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "11px", lineHeight: 1.4 }}>
+    <div style={{ background: "var(--bg-card)", color: "var(--text)", padding: "16px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "11px", lineHeight: 1.4 }}>
       <h2 style={{ textAlign: "center", fontSize: "20px", fontWeight: 700, letterSpacing: "8px", marginBottom: "4px" }}>세금계산서</h2>
       <div style={{ textAlign: "center", fontSize: "12px", marginBottom: "12px" }}>
         이 금액을&nbsp;
-        <span style={{ border: "1px solid #000", padding: "1px 6px" }}>{doc.invoiceType === "영수" ? "✓" : " "} 영수</span>
+        <span style={{ border: "1px solid var(--border)", padding: "1px 6px" }}>{doc.invoiceType === "영수" ? "✓" : " "} 영수</span>
         &nbsp;
-        <span style={{ border: "1px solid #000", padding: "1px 6px" }}>{doc.invoiceType === "청구" ? "✓" : " "} 청구</span>
+        <span style={{ border: "1px solid var(--border)", padding: "1px 6px" }}>{doc.invoiceType === "청구" ? "✓" : " "} 청구</span>
         &nbsp;함
       </div>
 
@@ -409,7 +409,7 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", tableLayout: "fixed" }}>
         <tbody>
           <tr>
-            <td style={{ width: "10%", border: "1px solid #000", background: "#f0f0f0", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px" }}>공급자</td>
+            <td style={{ width: "10%", border: "1px solid var(--border)", background: "var(--bg-hover)", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px" }}>공급자</td>
             <td style={{ width: "40%", border: "none", padding: 0 }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <tbody>
@@ -423,14 +423,14 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
                     ["연락처", doc.supplier.phone],
                   ].map(([k, v]) => (
                     <tr key={k}>
-                      <td style={{ border: "1px solid #000", padding: "3px 6px", background: "#f8f8f8", width: "34%", fontWeight: 600 }}>{k}</td>
-                      <td style={{ border: "1px solid #000", padding: "3px 6px" }}>{v}</td>
+                      <td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", width: "34%", fontWeight: 600 }}>{k}</td>
+                      <td style={{ border: "1px solid var(--border)", padding: "3px 6px" }}>{v}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </td>
-            <td style={{ width: "10%", border: "1px solid #000", background: "#f0f0f0", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px" }}>공급받는자</td>
+            <td style={{ width: "10%", border: "1px solid var(--border)", background: "var(--bg-hover)", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px" }}>공급받는자</td>
             <td style={{ width: "40%", border: "none", padding: 0 }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <tbody>
@@ -444,8 +444,8 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
                     ["연락처", ""],
                   ].map(([k, v]) => (
                     <tr key={k}>
-                      <td style={{ border: "1px solid #000", padding: "3px 6px", background: "#f8f8f8", width: "34%", fontWeight: 600 }}>{k}</td>
-                      <td style={{ border: "1px solid #000", padding: "3px 6px" }}>{v}</td>
+                      <td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", width: "34%", fontWeight: 600 }}>{k}</td>
+                      <td style={{ border: "1px solid var(--border)", padding: "3px 6px" }}>{v}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -459,14 +459,14 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "8px" }}>
         <tbody>
           <tr>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", background: "#f8f8f8", fontWeight: 700, width: "20%" }}>합계금액</td>
-            <td colSpan={3} style={{ border: "1px solid #000", padding: "5px 8px", fontWeight: 700, fontSize: "13px" }}>{toKoreanAmount(grand)} (₩{won(grand)})</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 700, width: "20%" }}>합계금액</td>
+            <td colSpan={3} style={{ border: "1px solid var(--border)", padding: "5px 8px", fontWeight: 700, fontSize: "13px" }}>{toKoreanAmount(grand)} (₩{won(grand)})</td>
           </tr>
           <tr>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>작성년월일</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", width: "30%" }}>{doc.date}</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>발행번호</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px" }}>{doc.docNumber}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>작성년월일</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", width: "30%" }}>{doc.date}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>발행번호</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px" }}>{doc.docNumber}</td>
           </tr>
         </tbody>
       </table>
@@ -474,9 +474,9 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
       {/* Items */}
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "8px" }}>
         <thead>
-          <tr style={{ background: "#f5f5f5" }}>
+          <tr style={{ background: "var(--bg-hover)" }}>
             {["월", "일", "품목", "규격", "수량", "단가", "공급가액", "세액", "비고"].map((h) => (
-              <th key={h} style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "center", fontSize: "10px" }}>{h}</th>
+              <th key={h} style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "center", fontSize: "10px" }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -486,22 +486,22 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
             const { supply: s, vat: v } = calcItem(it);
             return (
               <tr key={i}>
-                <td style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "center" }}>{String(d.getMonth() + 1).padStart(2, "0")}</td>
-                <td style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "center" }}>{String(d.getDate()).padStart(2, "0")}</td>
-                <td style={{ border: "1px solid #000", padding: "4px" }}>{it.name}</td>
-                <td style={{ border: "1px solid #000", padding: "4px" }}>{it.spec}</td>
-                <td style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "right" }}>{won(it.qty)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "right" }}>{won(it.unitPrice)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "right" }}>{won(s)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px 3px", textAlign: "right" }}>{won(v)}</td>
-                <td style={{ border: "1px solid #000", padding: "4px" }}>{it.remark}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "center" }}>{String(d.getMonth() + 1).padStart(2, "0")}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "center" }}>{String(d.getDate()).padStart(2, "0")}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px" }}>{it.name}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px" }}>{it.spec}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "right" }}>{won(it.qty)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "right" }}>{won(it.unitPrice)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "right" }}>{won(s)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 3px", textAlign: "right" }}>{won(v)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px" }}>{it.remark}</td>
               </tr>
             );
           })}
           {Array.from({ length: Math.max(0, 4 - doc.items.filter((it) => it.name).length) }).map((_, i) => (
             <tr key={"empty" + i}>
               {Array.from({ length: 9 }).map((__, j) => (
-                <td key={j} style={{ border: "1px solid #000", padding: "4px", height: "20px" }}></td>
+                <td key={j} style={{ border: "1px solid var(--border)", padding: "4px", height: "20px" }}></td>
               ))}
             </tr>
           ))}
@@ -512,11 +512,11 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
       <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "8px" }}>
         <tbody>
           <tr>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "12%" }}>합계</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", textAlign: "right", width: "22%" }}>{won(supply)}</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", textAlign: "right", width: "22%" }}>{won(vat)}</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "12%" }}>총합계</td>
-            <td style={{ border: "1px solid #000", padding: "5px 8px", textAlign: "right", fontWeight: 700 }}>{won(grand)}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "12%" }}>합계</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right", width: "22%" }}>{won(supply)}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right", width: "22%" }}>{won(vat)}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "12%" }}>총합계</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right", fontWeight: 700 }}>{won(grand)}</td>
           </tr>
         </tbody>
       </table>
@@ -524,18 +524,18 @@ function TaxPrintTemplate({ doc }: { doc: TaxDoc }) {
       {/* Payment breakdown */}
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ background: "#f5f5f5" }}>
+          <tr style={{ background: "var(--bg-hover)" }}>
             {["현금", "수표", "어음", "외상미수금"].map((h) => (
-              <th key={h} style={{ border: "1px solid #000", padding: "4px", textAlign: "center", width: "25%" }}>{h}</th>
+              <th key={h} style={{ border: "1px solid var(--border)", padding: "4px", textAlign: "center", width: "25%" }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{doc.cash ? won(doc.cash) : ""}</td>
-            <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{doc.check ? won(doc.check) : ""}</td>
-            <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{doc.note ? won(doc.note) : ""}</td>
-            <td style={{ border: "1px solid #000", padding: "5px", textAlign: "right" }}>{doc.credit ? won(doc.credit) : ""}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px", textAlign: "right" }}>{doc.cash ? won(doc.cash) : ""}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px", textAlign: "right" }}>{doc.check ? won(doc.check) : ""}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px", textAlign: "right" }}>{doc.note ? won(doc.note) : ""}</td>
+            <td style={{ border: "1px solid var(--border)", padding: "5px", textAlign: "right" }}>{doc.credit ? won(doc.credit) : ""}</td>
           </tr>
         </tbody>
       </table>
@@ -607,22 +607,22 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
       </div>
 
       {/* Paper-style form */}
-      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
-        <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif", fontSize: "12px" }}>
+      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid var(--border)" }}>
+        <div style={{ background: "var(--bg-card)", color: "var(--text)", padding: "20px", fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif", fontSize: "12px" }}>
 
           {/* Title */}
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "12px", color: "#111" }}>견 적 서</div>
+            <div style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "12px", color: "var(--text)" }}>견 적 서</div>
           </div>
 
           {/* Grand total */}
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
             <tbody>
               <tr>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "20%", fontSize: "13px" }}>합계금액</td>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", fontSize: "18px", fontWeight: 900, color: "#0071E3" }}>₩{won(totals.grand)}</td>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "15%" }}>견적번호</td>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", width: "25%", fontSize: "11px" }}>{docNumber}</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", background: "var(--bg-hover)", fontWeight: 700, width: "20%", fontSize: "13px" }}>합계금액</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", fontSize: "18px", fontWeight: 900, color: "#0071E3" }}>₩{won(totals.grand)}</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", background: "var(--bg-hover)", fontWeight: 700, width: "15%" }}>견적번호</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", width: "25%", fontSize: "11px" }}>{docNumber}</td>
               </tr>
             </tbody>
           </table>
@@ -631,18 +631,18 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
             <tbody>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>견적일자</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>견적일자</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px", width: "35%" }}>
                   <input type="date" value={date} onChange={e => setDate(e.target.value)} style={{ border: "none", outline: "none", width: "100%", fontSize: "12px", padding: "2px 4px" }} />
                 </td>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>유효기간</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>유효기간</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px", width: "35%" }}>
                   <input type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)} style={{ border: "none", outline: "none", width: "100%", fontSize: "12px", padding: "2px 4px" }} />
                 </td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>결제조건</td>
-                <td colSpan={3} style={{ border: "1px solid #999", padding: "3px 4px" }}>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>결제조건</td>
+                <td colSpan={3} style={{ border: "1px solid var(--border)", padding: "3px 4px" }}>
                   <input value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="현금, 30일 후 지급 등" style={{ border: "none", outline: "none", width: "100%", fontSize: "12px", padding: "2px 4px" }} />
                 </td>
               </tr>
@@ -653,8 +653,8 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
             <thead>
               <tr>
-                <th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>공급자</th>
-                <th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>공급받는자</th>
+                <th colSpan={2} style={{ border: "1px solid var(--border)", padding: "5px", background: "var(--bg-hover)", width: "50%" }}>공급자</th>
+                <th colSpan={2} style={{ border: "1px solid var(--border)", padding: "5px", background: "var(--bg-hover)", width: "50%" }}>공급받는자</th>
               </tr>
             </thead>
             <tbody>
@@ -665,10 +665,10 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
                 { label: "주소", left: biz.address, right: buyerAddr, setRight: setBuyerAddr },
               ].map(({ label, left, right, setRight }) => (
                 <tr key={label}>
-                  <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{label}</td>
-                  <td style={{ border: "1px solid #999", padding: "4px 8px", width: "35%", color: left ? "#000" : "#ccc" }}>{left || "사업자 정보를 설정하세요"}</td>
-                  <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{label}</td>
-                  <td style={{ border: "1px solid #999", padding: "2px 4px", width: "35%" }}>
+                  <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>{label}</td>
+                  <td style={{ border: "1px solid var(--border)", padding: "4px 8px", width: "35%", color: left ? "#000" : "#ccc" }}>{left || "사업자 정보를 설정하세요"}</td>
+                  <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>{label}</td>
+                  <td style={{ border: "1px solid var(--border)", padding: "2px 4px", width: "35%" }}>
                     <input value={right} onChange={e => setRight(e.target.value)} placeholder={`거래처 ${label}`} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px 4px" }} />
                   </td>
                 </tr>
@@ -679,15 +679,15 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
           {/* Items table */}
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "4px" }}>
             <thead>
-              <tr style={{ background: "#f0f0f0" }}>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "5%" }}>No</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600 }}>품명</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "12%" }}>규격</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "8%" }}>수량</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "13%", textAlign: "right" }}>단가</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "15%", textAlign: "right" }}>공급가액</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "13%", textAlign: "right" }}>세액</th>
-                <th style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, width: "5%" }}></th>
+              <tr style={{ background: "var(--bg-hover)" }}>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "5%" }}>No</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600 }}>품명</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "12%" }}>규격</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "8%" }}>수량</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "13%", textAlign: "right" }}>단가</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "15%", textAlign: "right" }}>공급가액</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "13%", textAlign: "right" }}>세액</th>
+                <th style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, width: "5%" }}></th>
               </tr>
             </thead>
             <tbody>
@@ -695,23 +695,23 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
                 const { supply, vat } = calcItem(it);
                 return (
                   <tr key={i}>
-                    <td style={{ border: "1px solid #999", padding: "3px 4px", textAlign: "center", color: "#999" }}>{i + 1}</td>
-                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                    <td style={{ border: "1px solid var(--border)", padding: "3px 4px", textAlign: "center", color: "var(--text-faint)" }}>{i + 1}</td>
+                    <td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}>
                       <input value={it.name} onChange={e => { const n = [...items]; n[i] = { ...it, name: e.target.value }; setItems(n); }} placeholder="품목명" style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px" }} />
                     </td>
-                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                    <td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}>
                       <input value={it.spec} onChange={e => { const n = [...items]; n[i] = { ...it, spec: e.target.value }; setItems(n); }} placeholder="규격" style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px" }} />
                     </td>
-                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                    <td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}>
                       <input type="number" value={it.qty} onChange={e => { const n = [...items]; n[i] = { ...it, qty: Number(e.target.value) }; setItems(n); }} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px", textAlign: "center" }} />
                     </td>
-                    <td style={{ border: "1px solid #999", padding: "2px 3px" }}>
+                    <td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}>
                       <input type="number" value={it.unitPrice} onChange={e => { const n = [...items]; n[i] = { ...it, unitPrice: Number(e.target.value) }; setItems(n); }} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "2px", textAlign: "right" }} />
                     </td>
-                    <td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right", fontWeight: 500 }}>{won(supply)}</td>
-                    <td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right", color: "#666" }}>{won(vat)}</td>
-                    <td style={{ border: "1px solid #999", padding: "2px", textAlign: "center" }}>
-                      {items.length > 1 && <button onClick={() => setItems(items.filter((_, idx) => idx !== i))} style={{ color: "#ccc", fontSize: "11px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}
+                    <td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "right", fontWeight: 500 }}>{won(supply)}</td>
+                    <td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "right", color: "var(--text-muted)" }}>{won(vat)}</td>
+                    <td style={{ border: "1px solid var(--border)", padding: "2px", textAlign: "center" }}>
+                      {items.length > 1 && <button onClick={() => setItems(items.filter((_, idx) => idx !== i))} style={{ color: "var(--text-ghost)", fontSize: "11px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}
                     </td>
                   </tr>
                 );
@@ -723,15 +723,15 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
           {/* Totals */}
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", marginBottom: "14px" }}>
             <tbody>
-              <tr style={{ background: "#f8f8f8" }}>
-                <td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>공급가액 합계</td>
-                <td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.supply)}</td>
-                <td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>세액 (VAT 10%)</td>
-                <td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.vat)}</td>
+              <tr style={{ background: "var(--bg-hover)" }}>
+                <td style={{ border: "1px solid var(--border)", padding: "6px 10px", fontWeight: 700, width: "25%" }}>공급가액 합계</td>
+                <td style={{ border: "1px solid var(--border)", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.supply)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "6px 10px", fontWeight: 700, width: "25%" }}>세액 (VAT 10%)</td>
+                <td style={{ border: "1px solid var(--border)", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.vat)}</td>
               </tr>
               <tr>
-                <td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", fontWeight: 800, fontSize: "14px" }}>합 계</td>
-                <td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", textAlign: "right", fontWeight: 900, fontSize: "16px", color: "#0071E3" }}>₩{won(totals.grand)}</td>
+                <td colSpan={2} style={{ border: "1.5px solid var(--text)", padding: "8px 10px", fontWeight: 800, fontSize: "14px" }}>합 계</td>
+                <td colSpan={2} style={{ border: "1.5px solid var(--text)", padding: "8px 10px", textAlign: "right", fontWeight: 900, fontSize: "16px", color: "#0071E3" }}>₩{won(totals.grand)}</td>
               </tr>
             </tbody>
           </table>
@@ -740,8 +740,8 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
             <tbody>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%", verticalAlign: "top" }}>특기사항</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px" }}>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%", verticalAlign: "top" }}>특기사항</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px" }}>
                   <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="납기, 운송비 별도 등" rows={2} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "4px", resize: "none" }} />
                 </td>
               </tr>
@@ -751,8 +751,8 @@ function QuoteEditor({ doc, onClose }: { doc: Partial<QuoteDoc>; onClose: () => 
           {/* Stamp area */}
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "11px", color: "#666" }}>{biz.companyName || "공급자"}</div>
-              <div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#ccc", marginTop: "4px", borderRadius: "50%" }}>직인</div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{biz.companyName || "공급자"}</div>
+              <div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "var(--text-ghost)", marginTop: "4px", borderRadius: "50%" }}>직인</div>
             </div>
           </div>
         </div>
@@ -827,58 +827,58 @@ function POEditor({ doc, onClose }: { doc: Partial<PODoc>; onClose: () => void }
           <button onClick={save} className="px-3 py-1.5 text-xs rounded-lg font-semibold text-white" style={{ background: "var(--primary)", minHeight: 0 }}>저장</button>
         </div>
       </div>
-      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
-        <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px" }}>
+      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid var(--border)" }}>
+        <div style={{ background: "var(--bg-card)", color: "var(--text)", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px" }}>
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <div style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "12px", color: "#111" }}>발 주 서</div>
+            <div style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "12px", color: "var(--text)" }}>발 주 서</div>
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
             <tbody>
               <tr>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "20%", fontSize: "13px" }}>합계금액</td>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", fontSize: "18px", fontWeight: 900, color: "#0071E3" }}>₩{won(totals.grand)}</td>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "15%" }}>발주번호</td>
-                <td style={{ border: "1.5px solid #000", padding: "8px 12px", width: "25%", fontSize: "11px" }}>{docNumber}</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", background: "var(--bg-hover)", fontWeight: 700, width: "20%", fontSize: "13px" }}>합계금액</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", fontSize: "18px", fontWeight: 900, color: "#0071E3" }}>₩{won(totals.grand)}</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", background: "var(--bg-hover)", fontWeight: 700, width: "15%" }}>발주번호</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "8px 12px", width: "25%", fontSize: "11px" }}>{docNumber}</td>
               </tr>
             </tbody>
           </table>
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
             <tbody>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>발주일자</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} /></td>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>납기일</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}><input type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>발주일자</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px", width: "35%" }}><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>납기일</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px", width: "35%" }}><input type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} style={inp} /></td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>납품장소</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px" }}><input value={deliveryPlace} onChange={e => setDeliveryPlace(e.target.value)} placeholder="본사 창고" style={inp} /></td>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>결제조건</td>
-                <td style={{ border: "1px solid #999", padding: "3px 4px" }}><input value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="현금, 30일 어음" style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>납품장소</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px" }}><input value={deliveryPlace} onChange={e => setDeliveryPlace(e.target.value)} placeholder="본사 창고" style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>결제조건</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 4px" }}><input value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="현금, 30일 어음" style={inp} /></td>
               </tr>
             </tbody>
           </table>
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
-            <thead><tr><th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>발주자</th><th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>공급업체</th></tr></thead>
+            <thead><tr><th colSpan={2} style={{ border: "1px solid var(--border)", padding: "5px", background: "var(--bg-hover)", width: "50%" }}>발주자</th><th colSpan={2} style={{ border: "1px solid var(--border)", padding: "5px", background: "var(--bg-hover)", width: "50%" }}>공급업체</th></tr></thead>
             <tbody>
               {[{ label: "상호", left: biz.companyName, right: buyerName, set: setBuyerName }, { label: "사업자번호", left: biz.regNumber, right: buyerReg, set: setBuyerReg }, { label: "대표자", left: biz.ceoName, right: buyerCeo, set: setBuyerCeo }, { label: "주소", left: biz.address, right: buyerAddr, set: setBuyerAddr }].map(r => (
-                <tr key={r.label}><td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{r.label}</td><td style={{ border: "1px solid #999", padding: "4px 8px", width: "35%" }}>{r.left || "—"}</td><td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{r.label}</td><td style={{ border: "1px solid #999", padding: "2px 4px", width: "35%" }}><input value={r.right} onChange={e => r.set(e.target.value)} placeholder={`${r.label}`} style={inp} /></td></tr>
+                <tr key={r.label}><td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>{r.label}</td><td style={{ border: "1px solid var(--border)", padding: "4px 8px", width: "35%" }}>{r.left || "—"}</td><td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>{r.label}</td><td style={{ border: "1px solid var(--border)", padding: "2px 4px", width: "35%" }}><input value={r.right} onChange={e => r.set(e.target.value)} placeholder={`${r.label}`} style={inp} /></td></tr>
               ))}
             </tbody>
           </table>
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "4px" }}>
-            <thead><tr style={{ background: "#f0f0f0" }}>{["No","품명","규격","수량","단가","공급가액","세액",""].map(h => <th key={h} style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, textAlign: h === "단가" || h === "공급가액" || h === "세액" ? "right" : "center", width: h === "No" ? "5%" : h === "" ? "5%" : undefined }}>{h}</th>)}</tr></thead>
-            <tbody>{items.map((it, i) => { const { supply, vat } = calcItem(it); return (<tr key={i}><td style={{ border: "1px solid #999", padding: "3px 4px", textAlign: "center", color: "#999" }}>{i+1}</td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={it.name} onChange={e => { const n=[...items]; n[i]={...it,name:e.target.value}; setItems(n); }} style={inp} /></td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={it.spec} onChange={e => { const n=[...items]; n[i]={...it,spec:e.target.value}; setItems(n); }} style={inp} /></td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input type="number" value={it.qty} onChange={e => { const n=[...items]; n[i]={...it,qty:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"center"}} /></td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input type="number" value={it.unitPrice} onChange={e => { const n=[...items]; n[i]={...it,unitPrice:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"right"}} /></td><td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right" }}>{won(supply)}</td><td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right", color: "#666" }}>{won(vat)}</td><td style={{ border: "1px solid #999", padding: "2px", textAlign: "center" }}>{items.length > 1 && <button onClick={() => setItems(items.filter((_,idx) => idx!==i))} style={{ color: "#ccc", fontSize: "11px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}</td></tr>); })}</tbody>
+            <thead><tr style={{ background: "var(--bg-hover)" }}>{["No","품명","규격","수량","단가","공급가액","세액",""].map(h => <th key={h} style={{ border: "1px solid var(--border)", padding: "5px 4px", fontWeight: 600, textAlign: h === "단가" || h === "공급가액" || h === "세액" ? "right" : "center", width: h === "No" ? "5%" : h === "" ? "5%" : undefined }}>{h}</th>)}</tr></thead>
+            <tbody>{items.map((it, i) => { const { supply, vat } = calcItem(it); return (<tr key={i}><td style={{ border: "1px solid var(--border)", padding: "3px 4px", textAlign: "center", color: "var(--text-faint)" }}>{i+1}</td><td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}><input value={it.name} onChange={e => { const n=[...items]; n[i]={...it,name:e.target.value}; setItems(n); }} style={inp} /></td><td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}><input value={it.spec} onChange={e => { const n=[...items]; n[i]={...it,spec:e.target.value}; setItems(n); }} style={inp} /></td><td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}><input type="number" value={it.qty} onChange={e => { const n=[...items]; n[i]={...it,qty:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"center"}} /></td><td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}><input type="number" value={it.unitPrice} onChange={e => { const n=[...items]; n[i]={...it,unitPrice:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"right"}} /></td><td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "right" }}>{won(supply)}</td><td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "right", color: "var(--text-muted)" }}>{won(vat)}</td><td style={{ border: "1px solid var(--border)", padding: "2px", textAlign: "center" }}>{items.length > 1 && <button onClick={() => setItems(items.filter((_,idx) => idx!==i))} style={{ color: "var(--text-ghost)", fontSize: "11px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}</td></tr>); })}</tbody>
           </table>
           <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])} style={{ fontSize: "11px", color: "#0071E3", background: "none", border: "none", cursor: "pointer", padding: "4px 0", fontWeight: 600 }}>+ 품목 추가</button>
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", marginBottom: "14px" }}>
             <tbody>
-              <tr style={{ background: "#f8f8f8" }}><td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>공급가액</td><td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.supply)}</td><td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>세액 (VAT)</td><td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.vat)}</td></tr>
-              <tr><td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", fontWeight: 800, fontSize: "14px" }}>합 계</td><td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", textAlign: "right", fontWeight: 900, fontSize: "16px", color: "#0071E3" }}>₩{won(totals.grand)}</td></tr>
+              <tr style={{ background: "var(--bg-hover)" }}><td style={{ border: "1px solid var(--border)", padding: "6px 10px", fontWeight: 700, width: "25%" }}>공급가액</td><td style={{ border: "1px solid var(--border)", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.supply)}</td><td style={{ border: "1px solid var(--border)", padding: "6px 10px", fontWeight: 700, width: "25%" }}>세액 (VAT)</td><td style={{ border: "1px solid var(--border)", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.vat)}</td></tr>
+              <tr><td colSpan={2} style={{ border: "1.5px solid var(--text)", padding: "8px 10px", fontWeight: 800, fontSize: "14px" }}>합 계</td><td colSpan={2} style={{ border: "1.5px solid var(--text)", padding: "8px 10px", textAlign: "right", fontWeight: 900, fontSize: "16px", color: "#0071E3" }}>₩{won(totals.grand)}</td></tr>
             </tbody>
           </table>
-          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}><tbody><tr><td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%", verticalAlign: "top" }}>특기사항</td><td style={{ border: "1px solid #999", padding: "3px 4px" }}><textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="포장방법, 운송비 조건 등" rows={2} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "4px", resize: "none" }} /></td></tr></tbody></table>
-          <div style={{ display: "flex", justifyContent: "flex-end" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "11px", color: "#666" }}>{biz.companyName || "발주자"}</div><div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#ccc", marginTop: "4px", borderRadius: "50%" }}>직인</div></div></div>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}><tbody><tr><td style={{ border: "1px solid var(--border)", padding: "5px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%", verticalAlign: "top" }}>특기사항</td><td style={{ border: "1px solid var(--border)", padding: "3px 4px" }}><textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="포장방법, 운송비 조건 등" rows={2} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "4px", resize: "none" }} /></td></tr></tbody></table>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{biz.companyName || "발주자"}</div><div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "var(--text-ghost)", marginTop: "4px", borderRadius: "50%" }}>직인</div></div></div>
         </div>
       </div>
       <div className="flex gap-2 mt-3">
@@ -949,16 +949,16 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
           <button onClick={save} className="px-3 py-1.5 text-xs rounded-lg font-semibold text-white" style={{ background: "var(--primary)", minHeight: 0 }}>저장</button>
         </div>
       </div>
-      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
-        <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px" }}>
+      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid var(--border)" }}>
+        <div style={{ background: "var(--bg-card)", color: "var(--text)", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px" }}>
           {/* Title */}
           <div style={{ textAlign: "center", marginBottom: "4px" }}>
-            <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "10px", color: "#111" }}>세금계산서</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "10px", color: "var(--text)" }}>세금계산서</div>
           </div>
           <div style={{ textAlign: "center", marginBottom: "14px", fontSize: "12px" }}>
             이 금액을&nbsp;
             {(["영수", "청구"] as const).map(t => (
-              <label key={t} style={{ cursor: "pointer", margin: "0 4px", border: "1px solid #000", padding: "1px 8px" }}>
+              <label key={t} style={{ cursor: "pointer", margin: "0 4px", border: "1px solid var(--border)", padding: "1px 8px" }}>
                 <input type="radio" checked={invoiceType === t} onChange={() => setInvoiceType(t)} style={{ marginRight: "3px" }} />{t}
               </label>
             ))}
@@ -969,16 +969,16 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
             <tbody>
               <tr>
-                <td style={{ border: "1.5px solid #000", padding: "6px 10px", background: "#f0f0f0", fontWeight: 700, width: "20%" }}>합계금액</td>
-                <td style={{ border: "1.5px solid #000", padding: "6px 10px", fontSize: "16px", fontWeight: 900, color: "#0071E3" }}>₩{won(grand)}</td>
-                <td style={{ border: "1.5px solid #000", padding: "6px 10px", background: "#f0f0f0", fontWeight: 700, width: "15%" }}>발행번호</td>
-                <td style={{ border: "1.5px solid #000", padding: "6px 10px", fontSize: "11px" }}>{docNumber}</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 700, width: "20%" }}>합계금액</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "6px 10px", fontSize: "16px", fontWeight: 900, color: "#0071E3" }}>₩{won(grand)}</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "6px 10px", background: "var(--bg-hover)", fontWeight: 700, width: "15%" }}>발행번호</td>
+                <td style={{ border: "1.5px solid var(--text)", padding: "6px 10px", fontSize: "11px" }}>{docNumber}</td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>작성일자</td>
-                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} /></td>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>한글금액</td>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", fontSize: "10px" }}>{toKoreanAmount(grand)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>작성일자</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 4px" }}><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>한글금액</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", fontSize: "10px" }}>{toKoreanAmount(grand)}</td>
               </tr>
             </tbody>
           </table>
@@ -987,13 +987,13 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
             <tbody>
               <tr>
-                <td rowSpan={6} style={{ border: "1px solid #000", background: "#f0f0f0", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px", width: "5%" }}>공급자</td>
+                <td rowSpan={6} style={{ border: "1px solid var(--border)", background: "var(--bg-hover)", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px", width: "5%" }}>공급자</td>
                 {[{ l: "등록번호", v: biz.regNumber }, { l: "상호", v: biz.companyName }].map(({ l, v }) => (
-                  <><td key={l+"l"} style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600, width: "10%" }}>{l}</td><td key={l+"v"} style={{ border: "1px solid #999", padding: "3px 6px", width: "30%" }}>{v || "—"}</td></>
+                  <><td key={l+"l"} style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600, width: "10%" }}>{l}</td><td key={l+"v"} style={{ border: "1px solid var(--border)", padding: "3px 6px", width: "30%" }}>{v || "—"}</td></>
                 ))}
-                <td rowSpan={6} style={{ border: "1px solid #000", background: "#f0f0f0", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px", width: "5%" }}>공급받는자</td>
-                <td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600, width: "10%" }}>등록번호</td>
-                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "30%" }}><input value={buyerReg} onChange={e => setBuyerReg(e.target.value)} placeholder="000-00-00000" style={inp} /></td>
+                <td rowSpan={6} style={{ border: "1px solid var(--border)", background: "var(--bg-hover)", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px", width: "5%" }}>공급받는자</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600, width: "10%" }}>등록번호</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 3px", width: "30%" }}><input value={buyerReg} onChange={e => setBuyerReg(e.target.value)} placeholder="000-00-00000" style={inp} /></td>
               </tr>
               {[
                 { l: "성명(대표)", left: biz.ceoName, right: buyerCeo, set: setBuyerCeo },
@@ -1002,13 +1002,13 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
                 { l: "종목", left: biz.bizItem, right: buyerBizItem, set: setBuyerBizItem },
               ].map((r, ri) => (
                 <tr key={ri}>
-                  {ri === 0 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>상호</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{biz.companyName || "—"}</td></>}
-                  {ri === 1 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{r.left || "—"}</td></>}
-                  {ri === 2 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{r.left || "—"}</td></>}
-                  {ri === 3 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{r.left || "—"}</td></>}
-                  {ri === 0 && <td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>상호</td>}
-                  {ri !== 0 && <td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td>}
-                  <td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={ri === 0 ? buyerName : r.right} onChange={e => ri === 0 ? setBuyerName(e.target.value) : r.set(e.target.value)} style={inp} /></td>
+                  {ri === 0 && <><td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600 }}>상호</td><td style={{ border: "1px solid var(--border)", padding: "3px 6px" }}>{biz.companyName || "—"}</td></>}
+                  {ri === 1 && <><td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid var(--border)", padding: "3px 6px" }}>{r.left || "—"}</td></>}
+                  {ri === 2 && <><td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid var(--border)", padding: "3px 6px" }}>{r.left || "—"}</td></>}
+                  {ri === 3 && <><td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid var(--border)", padding: "3px 6px" }}>{r.left || "—"}</td></>}
+                  {ri === 0 && <td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600 }}>상호</td>}
+                  {ri !== 0 && <td style={{ border: "1px solid var(--border)", padding: "3px 6px", background: "var(--bg-hover)", fontWeight: 600 }}>{r.l}</td>}
+                  <td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}><input value={ri === 0 ? buyerName : r.right} onChange={e => ri === 0 ? setBuyerName(e.target.value) : r.set(e.target.value)} style={inp} /></td>
                 </tr>
               ))}
             </tbody>
@@ -1016,18 +1016,18 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
 
           {/* Items */}
           <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "4px" }}>
-            <thead><tr style={{ background: "#f0f0f0" }}>{["월","일","품목","규격","수량","단가","공급가액","세액",""].map(h => <th key={h} style={{ border: "1px solid #999", padding: "4px 3px", fontWeight: 600, textAlign: "center", fontSize: "10px" }}>{h}</th>)}</tr></thead>
+            <thead><tr style={{ background: "var(--bg-hover)" }}>{["월","일","품목","규격","수량","단가","공급가액","세액",""].map(h => <th key={h} style={{ border: "1px solid var(--border)", padding: "4px 3px", fontWeight: 600, textAlign: "center", fontSize: "10px" }}>{h}</th>)}</tr></thead>
             <tbody>{items.map((it, i) => { const { supply: s, vat: v } = calcItem(it); const d2 = new Date(date); return (
               <tr key={i}>
-                <td style={{ border: "1px solid #999", padding: "3px", textAlign: "center", width: "6%" }}>{String(d2.getMonth()+1).padStart(2,"0")}</td>
-                <td style={{ border: "1px solid #999", padding: "3px", textAlign: "center", width: "6%" }}>{String(d2.getDate()).padStart(2,"0")}</td>
-                <td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={it.name} onChange={e => { const n=[...items]; n[i]={...it,name:e.target.value}; setItems(n); }} style={inp} /></td>
-                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "10%" }}><input value={it.spec} onChange={e => { const n=[...items]; n[i]={...it,spec:e.target.value}; setItems(n); }} style={inp} /></td>
-                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "8%" }}><input type="number" value={it.qty} onChange={e => { const n=[...items]; n[i]={...it,qty:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"center"}} /></td>
-                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "12%" }}><input type="number" value={it.unitPrice} onChange={e => { const n=[...items]; n[i]={...it,unitPrice:Number(e.target.value)}; setItems(n); }} style={ninp} /></td>
-                <td style={{ border: "1px solid #999", padding: "4px 4px", textAlign: "right", width: "13%" }}>{won(s)}</td>
-                <td style={{ border: "1px solid #999", padding: "4px 4px", textAlign: "right", width: "11%", color: "#666" }}>{won(v)}</td>
-                <td style={{ border: "1px solid #999", padding: "2px", textAlign: "center", width: "4%" }}>{items.length > 1 && <button onClick={() => setItems(items.filter((_,idx) => idx!==i))} style={{ color: "#ccc", fontSize: "10px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px", textAlign: "center", width: "6%" }}>{String(d2.getMonth()+1).padStart(2,"0")}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "3px", textAlign: "center", width: "6%" }}>{String(d2.getDate()).padStart(2,"0")}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 3px" }}><input value={it.name} onChange={e => { const n=[...items]; n[i]={...it,name:e.target.value}; setItems(n); }} style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 3px", width: "10%" }}><input value={it.spec} onChange={e => { const n=[...items]; n[i]={...it,spec:e.target.value}; setItems(n); }} style={inp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 3px", width: "8%" }}><input type="number" value={it.qty} onChange={e => { const n=[...items]; n[i]={...it,qty:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"center"}} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 3px", width: "12%" }}><input type="number" value={it.unitPrice} onChange={e => { const n=[...items]; n[i]={...it,unitPrice:Number(e.target.value)}; setItems(n); }} style={ninp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 4px", textAlign: "right", width: "13%" }}>{won(s)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 4px", textAlign: "right", width: "11%", color: "var(--text-muted)" }}>{won(v)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px", textAlign: "center", width: "4%" }}>{items.length > 1 && <button onClick={() => setItems(items.filter((_,idx) => idx!==i))} style={{ color: "var(--text-ghost)", fontSize: "10px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}</td>
               </tr>); })}</tbody>
           </table>
           <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])} style={{ fontSize: "11px", color: "#0071E3", background: "none", border: "none", cursor: "pointer", padding: "4px 0", fontWeight: 600 }}>+ 품목 추가</button>
@@ -1035,30 +1035,30 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
           {/* Totals + payment */}
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", marginBottom: "10px" }}>
             <tbody>
-              <tr style={{ background: "#f8f8f8" }}>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", fontWeight: 700 }}>공급가액</td>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", textAlign: "right" }}>₩{won(supply)}</td>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", fontWeight: 700 }}>세액</td>
-                <td style={{ border: "1px solid #999", padding: "5px 8px", textAlign: "right" }}>₩{won(vat)}</td>
+              <tr style={{ background: "var(--bg-hover)" }}>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", fontWeight: 700 }}>공급가액</td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right" }}>₩{won(supply)}</td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", fontWeight: 700 }}>세액</td>
+                <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right" }}>₩{won(vat)}</td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>현금</td>
-                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={cash || ""} onChange={e => setCash(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>수표</td>
-                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={check || ""} onChange={e => setCheck(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>현금</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 4px" }}><input type="number" value={cash || ""} onChange={e => setCash(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>수표</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 4px" }}><input type="number" value={check || ""} onChange={e => setCheck(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
               </tr>
               <tr>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>어음</td>
-                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={note || ""} onChange={e => setNote(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
-                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>외상미수금</td>
-                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={credit || ""} onChange={e => setCredit(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>어음</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 4px" }}><input type="number" value={note || ""} onChange={e => setNote(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+                <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>외상미수금</td>
+                <td style={{ border: "1px solid var(--border)", padding: "2px 4px" }}><input type="number" value={credit || ""} onChange={e => setCredit(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
               </tr>
             </tbody>
           </table>
 
           {/* Stamp */}
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <div style={{ textAlign: "center" }}><div style={{ fontSize: "11px", color: "#666" }}>{biz.companyName || "공급자"}</div><div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#ccc", marginTop: "4px", borderRadius: "50%" }}>직인</div></div>
+            <div style={{ textAlign: "center" }}><div style={{ fontSize: "11px", color: "var(--text-muted)" }}>{biz.companyName || "공급자"}</div><div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "var(--text-ghost)", marginTop: "4px", borderRadius: "50%" }}>직인</div></div>
           </div>
         </div>
       </div>
@@ -1099,17 +1099,17 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
           {docs.map((doc) => {
             const { supply, vat, grand } = calcTotals(doc.items);
             return (
-              <div key={doc.id} onClick={() => onEdit(doc)} className="cursor-pointer hover:shadow-lg transition-shadow rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
+              <div key={doc.id} onClick={() => onEdit(doc)} className="cursor-pointer hover:shadow-lg transition-shadow rounded-lg overflow-hidden" style={{ border: "2px solid var(--border)" }}>
                 {/* Paper-style document */}
-                <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif", fontSize: "11px" }}>
+                <div style={{ background: "var(--bg-card)", color: "var(--text)", padding: "20px", fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif", fontSize: "11px" }}>
                   {/* Title */}
                   <div style={{ textAlign: "center", marginBottom: "16px" }}>
-                    <div style={{ fontSize: "20px", fontWeight: 800, letterSpacing: "10px", color: "#111" }}>{label}</div>
-                    <div style={{ fontSize: "10px", color: "#999", marginTop: "4px" }}>{doc.docNumber} | {doc.date}</div>
+                    <div style={{ fontSize: "20px", fontWeight: 800, letterSpacing: "10px", color: "var(--text)" }}>{label}</div>
+                    <div style={{ fontSize: "10px", color: "var(--text-faint)", marginTop: "4px" }}>{doc.docNumber} | {doc.date}</div>
                   </div>
 
                   {/* Grand total highlight */}
-                  <div style={{ textAlign: "right", marginBottom: "14px", padding: "10px 14px", background: "#f8f8f8", borderRadius: "6px", border: "1px solid #e0e0e0" }}>
+                  <div style={{ textAlign: "right", marginBottom: "14px", padding: "10px 14px", background: "var(--bg-hover)", borderRadius: "6px", border: "1px solid #e0e0e0" }}>
                     <span style={{ fontSize: "10px", color: "#888" }}>합계금액 (VAT 포함)</span>
                     <div style={{ fontSize: "22px", fontWeight: 900, color: "#0071E3", letterSpacing: "-1px" }}>₩{won(grand)}</div>
                   </div>
@@ -1118,16 +1118,16 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
                   <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "12px", fontSize: "10px" }}>
                     <tbody>
                       <tr>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600, width: "15%" }}>공급자</td>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", width: "35%" }}>{doc.supplier?.companyName || "—"}</td>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600, width: "15%" }}>공급받는자</td>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", width: "35%" }}>{doc.buyerName || "—"}</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>공급자</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px", width: "35%" }}>{doc.supplier?.companyName || "—"}</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600, width: "15%" }}>공급받는자</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px", width: "35%" }}>{doc.buyerName || "—"}</td>
                       </tr>
                       <tr>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600 }}>사업자번호</td>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px" }}>{doc.supplier?.regNumber || "—"}</td>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600 }}>사업자번호</td>
-                        <td style={{ border: "1px solid #ccc", padding: "4px 8px" }}>{doc.buyerReg || "—"}</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>사업자번호</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px" }}>{doc.supplier?.regNumber || "—"}</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px", background: "var(--bg-hover)", fontWeight: 600 }}>사업자번호</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "4px 8px" }}>{doc.buyerReg || "—"}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1135,11 +1135,11 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
                   {/* Items table */}
                   <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "12px", fontSize: "10px" }}>
                     <thead>
-                      <tr style={{ background: "#f5f5f5" }}>
-                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600 }}>품명</th>
-                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600, width: "60px" }}>수량</th>
-                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600, width: "80px", textAlign: "right" }}>단가</th>
-                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600, width: "90px", textAlign: "right" }}>공급가액</th>
+                      <tr style={{ background: "var(--bg-hover)" }}>
+                        <th style={{ border: "1px solid var(--border)", padding: "4px 6px", fontWeight: 600 }}>품명</th>
+                        <th style={{ border: "1px solid var(--border)", padding: "4px 6px", fontWeight: 600, width: "60px" }}>수량</th>
+                        <th style={{ border: "1px solid var(--border)", padding: "4px 6px", fontWeight: 600, width: "80px", textAlign: "right" }}>단가</th>
+                        <th style={{ border: "1px solid var(--border)", padding: "4px 6px", fontWeight: 600, width: "90px", textAlign: "right" }}>공급가액</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1147,15 +1147,15 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
                         const s = calcItem(item).supply;
                         return (
                           <tr key={i}>
-                            <td style={{ border: "1px solid #ccc", padding: "4px 6px" }}>{item.name}{item.spec ? ` (${item.spec})` : ""}</td>
-                            <td style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "center" }}>{item.qty} {item.unit}</td>
-                            <td style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "right" }}>{won(item.unitPrice)}</td>
-                            <td style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "right" }}>{won(s)}</td>
+                            <td style={{ border: "1px solid var(--border)", padding: "4px 6px" }}>{item.name}{item.spec ? ` (${item.spec})` : ""}</td>
+                            <td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "center" }}>{item.qty} {item.unit}</td>
+                            <td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "right" }}>{won(item.unitPrice)}</td>
+                            <td style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "right" }}>{won(s)}</td>
                           </tr>
                         );
                       })}
                       {doc.items.length > 4 && (
-                        <tr><td colSpan={4} style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "center", color: "#999" }}>... 외 {doc.items.length - 4}건</td></tr>
+                        <tr><td colSpan={4} style={{ border: "1px solid var(--border)", padding: "4px 6px", textAlign: "center", color: "var(--text-faint)" }}>... 외 {doc.items.length - 4}건</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -1163,11 +1163,11 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
                   {/* Totals row */}
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px" }}>
                     <tbody>
-                      <tr style={{ background: "#f5f5f5" }}>
-                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", fontWeight: 600, width: "25%" }}>공급가액</td>
-                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", textAlign: "right", width: "25%" }}>{won(supply)}원</td>
-                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", fontWeight: 600, width: "25%" }}>세액 (10%)</td>
-                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", textAlign: "right", width: "25%" }}>{won(vat)}원</td>
+                      <tr style={{ background: "var(--bg-hover)" }}>
+                        <td style={{ border: "1px solid var(--border)", padding: "5px 8px", fontWeight: 600, width: "25%" }}>공급가액</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right", width: "25%" }}>{won(supply)}원</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "5px 8px", fontWeight: 600, width: "25%" }}>세액 (10%)</td>
+                        <td style={{ border: "1px solid var(--border)", padding: "5px 8px", textAlign: "right", width: "25%" }}>{won(vat)}원</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1177,7 +1177,7 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
                     <span style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "4px", fontWeight: 600, background: doc.status === "confirmed" ? "#E8F5E9" : "#F5F5F5", color: doc.status === "confirmed" ? "#2E7D32" : "#999" }}>
                       {doc.status === "confirmed" ? "✓ 확정" : "초안"}
                     </span>
-                    <span style={{ fontSize: "9px", color: "#bbb" }}>클릭하여 편집 →</span>
+                    <span style={{ fontSize: "9px", color: "var(--text-ghost)" }}>클릭하여 편집 →</span>
                   </div>
                 </div>
               </div>

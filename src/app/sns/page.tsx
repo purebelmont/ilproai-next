@@ -142,18 +142,18 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const Bookmark = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
 
   return (
-    <div className={embedded ? "h-full flex flex-col overflow-hidden" : "min-h-screen flex flex-col"} style={{ background: '#000', color: '#fff' }}>
+    <div className={embedded ? "h-full flex flex-col overflow-hidden" : "min-h-screen flex flex-col"} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <style>{`
         @keyframes igSpin { to { transform: rotate(360deg); } }
         @keyframes igPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
         .ig-ring { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; border-radius: 50%; }
-        .ig-ring-used { background: #333; padding: 2px; border-radius: 50%; }
+        .ig-ring-used { background: var(--bg-hover); padding: 2px; border-radius: 50%; }
         .ig-hide-scroll::-webkit-scrollbar { display: none; }
         .ig-hide-scroll { scrollbar-width: none; }
       `}</style>
 
       {/* ═══ Header ═══ */}
-      <header className="shrink-0 px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid #262626' }}>
+      <header className="shrink-0 px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2">
           {!embedded && (
             <Link href="/dashboard" className="text-white/40 hover:text-white/70 mr-1">
@@ -179,7 +179,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
       <div ref={feedRef} className="flex-1 overflow-y-auto ig-hide-scroll">
 
         {/* Stories row */}
-        <div className="px-4 py-3 overflow-x-auto ig-hide-scroll flex gap-4" style={{ borderBottom: '1px solid #262626' }}>
+        <div className="px-4 py-3 overflow-x-auto ig-hide-scroll flex gap-4" style={{ borderBottom: '1px solid var(--border)' }}>
           {/* "새 글" story (always first) */}
           <button onClick={() => document.getElementById('ig-input')?.focus()}
             className="flex flex-col items-center gap-1 shrink-0 active:scale-95 transition-transform" style={{ width: 64 }}>
@@ -193,7 +193,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
             <button key={i} onClick={() => tapStory(i)} disabled={loading}
               className="flex flex-col items-center gap-1 shrink-0 disabled:opacity-30 active:scale-95 transition-transform" style={{ width: 64 }}>
               <div className={usedStories.has(i) ? 'ig-ring-used' : 'ig-ring'}>
-                <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-lg" style={{ background: '#000' }}>
+                <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-lg" style={{ background: 'var(--bg)' }}>
                   {s.icon}
                 </div>
               </div>
@@ -203,10 +203,10 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
         </div>
 
         {/* Input bar — like Instagram's comment/DM input */}
-        <div className="px-4 py-3" style={{ borderBottom: '1px solid #262626' }}>
+        <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
           <form onSubmit={submit} className="flex items-center gap-3">
             <div className="ig-ring shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: '#000', color: '#fff' }}>AI</div>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--bg)', color: '#fff' }}>AI</div>
             </div>
             <input id="ig-input" value={input} onChange={e => setInput(e.target.value)} disabled={loading}
               placeholder="무엇을 홍보할까요?"
@@ -234,16 +234,16 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
 
         {/* Loading skeleton */}
         {loading && posts[0]?.text === '' && (
-          <div style={{ borderBottom: '1px solid #262626' }}>
+          <div style={{ borderBottom: '1px solid var(--border)' }}>
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-full" style={{ background: '#262626' }} />
-              <div className="h-3 rounded" style={{ background: '#262626', width: 100 }} />
+              <div className="w-8 h-8 rounded-full" style={{ background: 'var(--bg-hover)' }} />
+              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: 100 }} />
             </div>
-            <div className="aspect-square" style={{ background: '#111', animation: 'igPulse 1.5s ease infinite' }} />
+            <div className="aspect-square" style={{ background: 'var(--bg-card)', animation: 'igPulse 1.5s ease infinite' }} />
             <div className="px-4 py-3 space-y-2">
-              <div className="h-3 rounded" style={{ background: '#262626', width: '80%' }} />
-              <div className="h-3 rounded" style={{ background: '#262626', width: '60%' }} />
-              <div className="h-3 rounded" style={{ background: '#262626', width: '40%' }} />
+              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '80%' }} />
+              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '60%' }} />
+              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '40%' }} />
             </div>
           </div>
         )}
@@ -252,11 +252,11 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
         {posts.filter(p => p.text).map((post, idx) => {
           const cat = detectCategory(post.prompt);
           return (
-            <div key={post.id} style={{ borderBottom: '1px solid #262626' }}>
+            <div key={post.id} style={{ borderBottom: '1px solid var(--border)' }}>
               {/* Header */}
               <div className="flex items-center gap-3 px-4 py-2.5">
                 <div className="ig-ring">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: '#000' }}>AI</div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--bg)' }}>AI</div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-semibold truncate">{post.prompt}</div>
@@ -267,7 +267,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
               </div>
 
               {/* Image */}
-              <div className="aspect-square relative overflow-hidden" style={{ background: '#111' }}>
+              <div className="aspect-square relative overflow-hidden" style={{ background: 'var(--bg-card)' }}>
                 <img src={getPhoto(cat, idx)} alt="" className="w-full h-full object-cover" />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)' }} />
               </div>

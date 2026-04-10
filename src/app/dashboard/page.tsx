@@ -856,10 +856,7 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
             <div className="text-3xl mb-3 opacity-30">📅</div>
             <p className="text-[var(--gray-400)] mb-4">이 날에 일정이 없습니다</p>
             <div className="flex flex-wrap gap-2 justify-center">
-              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "fullscreen")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">A. 풀스크린</button>
-              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "bottom")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">B. 바텀시트</button>
-              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "side")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">C. 사이드</button>
-              <button onClick={() => { setInlineForm(true); setInlineData({ title: "", start_time: "", description: "" }); }} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white">D. 인라인</button>
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "bottom")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white font-medium">+ 추가</button>
             </div>
           </div>
         ) : (
@@ -876,10 +873,7 @@ function CalendarPanel({ userId, openModal, closeModal }: { userId: string; open
               </div>
             ))}
             <div className="flex flex-wrap gap-2 mt-3">
-              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "fullscreen")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">A. 풀스크린</button>
-              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "bottom")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">B. 바텀시트</button>
-              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "side")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--gray-100)] text-[var(--gray-700)]">C. 사이드</button>
-              <button onClick={() => { setInlineForm(true); setInlineData({ title: "", start_time: "", description: "" }); }} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white">D. 인라인</button>
+              <button onClick={() => openModal("새 일정", <EventForm event={{ start_date: selected }} onSave={saveEvent} />, "bottom")} className="px-3 py-1.5 text-xs rounded-lg bg-[var(--primary)] text-white font-medium">+ 추가</button>
             </div>
           </>
         )}

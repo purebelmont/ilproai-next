@@ -934,6 +934,96 @@ export default function QuotesPanel({ userId, openModal, closeModal }: { userId:
 
   useEffect(() => { reload(); }, [reload]);
 
+  function loadSampleData() {
+    const biz = loadBizProfile();
+    const supplier = biz.companyName ? biz : { companyName: "일프로 주식회사", regNumber: "123-45-67890", ceoName: "김사장", address: "서울시 강남구 역삼로 123", bizType: "서비스업", bizItem: "소프트웨어", phone: "02-1234-5678", fax: "" };
+
+    const sampleQuotes: QuoteDoc[] = [
+      {
+        id: genId(), docNumber: "EST-20260408-001", date: "2026-04-08", validUntil: "2026-05-08", status: "confirmed",
+        supplier: supplier as BizProfile, buyerName: "(주)한국제조", buyerReg: "234-56-78901", buyerCeo: "박진수", buyerAddr: "울산시 남구 공업로 45",
+        items: [
+          { name: "웹사이트 제작", spec: "반응형", qty: 1, unit: "건", unitPrice: 3000000, remark: "" },
+          { name: "로고 디자인", spec: "AI 파일", qty: 1, unit: "건", unitPrice: 500000, remark: "" },
+          { name: "월 유지보수", spec: "12개월", qty: 12, unit: "월", unitPrice: 200000, remark: "호스팅 포함" },
+        ],
+        notes: "계약금 50%, 잔금 50% (완료 시)", paymentTerms: "계좌이체",
+      },
+      {
+        id: genId(), docNumber: "EST-20260410-002", date: "2026-04-10", validUntil: "2026-05-10", status: "draft",
+        supplier: supplier as BizProfile, buyerName: "울산정밀(주)", buyerReg: "345-67-89012", buyerCeo: "최영호", buyerAddr: "울산시 북구 산업로 78",
+        items: [
+          { name: "ERP 시스템 구축", spec: "클라우드", qty: 1, unit: "식", unitPrice: 15000000, remark: "" },
+          { name: "직원 교육", spec: "2회", qty: 2, unit: "회", unitPrice: 500000, remark: "현장 방문" },
+          { name: "데이터 이전", spec: "기존 시스템", qty: 1, unit: "건", unitPrice: 2000000, remark: "" },
+        ],
+        notes: "납품 후 30일 이내 결제", paymentTerms: "계좌이체",
+      },
+      {
+        id: genId(), docNumber: "EST-20260405-003", date: "2026-04-05", validUntil: "2026-04-20", status: "confirmed",
+        supplier: supplier as BizProfile, buyerName: "카페 봄날", buyerReg: "456-78-90123", buyerCeo: "이서연", buyerAddr: "부산시 해운대구 해변로 12",
+        items: [
+          { name: "메뉴판 디자인", spec: "A3 양면", qty: 50, unit: "장", unitPrice: 3000, remark: "" },
+          { name: "배너 제작", spec: "가로 2m", qty: 2, unit: "개", unitPrice: 80000, remark: "실외용" },
+          { name: "SNS 콘텐츠 패키지", spec: "1개월", qty: 1, unit: "건", unitPrice: 500000, remark: "인스타+블로그" },
+        ],
+        notes: "시안 2회 수정 포함", paymentTerms: "현금",
+      },
+    ];
+
+    const samplePOs: PODoc[] = [
+      {
+        id: genId(), docNumber: "PO-20260409-001", date: "2026-04-09", validUntil: "2026-04-30", status: "confirmed",
+        supplier: supplier as BizProfile, buyerName: "신선식자재(주)", buyerReg: "567-89-01234", buyerCeo: "박서연", buyerAddr: "경기도 이천시 물류단지 5",
+        items: [
+          { name: "한우 등심", spec: "1++등급", qty: 20, unit: "kg", unitPrice: 48000, remark: "" },
+          { name: "양파", spec: "국산", qty: 15, unit: "kg", unitPrice: 2500, remark: "" },
+          { name: "대파", spec: "국산", qty: 5, unit: "단", unitPrice: 4000, remark: "" },
+          { name: "마늘", spec: "국산 깐마늘", qty: 3, unit: "kg", unitPrice: 12000, remark: "" },
+        ],
+        notes: "매주 월요일 납품", paymentTerms: "월말 정산",
+        deliveryDate: "2026-04-14", deliveryPlace: "서울시 강남구 역삼로 123 주방",
+      },
+      {
+        id: genId(), docNumber: "PO-20260410-002", date: "2026-04-10", validUntil: "2026-05-10", status: "draft",
+        supplier: supplier as BizProfile, buyerName: "울산종합유통", buyerReg: "678-90-12345", buyerCeo: "정동현", buyerAddr: "울산시 남구 유통로 33",
+        items: [
+          { name: "냅킨", spec: "300매입", qty: 10, unit: "박스", unitPrice: 15000, remark: "" },
+          { name: "일회용 장갑", spec: "L사이즈", qty: 5, unit: "박스", unitPrice: 8000, remark: "" },
+          { name: "세제", spec: "대용량 18L", qty: 2, unit: "통", unitPrice: 32000, remark: "" },
+        ],
+        notes: "", paymentTerms: "현금",
+        deliveryDate: "2026-04-15", deliveryPlace: "매장 직접 수령",
+      },
+    ];
+
+    const sampleTaxes: TaxDoc[] = [
+      {
+        id: genId(), docNumber: "TAX-20260401-001", date: "2026-04-01", status: "confirmed", invoiceType: "영수",
+        supplier: supplier as BizProfile, buyerName: "(주)한국제조", buyerReg: "234-56-78901", buyerCeo: "박진수", buyerAddr: "울산시 남구 공업로 45", buyerBizType: "제조업", buyerBizItem: "금속가공",
+        items: [
+          { name: "웹사이트 제작 (1차)", spec: "", qty: 1, unit: "건", unitPrice: 1500000, remark: "계약금" },
+        ],
+        cash: 1650000, check: 0, note: 0, credit: 0,
+      },
+      {
+        id: genId(), docNumber: "TAX-20260331-002", date: "2026-03-31", status: "confirmed", invoiceType: "청구",
+        supplier: supplier as BizProfile, buyerName: "카페 봄날", buyerReg: "456-78-90123", buyerCeo: "이서연", buyerAddr: "부산시 해운대구 해변로 12", buyerBizType: "음식업", buyerBizItem: "카페",
+        items: [
+          { name: "메뉴판 디자인", spec: "A3 양면", qty: 50, unit: "장", unitPrice: 3000, remark: "" },
+          { name: "배너 제작", spec: "가로 2m", qty: 2, unit: "개", unitPrice: 80000, remark: "" },
+          { name: "SNS 콘텐츠 패키지", spec: "1개월", qty: 1, unit: "건", unitPrice: 500000, remark: "" },
+        ],
+        cash: 0, check: 0, note: 0, credit: 814000,
+      },
+    ];
+
+    lsSave(LS_QUOTES, sampleQuotes);
+    lsSave(LS_POS, samplePOs);
+    lsSave(LS_TAXES, sampleTaxes);
+    reload();
+  }
+
   function closeEditor() {
     setEditing(null);
     reload();
@@ -955,13 +1045,22 @@ export default function QuotesPanel({ userId, openModal, closeModal }: { userId:
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-lg font-bold">비즈니스 문서</h4>
-        <button
-          onClick={() => setShowBizProfile(true)}
-          className="text-xs px-3 py-1.5 rounded-lg border"
-          style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-card)", minHeight: 0 }}
-        >
-          사업자 정보
-        </button>
+        <div className="flex gap-2">
+          {quotes.length === 0 && pos.length === 0 && taxes.length === 0 && (
+            <button onClick={loadSampleData}
+              className="text-xs px-3 py-1.5 rounded-lg font-medium"
+              style={{ background: "var(--primary)", color: "white", minHeight: 0 }}>
+              📦 샘플 데이터
+            </button>
+          )}
+          <button
+            onClick={() => setShowBizProfile(true)}
+            className="text-xs px-3 py-1.5 rounded-lg border"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "var(--bg-card)", minHeight: 0 }}
+          >
+            사업자 정보
+          </button>
+        </div>
       </div>
 
       {/* Tab bar */}

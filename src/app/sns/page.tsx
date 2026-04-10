@@ -464,12 +464,32 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const [lastPrompt, setLastPrompt] = useState('');
   const [savedCategory, setSavedCategory] = useState<string | null>(null);
   const [setupDone, setSetupDone] = useState(false);
+  const [showApiSettings, setShowApiSettings] = useState(false);
+  const [apiKeys, setApiKeys] = useState({ instagram: '', facebook: '' });
+  const [posting, setPosting] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('ilpro_sns_category');
     if (saved) { setSavedCategory(saved); setSetupDone(true); }
+    const keys = localStorage.getItem('ilpro_sns_api_keys');
+    if (keys) setApiKeys(JSON.parse(keys));
   }, []);
+
+  const saveApiKeys = () => {
+    localStorage.setItem('ilpro_sns_api_keys', JSON.stringify(apiKeys));
+    setShowApiSettings(false);
+  };
+
+  const postToSns = async (platform: string, text: string) => {
+    const key = platform === 'instagram' ? apiKeys.instagram : apiKeys.facebook;
+    if (!key) { setShowApiSettings(true); return; }
+    setPosting(platform);
+    // TODO: Implement actual API posting
+    // Instagram: Graph API POST /{ig-user-id}/media + /{ig-user-id}/media_publish
+    // Facebook: POST /{page-id}/feed
+    setTimeout(() => { setPosting(''); alert(`${platform === 'instagram' ? '인스타그램' : '페이스북'} 포스팅 기능은 API 키 설정 후 사용 가능합니다.`); }, 1000);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -660,20 +680,35 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
 
                       {/* 생성된 콘텐츠 */}
                       <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                          <span className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>📝 생성된 게시물</span>
+                        <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
+                          {message.text}
+                        </div>
+                        <div className="flex items-center gap-2 px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                           <button
                             onClick={() => copyToClipboard(message.text, setCopied, message.id)}
-                            className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
                             style={{
                               background: copied === message.id ? 'rgba(48,209,88,0.2)' : 'rgba(255,255,255,0.1)',
                               color: copied === message.id ? '#30D158' : 'rgba(255,255,255,0.6)',
                             }}>
                             {copied === message.id ? '✓ 복사됨' : '📋 복사'}
                           </button>
-                        </div>
-                        <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
-                          {message.text}
+                          <button
+                            onClick={() => postToSns('instagram', message.text)}
+                            disabled={posting === 'instagram'}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                            style={{ background: apiKeys.instagram ? 'rgba(225,48,108,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.instagram ? '#E1306C' : 'rgba(255,255,255,0.3)' }}>
+                            {posting === 'instagram' ? '...' : '📸 인스타'} {!apiKeys.instagram && '🔒'}
+                          </button>
+                          <button
+                            onClick={() => postToSns('facebook', message.text)}
+                            disabled={posting === 'facebook'}
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                            style={{ background: apiKeys.facebook ? 'rgba(24,119,242,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.facebook ? '#1877F2' : 'rgba(255,255,255,0.3)' }}>
+                            {posting === 'facebook' ? '...' : '👥 페이스북'} {!apiKeys.facebook && '🔒'}
+                          </button>
+                          <button onClick={() => setShowApiSettings(true)}
+                            className="ml-auto text-xs text-white/30 hover:text-white/60 transition-colors">⚙️</button>
                         </div>
                       </div>
                     </div>
@@ -717,6 +752,54 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                 생성
               </button>
             </form>
+          </div>
+        )}
+
+        {/* API Settings Modal */}
+        {showApiSettings && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+            <div className="w-full max-w-md rounded-2xl p-6" style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-base font-bold">⚙️ 자동 포스팅 설정</h3>
+                <button onClick={() => setShowApiSettings(false)} className="text-white/40 hover:text-white text-lg">✕</button>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="text-xs font-bold text-white/50 mb-1.5 block">📸 인스타그램 Access Token</label>
+                  <input value={apiKeys.instagram} onChange={e => setApiKeys(prev => ({ ...prev, instagram: e.target.value }))}
+                    placeholder="Instagram Graph API 토큰 입력"
+                    className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                  <p className="text-[10px] text-white/30 mt-1">Meta Developer → 앱 만들기 → Instagram Graph API 활성화</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-white/50 mb-1.5 block">👥 페이스북 Page Access Token</label>
+                  <input value={apiKeys.facebook} onChange={e => setApiKeys(prev => ({ ...prev, facebook: e.target.value }))}
+                    placeholder="Facebook Page 토큰 입력"
+                    className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                  <p className="text-[10px] text-white/30 mt-1">Meta Developer → 앱 만들기 → Pages API 활성화</p>
+                </div>
+              </div>
+
+              <div className="rounded-lg p-3 mb-6" style={{ background: 'rgba(0,113,227,0.1)', border: '1px solid rgba(0,113,227,0.2)' }}>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  <strong className="text-white/80">설정 방법:</strong><br/>
+                  1. <a href="https://developers.facebook.com" target="_blank" rel="noopener" className="underline text-[#0071E3]">Meta Developer</a> 에서 앱을 만드세요<br/>
+                  2. Instagram Graph API 또는 Pages API를 활성화하세요<br/>
+                  3. Access Token을 복사해서 위에 붙여넣으세요<br/>
+                  4. 게시물 생성 후 인스타/페이스북 버튼으로 바로 포스팅!
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={() => setShowApiSettings(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium"
+                  style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>취소</button>
+                <button onClick={saveApiKeys}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
+                  style={{ background: '#0071E3' }}>저장</button>
+              </div>
+            </div>
           </div>
         )}
 

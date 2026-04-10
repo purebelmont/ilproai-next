@@ -859,8 +859,8 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
   );
 }
 
-// ─── Document List ────────────────────────────────────────────────────────────
-function DocList<T extends { id: string; docNumber: string; date: string; status: string; buyerName: string; items: DocItem[] }>({
+// ─── Document List — Korean paper-style ───────────────────────────────────────
+function DocList<T extends { id: string; docNumber: string; date: string; status: string; buyerName: string; items: DocItem[]; supplier?: BizProfile; buyerReg?: string; buyerCeo?: string }>({
   docs,
   label,
   onAdd,
@@ -883,35 +883,95 @@ function DocList<T extends { id: string; docNumber: string; date: string; status
           {label}를 작성해보세요
         </div>
       ) : (
-        docs.map((doc) => {
-          const { grand } = calcTotals(doc.items);
-          return (
-            <div
-              key={doc.id}
-              onClick={() => onEdit(doc)}
-              className="rounded-xl border p-4 mb-2 cursor-pointer active:opacity-70"
-              style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>{doc.docNumber}</span>
-                <span
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{
-                    background: doc.status === "confirmed" ? "rgba(48,209,88,0.15)" : "rgba(142,142,147,0.15)",
-                    color: doc.status === "confirmed" ? "var(--success)" : "var(--text-muted)",
-                  }}
-                >
-                  {doc.status === "confirmed" ? "확정" : "초안"}
-                </span>
+        <div className="space-y-4">
+          {docs.map((doc) => {
+            const { supply, vat, grand } = calcTotals(doc.items);
+            return (
+              <div key={doc.id} onClick={() => onEdit(doc)} className="cursor-pointer hover:shadow-lg transition-shadow rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
+                {/* Paper-style document */}
+                <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif", fontSize: "11px" }}>
+                  {/* Title */}
+                  <div style={{ textAlign: "center", marginBottom: "16px" }}>
+                    <div style={{ fontSize: "20px", fontWeight: 800, letterSpacing: "10px", color: "#111" }}>{label}</div>
+                    <div style={{ fontSize: "10px", color: "#999", marginTop: "4px" }}>{doc.docNumber} | {doc.date}</div>
+                  </div>
+
+                  {/* Grand total highlight */}
+                  <div style={{ textAlign: "right", marginBottom: "14px", padding: "10px 14px", background: "#f8f8f8", borderRadius: "6px", border: "1px solid #e0e0e0" }}>
+                    <span style={{ fontSize: "10px", color: "#888" }}>합계금액 (VAT 포함)</span>
+                    <div style={{ fontSize: "22px", fontWeight: 900, color: "#0071E3", letterSpacing: "-1px" }}>₩{won(grand)}</div>
+                  </div>
+
+                  {/* Supplier / Buyer compact */}
+                  <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "12px", fontSize: "10px" }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600, width: "15%" }}>공급자</td>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", width: "35%" }}>{doc.supplier?.companyName || "—"}</td>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600, width: "15%" }}>공급받는자</td>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", width: "35%" }}>{doc.buyerName || "—"}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600 }}>사업자번호</td>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px" }}>{doc.supplier?.regNumber || "—"}</td>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px", background: "#f5f5f5", fontWeight: 600 }}>사업자번호</td>
+                        <td style={{ border: "1px solid #ccc", padding: "4px 8px" }}>{doc.buyerReg || "—"}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Items table */}
+                  <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "12px", fontSize: "10px" }}>
+                    <thead>
+                      <tr style={{ background: "#f5f5f5" }}>
+                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600 }}>품명</th>
+                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600, width: "60px" }}>수량</th>
+                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600, width: "80px", textAlign: "right" }}>단가</th>
+                        <th style={{ border: "1px solid #ccc", padding: "4px 6px", fontWeight: 600, width: "90px", textAlign: "right" }}>공급가액</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {doc.items.slice(0, 4).map((item, i) => {
+                        const s = calcItem(item).supply;
+                        return (
+                          <tr key={i}>
+                            <td style={{ border: "1px solid #ccc", padding: "4px 6px" }}>{item.name}{item.spec ? ` (${item.spec})` : ""}</td>
+                            <td style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "center" }}>{item.qty} {item.unit}</td>
+                            <td style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "right" }}>{won(item.unitPrice)}</td>
+                            <td style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "right" }}>{won(s)}</td>
+                          </tr>
+                        );
+                      })}
+                      {doc.items.length > 4 && (
+                        <tr><td colSpan={4} style={{ border: "1px solid #ccc", padding: "4px 6px", textAlign: "center", color: "#999" }}>... 외 {doc.items.length - 4}건</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+
+                  {/* Totals row */}
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "10px" }}>
+                    <tbody>
+                      <tr style={{ background: "#f5f5f5" }}>
+                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", fontWeight: 600, width: "25%" }}>공급가액</td>
+                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", textAlign: "right", width: "25%" }}>{won(supply)}원</td>
+                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", fontWeight: 600, width: "25%" }}>세액 (10%)</td>
+                        <td style={{ border: "1px solid #ccc", padding: "5px 8px", textAlign: "right", width: "25%" }}>{won(vat)}원</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Status + edit hint */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px" }}>
+                    <span style={{ fontSize: "10px", padding: "2px 8px", borderRadius: "4px", fontWeight: 600, background: doc.status === "confirmed" ? "#E8F5E9" : "#F5F5F5", color: doc.status === "confirmed" ? "#2E7D32" : "#999" }}>
+                      {doc.status === "confirmed" ? "✓ 확정" : "초안"}
+                    </span>
+                    <span style={{ fontSize: "9px", color: "#bbb" }}>클릭하여 편집 →</span>
+                  </div>
+                </div>
               </div>
-              <div className="font-semibold text-sm mb-1">{doc.buyerName || "—"}</div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}>{doc.date}</span>
-                <span className="text-sm font-bold" style={{ color: "var(--primary)" }}>₩{won(grand)}</span>
-              </div>
-            </div>
-          );
-        })
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -1041,7 +1101,7 @@ export default function QuotesPanel({ userId, openModal, closeModal }: { userId:
 
   // ── List view ──
   return (
-    <div className="p-5">
+    <div className="p-3">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-lg font-bold">비즈니스 문서</h4>

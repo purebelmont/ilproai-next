@@ -267,7 +267,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between px-4 py-4 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white shrink-0"
-              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
             <div className="text-[13px] font-semibold text-white truncate">{bizName}</div>
           </div>
         </div>
@@ -393,7 +393,7 @@ export default function Dashboard() {
             {/* Mobile menu header */}
             <div className="flex items-center gap-3 px-5 py-4">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold text-white"
-                style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+                style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
               <div>
                 <div className="text-[14px] font-bold text-white">{bizName}</div>
                 <div className="text-[11px] text-[#6B6B80]">{dateLabel}</div>
@@ -491,7 +491,7 @@ export default function Dashboard() {
           style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
-              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
+              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
             <div>
               <div className="text-sm font-bold">{bizName}</div>
               <div className="text-[10px] text-[var(--text-muted)]">{dateLabel}</div>

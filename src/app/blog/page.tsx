@@ -605,7 +605,7 @@ export default function BlogPage() {
         <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
-              style={{ background: "#111" }}>일</div>
+              style={{ background: "#111" }}>B</div>
             <span className="text-sm font-semibold text-[#111]">블로그</span>
           </Link>
           <div className="flex items-center gap-4">

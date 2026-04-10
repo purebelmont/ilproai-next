@@ -11,6 +11,7 @@ import PayrollPanel from "@/components/PayrollPanel";
 import ReportPanel from "@/components/ReportPanel";
 import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
 import AIRecommendPanel from "@/components/AIRecommendPanel";
+import { SNSPanel } from "@/app/sns/page";
 
 type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai";
 
@@ -49,7 +50,7 @@ const NAV_SECTIONS: NavSection[] = [
     pro: true,
     items: [
       { id: "website", icon: "🌐", label: "홈페이지" },
-      { id: "automation", icon: "📸", label: "SNS 콘텐츠", badge: "NEW", href: "/sns" },
+      { id: "automation", icon: "📸", label: "SNS 콘텐츠", badge: "NEW" },
     ],
   },
 ];
@@ -538,6 +539,7 @@ export default function Dashboard() {
           {tab === "quotes" && <QuotesPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
+          {tab === "automation" && <SNSPanel embedded />}
           {tab === "ai" && <AIRecommendPanel userId={user.id} setTab={setTab} />}
         </div>
       </div>

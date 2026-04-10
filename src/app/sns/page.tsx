@@ -378,7 +378,7 @@ function SnsCard({ title, subtitle, imageUrl, gradient, style }: {
 
 interface ChatMsg { id: string; role: 'user' | 'assistant'; text: string }
 
-export default function SNSPage() {
+export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState('');
@@ -458,8 +458,9 @@ export default function SNSPage() {
   const category = detectCategory(lastPrompt || input);
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a1a', color: '#fff' }}>
-      {/* Header */}
+    <div className={embedded ? "h-full overflow-y-auto" : "min-h-screen"} style={{ background: embedded ? 'var(--bg)' : '#0a0a1a', color: embedded ? 'var(--text)' : '#fff' }}>
+      {/* Header — only on standalone page */}
+      {!embedded && (
       <header style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }} className="px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -479,8 +480,9 @@ export default function SNSPage() {
           )}
         </div>
       </header>
+      )}
 
-      <div className="max-w-5xl mx-auto p-4">
+      <div className={embedded ? "p-4" : "max-w-5xl mx-auto p-4"}>
         {/* Business Setup Screen */}
         {!setupDone && (
           <div className="flex flex-col items-center justify-center py-16">
@@ -777,4 +779,8 @@ export default function SNSPage() {
       </div>
     </div>
   );
+}
+
+export default function SNSPage() {
+  return <SNSPanel />;
 }

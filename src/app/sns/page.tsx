@@ -603,7 +603,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
         {/* Tab Navigation */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl overflow-x-auto" style={{ background: 'rgba(255,255,255,0.05)' }}>
           {[
-            { id: 'generate' as const, label: '생성', icon: '✨' },
+            { id: 'generate' as const, label: 'SNS 이미지 생성', icon: '✨' },
             { id: 'video' as const, label: '비디오', icon: '🎬' },
             { id: 'calendar' as const, label: '캘린더', icon: '📅' },
             { id: 'history' as const, label: '히스토리', icon: '📊' },
@@ -622,94 +622,148 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
           ))}
         </div>
 
-        {/* Generate Tab — minimal, focused */}
+        {/* Generate Tab — Instagram phone-like preview */}
         {activeTab === 'generate' && (
-          <div>
-            {/* Input first — always visible at top */}
-            <div className="mb-6">
-              {messages.length === 0 && (
-                <div className="text-center mb-6">
-                  <div className="text-2xl mb-2">{currentBiz?.icon || '📣'}</div>
-                  <h2 className="text-lg font-bold mb-1">오늘 뭐 올릴까요?</h2>
-                  <p className="text-xs text-white/40">한 줄만 적어주세요. 나머지는 AI가 알아서 해요.</p>
-                </div>
-              )}
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  disabled={isLoading}
-                  placeholder={currentBiz ? `예: ${quickPrompts[0]?.text || '이벤트 홍보'}` : '어떤 내용을 올릴까요?'}
-                  className="flex-1 px-4 py-3 rounded-xl text-sm focus:outline-none disabled:opacity-50"
-                  style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }}
-                />
-                <button type="submit" disabled={isLoading || !input.trim()}
-                  className="px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
-                  style={{ background: '#0071E3' }}>
-                  {isLoading ? '...' : '생성'}
-                </button>
-              </form>
+          <div className="flex justify-center">
+            <div className="w-full max-w-[420px]">
+              {/* Input */}
+              <div className="mb-4">
+                {messages.length === 0 && (
+                  <div className="text-center mb-4">
+                    <div className="text-2xl mb-1">{currentBiz?.icon || '📣'}</div>
+                    <h2 className="text-base font-bold">오늘 뭐 올릴까요?</h2>
+                    <p className="text-[11px] text-white/40 mt-1">한 줄만 적어주세요</p>
+                  </div>
+                )}
+                <form onSubmit={handleSubmit} className="flex gap-2">
+                  <input value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading}
+                    placeholder={currentBiz ? `예: ${quickPrompts[0]?.text || '이벤트 홍보'}` : '어떤 내용을 올릴까요?'}
+                    className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none disabled:opacity-50"
+                    style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }} />
+                  <button type="submit" disabled={isLoading || !input.trim()}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+                    style={{ background: '#0071E3' }}>
+                    {isLoading ? '...' : '생성'}
+                  </button>
+                </form>
 
-              {/* Quick suggestions — 2 pills only */}
-              {messages.length === 0 && (
-                <div className="flex gap-2 mt-3 flex-wrap">
-                  {quickPrompts.slice(0, 3).map((p, i) => (
-                    <button key={i} onClick={() => handleQuickPrompt(p.text)} disabled={isLoading}
-                      className="px-3 py-1.5 rounded-full text-xs transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-                      style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
-                      {p.icon} {p.text}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                {/* Quick suggestions */}
+                {messages.length === 0 && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {quickPrompts.slice(0, 3).map((p, i) => (
+                      <button key={i} onClick={() => handleQuickPrompt(p.text)} disabled={isLoading}
+                        className="px-2.5 py-1 rounded-full text-[11px] hover:scale-105 active:scale-95 disabled:opacity-50"
+                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
+                        {p.icon} {p.text}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-            {/* Loading */}
-            {isLoading && (
-              <div className="rounded-xl p-6 text-center mb-6" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <div className="w-8 h-8 rounded-full mx-auto mb-3" style={{ border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#0071E3', animation: 'spin 1s linear infinite' }} />
-                <p className="text-sm text-white/50">게시물을 만들고 있어요...</p>
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                {/* 상세 설정 (expandable) */}
+                {messages.length === 0 && (
+                  <details className="mt-3">
+                    <summary className="text-[11px] text-white/30 cursor-pointer hover:text-white/50 select-none">⚙️ 상세 설정</summary>
+                    <div className="mt-2 p-3 rounded-lg space-y-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div>
+                        <label className="text-[10px] text-white/40 block mb-1">톤</label>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {['친근한', '전문적', '유머', '감성적'].map(t => (
+                            <button key={t} className="px-2 py-1 rounded text-[10px]"
+                              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{t}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-white/40 block mb-1">길이</label>
+                        <div className="flex gap-1.5">
+                          {['짧게', '보통', '길게'].map(l => (
+                            <button key={l} className="px-2 py-1 rounded text-[10px]"
+                              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{l}</button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-white/40 block mb-1">플랫폼</label>
+                        <div className="flex gap-1.5">
+                          {['인스타그램', '블로그', '페이스북'].map(p => (
+                            <button key={p} className="px-2 py-1 rounded text-[10px]"
+                              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{p}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+                )}
               </div>
-            )}
 
-            {/* Generated Content — latest first */}
-            <div className="space-y-4">
-              {[...messages].reverse().filter(m => m.role === 'assistant' && m.text).map((message) => (
-                <div key={message.id} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  {/* Image */}
-                  <div className="aspect-[2/1] relative overflow-hidden">
-                    <img src={getPhoto(category.key, 0)} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-3 left-4 text-white font-bold" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{category.title}</div>
-                  </div>
-                  {/* Text */}
-                  <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed max-h-[300px] overflow-y-auto">
-                    {message.text}
-                  </div>
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <button
-                      onClick={() => copyToClipboard(message.text, setCopied, message.id)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                      style={{ background: copied === message.id ? 'rgba(48,209,88,0.2)' : 'rgba(255,255,255,0.1)', color: copied === message.id ? '#30D158' : 'rgba(255,255,255,0.6)' }}>
-                      {copied === message.id ? '✓ 복사됨' : '📋 복사'}
-                    </button>
-                    <button onClick={() => postToSns('instagram', message.text)} disabled={posting === 'instagram'}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                      style={{ background: apiKeys.instagram ? 'rgba(225,48,108,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.instagram ? '#E1306C' : 'rgba(255,255,255,0.3)' }}>
-                      📸 인스타 {!apiKeys.instagram && '🔒'}
-                    </button>
-                    <button onClick={() => postToSns('facebook', message.text)} disabled={posting === 'facebook'}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                      style={{ background: apiKeys.facebook ? 'rgba(24,119,242,0.2)' : 'rgba(255,255,255,0.05)', color: apiKeys.facebook ? '#1877F2' : 'rgba(255,255,255,0.3)' }}>
-                      👥 페이스북 {!apiKeys.facebook && '🔒'}
-                    </button>
-                    <button onClick={() => setShowApiSettings(true)} className="ml-auto text-xs text-white/30 hover:text-white/60">⚙️</button>
-                  </div>
+              {/* Loading */}
+              {isLoading && (
+                <div className="rounded-xl p-6 text-center mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <div className="w-6 h-6 rounded-full mx-auto mb-2" style={{ border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#0071E3', animation: 'spin 1s linear infinite' }} />
+                  <p className="text-xs text-white/50">게시물을 만들고 있어요...</p>
+                  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
+              )}
+
+              {/* Instagram-style post cards */}
+              <div className="space-y-4">
+                {[...messages].reverse().filter(m => m.role === 'assistant' && m.text).map((message) => (
+                  <div key={message.id} className="rounded-2xl overflow-hidden" style={{ background: '#fff' }}>
+                    {/* Instagram header */}
+                    <div className="flex items-center gap-2 px-3 py-2.5">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: 'linear-gradient(135deg, #833AB4, #E1306C, #F77737)' }}>
+                        <span className="text-white text-xs font-bold">{currentBiz?.icon || '📣'}</span>
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold text-black">{currentBiz?.label || '내 가게'}</div>
+                        <div className="text-[10px] text-gray-400">Sponsored</div>
+                      </div>
+                    </div>
+                    {/* Square image */}
+                    <div className="aspect-square relative overflow-hidden">
+                      <img src={getPhoto(category.key, 0)} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="text-white font-bold text-lg leading-tight" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>{category.title}</div>
+                      </div>
+                    </div>
+                    {/* Instagram action icons */}
+                    <div className="flex items-center gap-4 px-3 py-2">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </div>
+                    {/* Caption */}
+                    <div className="px-3 pb-3">
+                      <div className="text-xs text-black whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">
+                        <span className="font-semibold">{currentBiz?.label || '내 가게'}</span>{' '}
+                        {message.text}
+                      </div>
+                    </div>
+                    {/* Action buttons — outside the "phone" card */}
+                    <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                      <button onClick={() => copyToClipboard(message.text, setCopied, message.id)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all"
+                        style={{ background: copied === message.id ? '#E8F5E9' : '#f5f5f5', color: copied === message.id ? '#2E7D32' : '#888' }}>
+                        {copied === message.id ? '✓ 복사됨' : '📋 복사'}
+                      </button>
+                      <button onClick={() => postToSns('instagram', message.text)} disabled={posting === 'instagram'}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium"
+                        style={{ background: apiKeys.instagram ? '#FCE4EC' : '#f5f5f5', color: apiKeys.instagram ? '#E1306C' : '#ccc' }}>
+                        📸 인스타 {!apiKeys.instagram && '🔒'}
+                      </button>
+                      <button onClick={() => postToSns('facebook', message.text)} disabled={posting === 'facebook'}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium"
+                        style={{ background: apiKeys.facebook ? '#E3F2FD' : '#f5f5f5', color: apiKeys.facebook ? '#1877F2' : '#ccc' }}>
+                        👥 페북 {!apiKeys.facebook && '🔒'}
+                      </button>
+                      <button onClick={() => setShowApiSettings(true)} className="ml-auto text-[11px] text-gray-300 hover:text-gray-500">⚙️</button>
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
           </div>
         )}

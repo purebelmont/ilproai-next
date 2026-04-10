@@ -5,83 +5,63 @@ import Link from 'next/link';
 
 // ──── Data ────
 
-const STORY_PROMPTS = [
+const PROMPTS = [
   { icon: '🍕', text: '주말 메뉴 이벤트' },
-  { icon: '☕', text: '신메뉴 출시 알림' },
+  { icon: '☕', text: '신메뉴 출시' },
   { icon: '🎉', text: '오픈 기념 할인' },
-  { icon: '📸', text: '고객 후기 이벤트' },
-  { icon: '💇', text: '시즌 할인 홍보' },
-  { icon: '💪', text: '신규 회원 모집' },
-  { icon: '🐕', text: '귀여운 일상 공유' },
+  { icon: '📸', text: '후기 이벤트' },
+  { icon: '💇', text: '시즌 할인' },
+  { icon: '💪', text: '회원 모집' },
+  { icon: '🐕', text: '일상 공유' },
   { icon: '🎁', text: '감사 이벤트' },
 ];
 
-const PHOTO_DB: Record<string, string[]> = {
-  피자: [
-    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=600&fit=crop',
-  ],
-  미용: [
-    'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=600&h=600&fit=crop',
-  ],
-  카페: [
-    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&h=600&fit=crop',
-  ],
-  헬스: [
-    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=600&fit=crop',
-  ],
-  반려동물: [
-    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&h=600&fit=crop',
-  ],
-  학원: [
-    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1523050854058-8df90110c6f6?w=600&h=600&fit=crop',
-  ],
-  기본: [
-    'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1528698827591-e19cef51a699?w=600&h=600&fit=crop',
-  ],
+const PHOTOS: Record<string, string[]> = {
+  피자: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=600&fit=crop','https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&h=600&fit=crop'],
+  카페: ['https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop','https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=600&fit=crop'],
+  미용: ['https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=600&fit=crop','https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=600&fit=crop'],
+  헬스: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=600&fit=crop','https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=600&fit=crop'],
+  반려: ['https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop','https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&h=600&fit=crop'],
+  기본: ['https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=600&fit=crop','https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=600&fit=crop'],
 };
 
-function getPhoto(category: string, index = 0): string {
-  const key = Object.keys(PHOTO_DB).find(k => category.includes(k)) || '기본';
-  const photos = PHOTO_DB[key];
-  return photos[index % photos.length];
+function getPhoto(text: string, i = 0) {
+  const k = Object.keys(PHOTOS).find(k => text.includes(k)) || '기본';
+  return PHOTOS[k][i % PHOTOS[k].length];
 }
 
-function detectCategory(text: string): string {
-  const t = text.toLowerCase();
-  if (/피자|음식|식당|치킨|맛집|메뉴|점심/.test(t)) return '피자';
-  if (/미용|헤어|살롱|네일|뷰티/.test(t)) return '미용';
-  if (/카페|커피|라떼|신메뉴/.test(t)) return '카페';
-  if (/헬스|운동|피트|요가|회원/.test(t)) return '헬스';
-  if (/반려|펫|강아지|고양이|동물|귀여운/.test(t)) return '반려동물';
-  if (/학원|교육|특강/.test(t)) return '학원';
-  return '기본';
-}
+// Video scene templates
+const VIDEO_TEMPLATES = [
+  { id: 'hook', name: '후크→CTA', icon: '⚡', scenes: ['🍕 주말에 피자 두 판?!', '화덕에서 갓 구운 바삭한 모짜렐라', '금~일 라지 주문 시 1판 무료!', '📍 지금 주문하세요!'] },
+  { id: 'list', name: 'TOP 리스트', icon: '📊', scenes: ['☕ 봄 신메뉴 TOP 3', '3️⃣ 피치 스파클링', '2️⃣ 그린티 블로썸', '1️⃣ 딸기 로즈 라떼'] },
+  { id: 'before', name: '비포/애프터', icon: '✨', scenes: ['BEFORE 💇 칙칙한 머리..', '✂️ 원장 직접 시술', 'AFTER ✨ 완전 다른 사람!', '오픈 기념 30% OFF'] },
+  { id: 'review', name: '고객 후기', icon: '⭐', scenes: ['"진짜 인생 맛집..."', '⭐⭐⭐⭐⭐ 네이버 4.9점', '직접 경험해보세요!'] },
+];
 
 // ──── Component ────
 
 interface Post { id: string; prompt: string; text: string }
 
 export function SNSPanel({ embedded }: { embedded?: boolean }) {
+  const [mode, setMode] = useState<'image' | 'video'>('image');
   const [posts, setPosts] = useState<Post[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState('');
-  const [usedStories, setUsedStories] = useState<Set<number>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // Video state
+  const [videoTemplate, setVideoTemplate] = useState(0);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoScene, setVideoScene] = useState(0);
   const feedRef = useRef<HTMLDivElement>(null);
+
+  // Video auto-play
+  useEffect(() => {
+    if (!videoPlaying) return;
+    const scenes = VIDEO_TEMPLATES[videoTemplate].scenes;
+    const iv = setInterval(() => setVideoScene(p => (p + 1) % scenes.length), 2500);
+    return () => clearInterval(iv);
+  }, [videoPlaying, videoTemplate]);
 
   const copy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -92,11 +72,9 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   async function generate(promptText: string) {
     setLoading(true);
     const id = Date.now().toString();
-    const newPost: Post = { id, prompt: promptText, text: '' };
-    setPosts(prev => [newPost, ...prev]);
+    setPosts(prev => [{ id, prompt: promptText, text: '' }, ...prev]);
 
     const fullPrompt = `다음 내용으로 인스타그램용 SNS 게시물을 만들어주세요:\n\n${promptText}\n[톤: 친근한] [길이: 5~8줄 정도로]\n해시태그도 포함해주세요.`;
-
     try {
       const res = await fetch('/api/sns/generate', {
         method: 'POST',
@@ -116,10 +94,9 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
         }
       }
     } catch {
-      setPosts(prev => prev.map(p => p.id === id ? { ...p, text: '생성 중 오류가 발생했어요. 다시 시도해주세요.' } : p));
+      setPosts(prev => prev.map(p => p.id === id ? { ...p, text: '오류가 발생했어요. 다시 시도해주세요.' } : p));
     }
     setLoading(false);
-    setTimeout(() => feedRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 100);
   }
 
   const submit = (e: React.FormEvent) => {
@@ -129,184 +106,314 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
     setInput('');
   };
 
-  const tapStory = (i: number) => {
-    if (loading) return;
-    setUsedStories(prev => new Set(prev).add(i));
-    generate(STORY_PROMPTS[i].text);
+  const toggleExpand = (id: string) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   };
 
-  // SVG icons as components for cleanliness
-  const Heart = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>;
-  const Comment = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
-  const Send = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>;
-  const Bookmark = <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>;
+  const scenes = VIDEO_TEMPLATES[videoTemplate].scenes;
 
   return (
-    <div className={embedded ? "h-full flex flex-col overflow-hidden" : "min-h-screen flex flex-col"} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <div className={embedded ? "h-full flex flex-col" : "min-h-screen flex flex-col"} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
       <style>{`
         @keyframes igSpin { to { transform: rotate(360deg); } }
-        @keyframes igPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
-        .ig-ring { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; border-radius: 50%; }
-        .ig-ring-used { background: var(--bg-hover); padding: 2px; border-radius: 50%; }
-        .ig-hide-scroll::-webkit-scrollbar { display: none; }
-        .ig-hide-scroll { scrollbar-width: none; }
+        @keyframes igPulse { 0%,100%{opacity:.3} 50%{opacity:.7} }
+        @keyframes sceneFade { from{opacity:0;transform:scale(1.05)} to{opacity:1;transform:scale(1)} }
+        .ig-ring{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);padding:2px;border-radius:50%}
+        .ig-scroll::-webkit-scrollbar{display:none} .ig-scroll{scrollbar-width:none}
+        .phone-frame{border-radius:40px;box-shadow:0 0 0 3px #333,0 0 0 6px #1a1a1a,0 20px 60px rgba(0,0,0,0.5)}
       `}</style>
 
-      {/* ═══ Header ═══ */}
-      <header className="shrink-0 px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="flex items-center gap-2">
+      {/* ═══ Outer wrapper — centers phone on desktop, full on mobile ═══ */}
+      <div className="flex-1 flex items-start justify-center overflow-y-auto ig-scroll py-4 px-4">
+        {/* Phone frame */}
+        <div className={`w-full ${embedded ? '' : 'max-w-[390px]'} flex flex-col ${embedded ? '' : 'phone-frame'} overflow-hidden`}
+          style={{ background: 'var(--bg)', maxHeight: embedded ? undefined : 'calc(100vh - 32px)' }}>
+
+          {/* ═══ Status bar (standalone only) ═══ */}
           {!embedded && (
-            <Link href="/dashboard" className="text-white/40 hover:text-white/70 mr-1">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            </Link>
-          )}
-          <span className="text-lg font-semibold" style={{ fontFamily: '-apple-system, sans-serif' }}>
-            {embedded ? 'SNS' : '일프로 SNS'}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          {loading && (
-            <div className="w-4 h-4 rounded-full mr-2"
-              style={{ border: '2px solid #333', borderTopColor: '#0095F6', animation: 'igSpin 0.6s linear infinite' }} />
-          )}
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/80">
-            <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
-          </svg>
-        </div>
-      </header>
-
-      {/* ═══ Scrollable Feed ═══ */}
-      <div ref={feedRef} className="flex-1 overflow-y-auto ig-hide-scroll">
-
-        {/* Stories row */}
-        <div className="px-4 py-3 overflow-x-auto ig-hide-scroll flex gap-4" style={{ borderBottom: '1px solid var(--border)' }}>
-          {/* "새 글" story (always first) */}
-          <button onClick={() => document.getElementById('ig-input')?.focus()}
-            className="flex flex-col items-center gap-1 shrink-0 active:scale-95 transition-transform" style={{ width: 64 }}>
-            <div className="w-[56px] h-[56px] rounded-full flex items-center justify-center relative" style={{ border: '1px dashed #555' }}>
-              <span className="text-2xl">✏️</span>
-              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: '#0095F6' }}>+</div>
-            </div>
-            <span className="text-[10px] text-white/50">새 글</span>
-          </button>
-          {STORY_PROMPTS.map((s, i) => (
-            <button key={i} onClick={() => tapStory(i)} disabled={loading}
-              className="flex flex-col items-center gap-1 shrink-0 disabled:opacity-30 active:scale-95 transition-transform" style={{ width: 64 }}>
-              <div className={usedStories.has(i) ? 'ig-ring-used' : 'ig-ring'}>
-                <div className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-lg" style={{ background: 'var(--bg)' }}>
-                  {s.icon}
-                </div>
+            <div className="shrink-0 flex items-center justify-between px-6 pt-3 pb-1">
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>9:41</span>
+              <div className="w-[80px] h-[28px] rounded-full" style={{ background: '#000' }} />
+              <div className="flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-secondary)' }}><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-secondary)' }}><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
               </div>
-              <span className="text-[10px] text-white/50 truncate w-full text-center">{s.text.slice(0, 6)}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Input bar — like Instagram's comment/DM input */}
-        <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-          <form onSubmit={submit} className="flex items-center gap-3">
-            <div className="ig-ring shrink-0">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--bg)', color: '#fff' }}>AI</div>
             </div>
-            <input id="ig-input" value={input} onChange={e => setInput(e.target.value)} disabled={loading}
-              placeholder="무엇을 홍보할까요?"
-              className="flex-1 bg-transparent text-sm text-white placeholder-white/30 focus:outline-none disabled:opacity-40" />
-            {input.trim() && (
-              <button type="submit" disabled={loading}
-                className="text-sm font-bold shrink-0 disabled:opacity-30"
-                style={{ color: '#0095F6' }}>
-                생성
+          )}
+
+          {/* ═══ App Header ═══ */}
+          <div className="shrink-0 flex items-center justify-between px-4 py-2" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="flex items-center gap-2">
+              {!embedded && (
+                <Link href="/dashboard" style={{ color: 'var(--text-muted)' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </Link>
+              )}
+              <span className="text-base font-bold">SNS</span>
+            </div>
+            {/* Mode toggle */}
+            <div className="flex rounded-full p-0.5" style={{ background: 'var(--bg-hover)' }}>
+              <button onClick={() => setMode('image')}
+                className="px-3 py-1 rounded-full text-[11px] font-semibold transition-all"
+                style={{ background: mode === 'image' ? '#0095F6' : 'transparent', color: mode === 'image' ? '#fff' : 'var(--text-muted)' }}>
+                이미지
               </button>
-            )}
-          </form>
-        </div>
-
-        {/* Empty state */}
-        {posts.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ border: '2px solid #333' }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="#555"/></svg>
-            </div>
-            <div className="text-sm font-semibold text-white/60 mb-1">AI가 SNS 게시물을 만들어 드려요</div>
-            <div className="text-xs text-white/30">위에 주제를 입력하거나, 스토리를 탭하세요</div>
-          </div>
-        )}
-
-        {/* Loading skeleton */}
-        {loading && posts[0]?.text === '' && (
-          <div style={{ borderBottom: '1px solid var(--border)' }}>
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-full" style={{ background: 'var(--bg-hover)' }} />
-              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: 100 }} />
-            </div>
-            <div className="aspect-square" style={{ background: 'var(--bg-card)', animation: 'igPulse 1.5s ease infinite' }} />
-            <div className="px-4 py-3 space-y-2">
-              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '80%' }} />
-              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '60%' }} />
-              <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '40%' }} />
+              <button onClick={() => setMode('video')}
+                className="px-3 py-1 rounded-full text-[11px] font-semibold transition-all"
+                style={{ background: mode === 'video' ? '#0095F6' : 'transparent', color: mode === 'video' ? '#fff' : 'var(--text-muted)' }}>
+                동영상
+              </button>
             </div>
           </div>
-        )}
 
-        {/* ═══ Post Feed ═══ */}
-        {posts.filter(p => p.text).map((post, idx) => {
-          const cat = detectCategory(post.prompt);
-          return (
-            <div key={post.id} style={{ borderBottom: '1px solid var(--border)' }}>
-              {/* Header */}
-              <div className="flex items-center gap-3 px-4 py-2.5">
-                <div className="ig-ring">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--bg)' }}>AI</div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold truncate">{post.prompt}</div>
-                </div>
-                <button onClick={() => copy(post.text, post.id)} className="text-white/40 hover:text-white/70 transition-colors">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                </button>
-              </div>
+          {/* ═══ Scrollable Content ═══ */}
+          <div ref={feedRef} className="flex-1 overflow-y-auto ig-scroll">
 
-              {/* Image */}
-              <div className="aspect-square relative overflow-hidden" style={{ background: 'var(--bg-card)' }}>
-                <img src={getPhoto(cat, idx)} alt="" className="w-full h-full object-cover" />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)' }} />
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center px-4 py-2.5">
-                <div className="flex items-center gap-4 flex-1">
-                  <span className="cursor-pointer hover:opacity-50 transition-opacity">{Heart}</span>
-                  <span className="cursor-pointer hover:opacity-50 transition-opacity">{Comment}</span>
-                  <span className="cursor-pointer hover:opacity-50 transition-opacity">{Send}</span>
+            {/* ══════════════════════════════════════ */}
+            {/* ═══ IMAGE MODE ═══ */}
+            {/* ══════════════════════════════════════ */}
+            {mode === 'image' && (
+              <>
+                {/* Stories row */}
+                <div className="px-3 py-3 flex gap-3 overflow-x-auto ig-scroll" style={{ borderBottom: '1px solid var(--border)' }}>
+                  {PROMPTS.map((s, i) => (
+                    <button key={i} onClick={() => !loading && generate(s.text)}
+                      disabled={loading}
+                      className="flex flex-col items-center gap-1 shrink-0 disabled:opacity-30 active:scale-90 transition-transform" style={{ width: 58 }}>
+                      <div className="ig-ring">
+                        <div className="w-[50px] h-[50px] rounded-full flex items-center justify-center text-lg" style={{ background: 'var(--bg)' }}>
+                          {s.icon}
+                        </div>
+                      </div>
+                      <span className="text-[9px] truncate w-full text-center" style={{ color: 'var(--text-muted)' }}>{s.text}</span>
+                    </button>
+                  ))}
                 </div>
-                <span className="cursor-pointer hover:opacity-50 transition-opacity">{Bookmark}</span>
-              </div>
 
-              {/* Caption */}
-              <div className="px-4 pb-4">
-                <div className="text-[13px] text-white/90 whitespace-pre-wrap leading-relaxed"
-                  style={{ display: '-webkit-box', WebkitLineClamp: 8, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {post.text}
+                {/* Input */}
+                <div className="px-4 py-2.5" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <form onSubmit={submit} className="flex items-center gap-2">
+                    <div className="ig-ring shrink-0">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: 'var(--bg)' }}>AI</div>
+                    </div>
+                    <input id="ig-input" value={input} onChange={e => setInput(e.target.value)} disabled={loading}
+                      placeholder="무엇을 홍보할까요?"
+                      className="flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-40"
+                      style={{ color: 'var(--text)' }} />
+                    {input.trim() ? (
+                      <button type="submit" disabled={loading} className="text-sm font-bold disabled:opacity-30" style={{ color: '#0095F6' }}>생성</button>
+                    ) : (
+                      <button type="button" onClick={() => !loading && generate(PROMPTS[Math.floor(Math.random() * PROMPTS.length)].text)}
+                        disabled={loading} className="text-[11px] font-semibold px-2.5 py-1 rounded-full disabled:opacity-30" style={{ background: '#0095F6', color: '#fff' }}>
+                        자동생성
+                      </button>
+                    )}
+                  </form>
                 </div>
-                {post.text.split('\n').length > 8 && (
-                  <button className="text-[13px] text-white/40 mt-1">더 보기</button>
+
+                {/* Loading skeleton */}
+                {loading && posts[0]?.text === '' && (
+                  <div style={{ borderBottom: '1px solid var(--border)' }}>
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <div className="w-8 h-8 rounded-full" style={{ background: 'var(--bg-hover)' }} />
+                      <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: 100 }} />
+                    </div>
+                    <div className="aspect-square" style={{ background: 'var(--bg-card)', animation: 'igPulse 1.5s ease infinite' }} />
+                    <div className="px-4 py-3 space-y-2">
+                      <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '80%' }} />
+                      <div className="h-3 rounded" style={{ background: 'var(--bg-hover)', width: '50%' }} />
+                    </div>
+                  </div>
                 )}
-              </div>
 
-              {/* Copy button */}
-              <div className="px-4 pb-3">
-                <button onClick={() => copy(post.text, post.id)}
-                  className="text-[12px] font-semibold px-4 py-2 rounded-lg transition-all active:scale-95"
-                  style={{ background: copied === post.id ? '#262626' : '#0095F6', color: '#fff' }}>
-                  {copied === post.id ? '✓ 복사됨' : '📋 텍스트 복사'}
-                </button>
+                {/* Empty state */}
+                {posts.length === 0 && !loading && (
+                  <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ border: '2px solid var(--border)' }}>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="var(--text-muted)"/></svg>
+                    </div>
+                    <div className="text-sm font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>SNS 게시물을 만들어 보세요</div>
+                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>스토리를 탭하거나, 자동생성을 눌러보세요</div>
+                  </div>
+                )}
+
+                {/* Post Feed */}
+                {posts.filter(p => p.text).map((post, idx) => (
+                  <div key={post.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    {/* Post header */}
+                    <div className="flex items-center gap-2.5 px-4 py-2.5">
+                      <div className="ig-ring">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: 'var(--bg)' }}>AI</div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-semibold truncate">{post.prompt}</div>
+                      </div>
+                      <button onClick={() => copy(post.text, post.id)} style={{ color: 'var(--text-muted)' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                      </button>
+                    </div>
+                    {/* Image */}
+                    <div className="aspect-square relative overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+                      <img src={getPhoto(post.prompt, idx)} alt="" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
+                    </div>
+                    {/* Actions */}
+                    <div className="flex items-center px-4 py-2">
+                      <div className="flex items-center gap-4 flex-1">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      </div>
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    {/* Caption */}
+                    <div className="px-4 pb-3">
+                      <div className={`text-[13px] whitespace-pre-wrap leading-relaxed ${expanded.has(post.id) ? '' : 'line-clamp-4'}`}
+                        style={{ color: 'var(--text-secondary)' }}>
+                        {post.text}
+                      </div>
+                      {post.text.split('\n').length > 4 && (
+                        <button onClick={() => toggleExpand(post.id)} className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                          {expanded.has(post.id) ? '접기' : '더 보기'}
+                        </button>
+                      )}
+                    </div>
+                    {/* Copy */}
+                    <div className="px-4 pb-3">
+                      <button onClick={() => copy(post.text, post.id)}
+                        className="text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                        style={{ background: copied === post.id ? 'var(--bg-hover)' : '#0095F6', color: '#fff' }}>
+                        {copied === post.id ? '✓ 복사됨' : '📋 복사'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {/* ══════════════════════════════════════ */}
+            {/* ═══ VIDEO MODE ═══ */}
+            {/* ══════════════════════════════════════ */}
+            {mode === 'video' && (
+              <>
+                {/* Template selector */}
+                <div className="px-4 py-3 flex gap-2 overflow-x-auto ig-scroll" style={{ borderBottom: '1px solid var(--border)' }}>
+                  {VIDEO_TEMPLATES.map((t, i) => (
+                    <button key={t.id} onClick={() => { setVideoTemplate(i); setVideoPlaying(false); setVideoScene(0); }}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                      style={{
+                        background: videoTemplate === i ? '#0095F6' : 'var(--bg-hover)',
+                        color: videoTemplate === i ? '#fff' : 'var(--text-secondary)',
+                      }}>
+                      <span>{t.icon}</span> {t.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Phone preview — 9:16 vertical video */}
+                <div className="px-8 py-6">
+                  <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: '9/16', background: '#111' }}>
+                    {/* Background image */}
+                    <img src={getPhoto(scenes[videoScene] || '', videoScene)} alt=""
+                      className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                    {/* Scene content */}
+                    <div className="absolute inset-0 flex items-center justify-center p-8"
+                      style={{ animation: videoPlaying ? 'sceneFade 0.5s ease' : 'none' }}>
+                      <div className="text-center">
+                        <div className="text-white text-xl font-black leading-tight drop-shadow-lg"
+                          style={{ textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}>
+                          {scenes[videoScene]}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Progress dots */}
+                    <div className="absolute top-3 left-3 right-3 flex gap-1">
+                      {scenes.map((_, i) => (
+                        <div key={i} className="flex-1 h-0.5 rounded-full transition-all duration-300"
+                          style={{ background: i === videoScene ? '#fff' : 'rgba(255,255,255,0.3)' }} />
+                      ))}
+                    </div>
+                    {/* Play/pause overlay */}
+                    {!videoPlaying && (
+                      <button onClick={() => setVideoPlaying(true)}
+                        className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+                        </div>
+                      </button>
+                    )}
+                    {videoPlaying && (
+                      <button onClick={() => setVideoPlaying(false)} className="absolute inset-0" />
+                    )}
+                    {/* Reels UI overlay */}
+                    <div className="absolute bottom-4 right-3 flex flex-col items-center gap-4">
+                      <div className="flex flex-col items-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <span className="text-[10px] text-white mt-0.5">1.2K</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <span className="text-[10px] text-white mt-0.5">48</span>
+                      </div>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </div>
+                    <div className="absolute bottom-4 left-3 right-14">
+                      <div className="text-white text-[11px] font-semibold">@our_store</div>
+                      <div className="text-white/60 text-[10px] mt-0.5 truncate">{VIDEO_TEMPLATES[videoTemplate].name} 템플릿</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scene editor */}
+                <div className="px-4 pb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold">장면 편집</span>
+                    <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{scenes.length}컷</span>
+                  </div>
+                  <div className="space-y-2">
+                    {scenes.map((scene, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <button onClick={() => { setVideoScene(i); setVideoPlaying(false); }}
+                          className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold transition-all"
+                          style={{ background: videoScene === i ? '#0095F6' : 'var(--bg-hover)', color: videoScene === i ? '#fff' : 'var(--text-muted)' }}>
+                          {i + 1}
+                        </button>
+                        <div className="flex-1 text-[12px] py-2 px-3 rounded-lg" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>
+                          {scene}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Auto generate button */}
+                  <button onClick={() => { setVideoTemplate(Math.floor(Math.random() * VIDEO_TEMPLATES.length)); setVideoPlaying(true); setVideoScene(0); }}
+                    className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-transform"
+                    style={{ background: '#0095F6' }}>
+                    🎬 자동 생성
+                  </button>
+                </div>
+              </>
+            )}
+
+            <div className="h-16" />
+          </div>
+
+          {/* ═══ Bottom nav (standalone only) ═══ */}
+          {!embedded && (
+            <div className="shrink-0 flex items-center justify-around py-2" style={{ borderTop: '1px solid var(--border)' }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text)' }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--text)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              <div className="w-6 h-6 rounded-full" style={{ background: 'var(--bg-hover)', border: '1px solid var(--text-muted)' }} />
             </div>
-          );
-        })}
-
-        {/* Bottom spacer for embedded mode */}
-        <div className="h-20" />
+          )}
+        </div>
       </div>
     </div>
   );

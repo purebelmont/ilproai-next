@@ -21,7 +21,7 @@ export default function Home() {
       <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
-            style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
+            style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
           <span className="text-sm font-bold text-white/80">일프로AI</span>
         </Link>
         <div className="flex items-center gap-4">

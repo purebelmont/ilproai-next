@@ -267,7 +267,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between px-4 py-4 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white shrink-0"
-              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
+              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
             <div className="text-[13px] font-semibold text-white truncate">{bizName}</div>
           </div>
         </div>
@@ -393,7 +393,7 @@ export default function Dashboard() {
             {/* Mobile menu header */}
             <div className="flex items-center gap-3 px-5 py-4">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-extrabold text-white"
-                style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
+                style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
               <div>
                 <div className="text-[14px] font-bold text-white">{bizName}</div>
                 <div className="text-[11px] text-[#6B6B80]">{dateLabel}</div>
@@ -491,7 +491,7 @@ export default function Dashboard() {
           style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
-              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>B</div>
+              style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
             <div>
               <div className="text-sm font-bold">{bizName}</div>
               <div className="text-[10px] text-[var(--text-muted)]">{dateLabel}</div>
@@ -694,10 +694,7 @@ function ContactsPanel({ userId, openModal, closeModal }: { userId: string; open
             className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] dark:bg-gray-700 text-[var(--gray-700)]">
             {importing ? "..." : "📥 Import"}
           </button>
-          <button onClick={() => openForm(undefined, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
-          <button onClick={() => openForm(undefined, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
-          <button onClick={() => openForm(undefined, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>
-          <button onClick={() => openForm(undefined, "inline")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white">D</button>
+          <button onClick={() => openForm(undefined, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white font-medium">+ 추가</button>
         </div>
       </div>
       {/* Inline form */}
@@ -969,10 +966,7 @@ function NotesPanel({ userId, openModal, closeModal }: { userId: string; openMod
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold">메모</h4>
         <div className="flex gap-1.5">
-          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
-          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
-          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>
-          <button onClick={() => { setInlineOpen(true); setInlineData({ title: "", content: "" }); }} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white">D</button>
+          <button onClick={() => openModal("새 메모", <NoteForm onSave={save} />, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white font-medium">+ 추가</button>
         </div>
       </div>
       {/* Inline form */}
@@ -1204,10 +1198,7 @@ function ReservationsPanel({ userId, openModal, closeModal }: { userId: string; 
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold">오늘 예약</h4>
         <div className="flex gap-1.5">
-          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "fullscreen")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">A</button>
-          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">B</button>
-          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "side")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--gray-100)] text-[var(--gray-700)]">C</button>
-          <button onClick={() => { setInlineOpen(true); setInlineData({ customer_name: "", customer_phone: "", party_size: 2, reservation_time: "" }); }} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white">D</button>
+          <button onClick={() => openModal("예약 추가", <ReservationForm onSave={save} />, "bottom")} className="px-2.5 py-1 text-[10px] rounded-md bg-[var(--primary)] text-white font-medium">+ 추가</button>
         </div>
       </div>
       {/* Inline form */}

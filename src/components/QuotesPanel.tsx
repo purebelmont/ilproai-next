@@ -815,45 +815,77 @@ function POEditor({ doc, onClose }: { doc: Partial<PODoc>; onClose: () => void }
     onClose();
   }
 
+  const totals = calcTotals(items);
+  const inp = { border: "none" as const, outline: "none" as const, width: "100%", fontSize: "11px", padding: "2px 4px" };
+
   return (
-    <div className="p-5 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-5">
+    <div className="p-3">
+      <div className="flex items-center justify-between mb-3">
         <button onClick={onClose} className="text-[var(--primary)] text-sm">← 목록</button>
-        <div className="flex gap-3">
-          <button onClick={() => printEl(printId.current)} className="text-sm font-medium" style={{ color: "var(--text-muted)", minHeight: 0 }}>PDF</button>
-          <button onClick={save} className="text-sm font-bold" style={{ color: "var(--primary)", minHeight: 0 }}>저장</button>
+        <div className="flex gap-2">
+          <button onClick={() => printEl(printId.current)} className="px-3 py-1.5 text-xs rounded-lg" style={{ background: "var(--bg-hover)", color: "var(--text-muted)", minHeight: 0 }}>🖨️ PDF</button>
+          <button onClick={save} className="px-3 py-1.5 text-xs rounded-lg font-semibold text-white" style={{ background: "var(--primary)", minHeight: 0 }}>저장</button>
         </div>
       </div>
-
-      <div className="rounded-xl border p-3 mb-4 text-xs" style={{ borderColor: "var(--border)", background: "var(--bg-card)", color: "var(--text-secondary)" }}>
-        <span className="font-semibold">발주번호:</span> {docNumber}
-        {biz.companyName && <span className="ml-3"><span className="font-semibold">발주자:</span> {biz.companyName}</span>}
+      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
+        <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px" }}>
+          <div style={{ textAlign: "center", marginBottom: "16px" }}>
+            <div style={{ fontSize: "24px", fontWeight: 800, letterSpacing: "12px", color: "#111" }}>발 주 서</div>
+          </div>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "20%", fontSize: "13px" }}>합계금액</td>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", fontSize: "18px", fontWeight: 900, color: "#0071E3" }}>₩{won(totals.grand)}</td>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", background: "#f0f0f0", fontWeight: 700, width: "15%" }}>발주번호</td>
+                <td style={{ border: "1.5px solid #000", padding: "8px 12px", width: "25%", fontSize: "11px" }}>{docNumber}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <tbody>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>발주일자</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} /></td>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>납기일</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px", width: "35%" }}><input type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} style={inp} /></td>
+              </tr>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>납품장소</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px" }}><input value={deliveryPlace} onChange={e => setDeliveryPlace(e.target.value)} placeholder="본사 창고" style={inp} /></td>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600 }}>결제조건</td>
+                <td style={{ border: "1px solid #999", padding: "3px 4px" }}><input value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} placeholder="현금, 30일 어음" style={inp} /></td>
+              </tr>
+            </tbody>
+          </table>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}>
+            <thead><tr><th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>발주자</th><th colSpan={2} style={{ border: "1px solid #999", padding: "5px", background: "#f0f0f0", width: "50%" }}>공급업체</th></tr></thead>
+            <tbody>
+              {[{ label: "상호", left: biz.companyName, right: buyerName, set: setBuyerName }, { label: "사업자번호", left: biz.regNumber, right: buyerReg, set: setBuyerReg }, { label: "대표자", left: biz.ceoName, right: buyerCeo, set: setBuyerCeo }, { label: "주소", left: biz.address, right: buyerAddr, set: setBuyerAddr }].map(r => (
+                <tr key={r.label}><td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{r.label}</td><td style={{ border: "1px solid #999", padding: "4px 8px", width: "35%" }}>{r.left || "—"}</td><td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%" }}>{r.label}</td><td style={{ border: "1px solid #999", padding: "2px 4px", width: "35%" }}><input value={r.right} onChange={e => r.set(e.target.value)} placeholder={`${r.label}`} style={inp} /></td></tr>
+              ))}
+            </tbody>
+          </table>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "4px" }}>
+            <thead><tr style={{ background: "#f0f0f0" }}>{["No","품명","규격","수량","단가","공급가액","세액",""].map(h => <th key={h} style={{ border: "1px solid #999", padding: "5px 4px", fontWeight: 600, textAlign: h === "단가" || h === "공급가액" || h === "세액" ? "right" : "center", width: h === "No" ? "5%" : h === "" ? "5%" : undefined }}>{h}</th>)}</tr></thead>
+            <tbody>{items.map((it, i) => { const { supply, vat } = calcItem(it); return (<tr key={i}><td style={{ border: "1px solid #999", padding: "3px 4px", textAlign: "center", color: "#999" }}>{i+1}</td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={it.name} onChange={e => { const n=[...items]; n[i]={...it,name:e.target.value}; setItems(n); }} style={inp} /></td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={it.spec} onChange={e => { const n=[...items]; n[i]={...it,spec:e.target.value}; setItems(n); }} style={inp} /></td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input type="number" value={it.qty} onChange={e => { const n=[...items]; n[i]={...it,qty:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"center"}} /></td><td style={{ border: "1px solid #999", padding: "2px 3px" }}><input type="number" value={it.unitPrice} onChange={e => { const n=[...items]; n[i]={...it,unitPrice:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"right"}} /></td><td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right" }}>{won(supply)}</td><td style={{ border: "1px solid #999", padding: "4px 6px", textAlign: "right", color: "#666" }}>{won(vat)}</td><td style={{ border: "1px solid #999", padding: "2px", textAlign: "center" }}>{items.length > 1 && <button onClick={() => setItems(items.filter((_,idx) => idx!==i))} style={{ color: "#ccc", fontSize: "11px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}</td></tr>); })}</tbody>
+          </table>
+          <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])} style={{ fontSize: "11px", color: "#0071E3", background: "none", border: "none", cursor: "pointer", padding: "4px 0", fontWeight: 600 }}>+ 품목 추가</button>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", marginBottom: "14px" }}>
+            <tbody>
+              <tr style={{ background: "#f8f8f8" }}><td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>공급가액</td><td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.supply)}</td><td style={{ border: "1px solid #999", padding: "6px 10px", fontWeight: 700, width: "25%" }}>세액 (VAT)</td><td style={{ border: "1px solid #999", padding: "6px 10px", textAlign: "right", width: "25%" }}>₩{won(totals.vat)}</td></tr>
+              <tr><td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", fontWeight: 800, fontSize: "14px" }}>합 계</td><td colSpan={2} style={{ border: "1.5px solid #000", padding: "8px 10px", textAlign: "right", fontWeight: 900, fontSize: "16px", color: "#0071E3" }}>₩{won(totals.grand)}</td></tr>
+            </tbody>
+          </table>
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px" }}><tbody><tr><td style={{ border: "1px solid #999", padding: "5px 8px", background: "#f8f8f8", fontWeight: 600, width: "15%", verticalAlign: "top" }}>특기사항</td><td style={{ border: "1px solid #999", padding: "3px 4px" }}><textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="포장방법, 운송비 조건 등" rows={2} style={{ border: "none", outline: "none", width: "100%", fontSize: "11px", padding: "4px", resize: "none" }} /></td></tr></tbody></table>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}><div style={{ textAlign: "center" }}><div style={{ fontSize: "11px", color: "#666" }}>{biz.companyName || "발주자"}</div><div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#ccc", marginTop: "4px", borderRadius: "50%" }}>직인</div></div></div>
+        </div>
       </div>
-
-      <div className="ios-fields mb-4">
-        <div className="ios-field"><label>발주일자</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-        <div className="ios-field"><label>납기일</label><input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} /></div>
-        <div className="ios-field"><label>납품장소</label><input value={deliveryPlace} onChange={(e) => setDeliveryPlace(e.target.value)} placeholder="본사 창고" /></div>
-        <div className="ios-field"><label>결제조건</label><input value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} placeholder="30일 어음 등" /></div>
+      <div className="flex gap-2 mt-3">
+        <button onClick={save} className="flex-1 p-3 rounded-xl font-semibold text-sm text-white" style={{ background: "var(--primary)" }}>저장</button>
+        {doc.id && <button onClick={del} className="px-4 py-3 rounded-xl text-sm" style={{ background: "rgba(255,59,48,0.1)", color: "#FF3B30" }}>삭제</button>}
       </div>
-
-      <div className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>공급업체</div>
-      <BuyerFields name={buyerName} regNum={buyerReg} ceo={buyerCeo} addr={buyerAddr}
-        setName={setBuyerName} setRegNum={setBuyerReg} setCeo={setBuyerCeo} setAddr={setBuyerAddr} />
-
-      <ItemTable items={items} setItems={setItems} />
-      <TotalsBox items={items} />
-
-      <div className="ios-fields mb-5">
-        <div className="ios-field"><label>특기사항</label><textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="포장방법, 운송비 조건 등" /></div>
-      </div>
-
-      <button onClick={save} className="w-full p-3 rounded-xl font-semibold text-sm text-white" style={{ background: "var(--primary)" }}>저장</button>
-      {doc.id && <div className="ios-danger mt-2" onClick={del}>발주서 삭제</div>}
-
-      <div id={printId.current} style={{ display: "none" }}>
-        <QuotePrintTemplate doc={buildDoc()} isPO={true} />
-      </div>
+      <div id={printId.current} style={{ display: "none" }}><QuotePrintTemplate doc={buildDoc()} isPO={true} /></div>
     </div>
   );
 }
@@ -905,89 +937,136 @@ function TaxEditor({ doc, onClose }: { doc: Partial<TaxDoc>; onClose: () => void
     onClose();
   }
 
+  const inp = { border: "none" as const, outline: "none" as const, width: "100%", fontSize: "11px", padding: "2px 4px" };
+  const ninp = { ...inp, textAlign: "right" as const };
+
   return (
-    <div className="p-5 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-5">
+    <div className="p-3">
+      <div className="flex items-center justify-between mb-3">
         <button onClick={onClose} className="text-[var(--primary)] text-sm">← 목록</button>
-        <div className="flex gap-3">
-          <button onClick={() => printEl(printId.current)} className="text-sm font-medium" style={{ color: "var(--text-muted)", minHeight: 0 }}>PDF</button>
-          <button onClick={save} className="text-sm font-bold" style={{ color: "var(--primary)", minHeight: 0 }}>저장</button>
+        <div className="flex gap-2">
+          <button onClick={() => printEl(printId.current)} className="px-3 py-1.5 text-xs rounded-lg" style={{ background: "var(--bg-hover)", color: "var(--text-muted)", minHeight: 0 }}>🖨️ PDF</button>
+          <button onClick={save} className="px-3 py-1.5 text-xs rounded-lg font-semibold text-white" style={{ background: "var(--primary)", minHeight: 0 }}>저장</button>
         </div>
       </div>
-
-      <div className="rounded-xl border p-3 mb-4 text-xs" style={{ borderColor: "var(--border)", background: "var(--bg-card)", color: "var(--text-secondary)" }}>
-        <span className="font-semibold">발행번호:</span> {docNumber}
-        {biz.companyName && <span className="ml-3"><span className="font-semibold">공급자:</span> {biz.companyName}</span>}
-      </div>
-
-      <div className="ios-fields mb-4">
-        <div className="ios-field"><label>작성일자</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-        <div className="ios-field">
-          <label>구분</label>
-          <div className="flex gap-3 flex-1">
-            {(["영수", "청구"] as const).map((t) => (
-              <label key={t} className="flex items-center gap-1 cursor-pointer" style={{ minHeight: 0 }}>
-                <input type="radio" checked={invoiceType === t} onChange={() => setInvoiceType(t)} />
-                <span className="text-sm">{t}</span>
+      <div className="rounded-lg overflow-hidden" style={{ border: "2px solid #333" }}>
+        <div style={{ background: "#fff", color: "#000", padding: "20px", fontFamily: "'Noto Sans KR', sans-serif", fontSize: "12px" }}>
+          {/* Title */}
+          <div style={{ textAlign: "center", marginBottom: "4px" }}>
+            <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "10px", color: "#111" }}>세금계산서</div>
+          </div>
+          <div style={{ textAlign: "center", marginBottom: "14px", fontSize: "12px" }}>
+            이 금액을&nbsp;
+            {(["영수", "청구"] as const).map(t => (
+              <label key={t} style={{ cursor: "pointer", margin: "0 4px", border: "1px solid #000", padding: "1px 8px" }}>
+                <input type="radio" checked={invoiceType === t} onChange={() => setInvoiceType(t)} style={{ marginRight: "3px" }} />{t}
               </label>
             ))}
+            &nbsp;함
+          </div>
+
+          {/* Amount + docnum */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
+            <tbody>
+              <tr>
+                <td style={{ border: "1.5px solid #000", padding: "6px 10px", background: "#f0f0f0", fontWeight: 700, width: "20%" }}>합계금액</td>
+                <td style={{ border: "1.5px solid #000", padding: "6px 10px", fontSize: "16px", fontWeight: 900, color: "#0071E3" }}>₩{won(grand)}</td>
+                <td style={{ border: "1.5px solid #000", padding: "6px 10px", background: "#f0f0f0", fontWeight: 700, width: "15%" }}>발행번호</td>
+                <td style={{ border: "1.5px solid #000", padding: "6px 10px", fontSize: "11px" }}>{docNumber}</td>
+              </tr>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>작성일자</td>
+                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} /></td>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>한글금액</td>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", fontSize: "10px" }}>{toKoreanAmount(grand)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Supplier / Buyer — 국세청 style with vertical labels */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
+            <tbody>
+              <tr>
+                <td rowSpan={6} style={{ border: "1px solid #000", background: "#f0f0f0", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px", width: "5%" }}>공급자</td>
+                {[{ l: "등록번호", v: biz.regNumber }, { l: "상호", v: biz.companyName }].map(({ l, v }) => (
+                  <><td key={l+"l"} style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600, width: "10%" }}>{l}</td><td key={l+"v"} style={{ border: "1px solid #999", padding: "3px 6px", width: "30%" }}>{v || "—"}</td></>
+                ))}
+                <td rowSpan={6} style={{ border: "1px solid #000", background: "#f0f0f0", padding: "4px", textAlign: "center", fontWeight: 700, writingMode: "vertical-rl", fontSize: "13px", letterSpacing: "4px", width: "5%" }}>공급받는자</td>
+                <td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600, width: "10%" }}>등록번호</td>
+                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "30%" }}><input value={buyerReg} onChange={e => setBuyerReg(e.target.value)} placeholder="000-00-00000" style={inp} /></td>
+              </tr>
+              {[
+                { l: "성명(대표)", left: biz.ceoName, right: buyerCeo, set: setBuyerCeo },
+                { l: "사업장", left: biz.address, right: buyerAddr, set: setBuyerAddr },
+                { l: "업태", left: biz.bizType, right: buyerBizType, set: setBuyerBizType },
+                { l: "종목", left: biz.bizItem, right: buyerBizItem, set: setBuyerBizItem },
+              ].map((r, ri) => (
+                <tr key={ri}>
+                  {ri === 0 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>상호</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{biz.companyName || "—"}</td></>}
+                  {ri === 1 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{r.left || "—"}</td></>}
+                  {ri === 2 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{r.left || "—"}</td></>}
+                  {ri === 3 && <><td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td><td style={{ border: "1px solid #999", padding: "3px 6px" }}>{r.left || "—"}</td></>}
+                  {ri === 0 && <td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>상호</td>}
+                  {ri !== 0 && <td style={{ border: "1px solid #999", padding: "3px 6px", background: "#f8f8f8", fontWeight: 600 }}>{r.l}</td>}
+                  <td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={ri === 0 ? buyerName : r.right} onChange={e => ri === 0 ? setBuyerName(e.target.value) : r.set(e.target.value)} style={inp} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Items */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "4px" }}>
+            <thead><tr style={{ background: "#f0f0f0" }}>{["월","일","품목","규격","수량","단가","공급가액","세액",""].map(h => <th key={h} style={{ border: "1px solid #999", padding: "4px 3px", fontWeight: 600, textAlign: "center", fontSize: "10px" }}>{h}</th>)}</tr></thead>
+            <tbody>{items.map((it, i) => { const { supply: s, vat: v } = calcItem(it); const d2 = new Date(date); return (
+              <tr key={i}>
+                <td style={{ border: "1px solid #999", padding: "3px", textAlign: "center", width: "6%" }}>{String(d2.getMonth()+1).padStart(2,"0")}</td>
+                <td style={{ border: "1px solid #999", padding: "3px", textAlign: "center", width: "6%" }}>{String(d2.getDate()).padStart(2,"0")}</td>
+                <td style={{ border: "1px solid #999", padding: "2px 3px" }}><input value={it.name} onChange={e => { const n=[...items]; n[i]={...it,name:e.target.value}; setItems(n); }} style={inp} /></td>
+                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "10%" }}><input value={it.spec} onChange={e => { const n=[...items]; n[i]={...it,spec:e.target.value}; setItems(n); }} style={inp} /></td>
+                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "8%" }}><input type="number" value={it.qty} onChange={e => { const n=[...items]; n[i]={...it,qty:Number(e.target.value)}; setItems(n); }} style={{...inp,textAlign:"center"}} /></td>
+                <td style={{ border: "1px solid #999", padding: "2px 3px", width: "12%" }}><input type="number" value={it.unitPrice} onChange={e => { const n=[...items]; n[i]={...it,unitPrice:Number(e.target.value)}; setItems(n); }} style={ninp} /></td>
+                <td style={{ border: "1px solid #999", padding: "4px 4px", textAlign: "right", width: "13%" }}>{won(s)}</td>
+                <td style={{ border: "1px solid #999", padding: "4px 4px", textAlign: "right", width: "11%", color: "#666" }}>{won(v)}</td>
+                <td style={{ border: "1px solid #999", padding: "2px", textAlign: "center", width: "4%" }}>{items.length > 1 && <button onClick={() => setItems(items.filter((_,idx) => idx!==i))} style={{ color: "#ccc", fontSize: "10px", cursor: "pointer", border: "none", background: "none" }}>✕</button>}</td>
+              </tr>); })}</tbody>
+          </table>
+          <button onClick={() => setItems([...items, { ...EMPTY_ITEM }])} style={{ fontSize: "11px", color: "#0071E3", background: "none", border: "none", cursor: "pointer", padding: "4px 0", fontWeight: 600 }}>+ 품목 추가</button>
+
+          {/* Totals + payment */}
+          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "8px", marginBottom: "10px" }}>
+            <tbody>
+              <tr style={{ background: "#f8f8f8" }}>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", fontWeight: 700 }}>공급가액</td>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", textAlign: "right" }}>₩{won(supply)}</td>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", fontWeight: 700 }}>세액</td>
+                <td style={{ border: "1px solid #999", padding: "5px 8px", textAlign: "right" }}>₩{won(vat)}</td>
+              </tr>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>현금</td>
+                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={cash || ""} onChange={e => setCash(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>수표</td>
+                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={check || ""} onChange={e => setCheck(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+              </tr>
+              <tr>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>어음</td>
+                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={note || ""} onChange={e => setNote(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+                <td style={{ border: "1px solid #999", padding: "4px 8px", background: "#f8f8f8", fontWeight: 600 }}>외상미수금</td>
+                <td style={{ border: "1px solid #999", padding: "2px 4px" }}><input type="number" value={credit || ""} onChange={e => setCredit(Number(e.target.value)||0)} placeholder="0" style={ninp} /></td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Stamp */}
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ textAlign: "center" }}><div style={{ fontSize: "11px", color: "#666" }}>{biz.companyName || "공급자"}</div><div style={{ width: 60, height: 60, border: "1px dashed #ccc", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#ccc", marginTop: "4px", borderRadius: "50%" }}>직인</div></div>
           </div>
         </div>
       </div>
-
-      <div className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>공급받는자</div>
-      <BuyerFields
-        name={buyerName} regNum={buyerReg} ceo={buyerCeo} addr={buyerAddr}
-        bizType={buyerBizType} bizItem={buyerBizItem}
-        setName={setBuyerName} setRegNum={setBuyerReg} setCeo={setBuyerCeo} setAddr={setBuyerAddr}
-        setBizType={setBuyerBizType} setBizItem={setBuyerBizItem}
-        showBizFields
-      />
-
-      <ItemTable items={items} setItems={setItems} isTax />
-
-      {/* Tax totals */}
-      <div className="rounded-xl p-4 mb-4" style={{ background: "var(--bg-hover)" }}>
-        <div className="grid grid-cols-2 gap-1 text-sm mb-3">
-          <div style={{ color: "var(--text-muted)" }}>공급가액</div><div className="text-right font-semibold">{won(supply)}원</div>
-          <div style={{ color: "var(--text-muted)" }}>세액</div><div className="text-right font-semibold">{won(vat)}원</div>
-          <div className="font-bold border-t pt-2" style={{ borderColor: "var(--border)" }}>합계금액</div>
-          <div className="text-right font-extrabold border-t pt-2" style={{ borderColor: "var(--border)", color: "var(--primary)" }}>{won(grand)}원</div>
-        </div>
-        <div className="text-xs rounded p-2" style={{ background: "var(--bg-card)", color: "var(--text-muted)" }}>
-          {toKoreanAmount(grand)}
-        </div>
+      <div className="flex gap-2 mt-3">
+        <button onClick={save} className="flex-1 p-3 rounded-xl font-semibold text-sm text-white" style={{ background: "var(--primary)" }}>저장</button>
+        {doc.id && <button onClick={del} className="px-4 py-3 rounded-xl text-sm" style={{ background: "rgba(255,59,48,0.1)", color: "#FF3B30" }}>삭제</button>}
       </div>
-
-      {/* Payment breakdown */}
-      <div className="text-xs font-bold mb-2" style={{ color: "var(--text-muted)" }}>결제 내역</div>
-      <div className="grid grid-cols-2 gap-2 mb-5">
-        {[
-          { label: "현금", val: cash, set: setCash },
-          { label: "수표", val: check, set: setCheck },
-          { label: "어음", val: note, set: setNote },
-          { label: "외상미수금", val: credit, set: setCredit },
-        ].map(({ label, val, set }) => (
-          <div key={label} className="rounded-xl border p-3" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
-            <div className="text-[10px] mb-1" style={{ color: "var(--text-muted)" }}>{label}</div>
-            <input
-              type="number"
-              value={val || ""}
-              onChange={(e) => set(Number(e.target.value) || 0)}
-              placeholder="0"
-              className="w-full text-sm text-right outline-none border-none bg-transparent"
-              style={{ color: "var(--text)" }}
-            />
-          </div>
-        ))}
-      </div>
-
-      <button onClick={save} className="w-full p-3 rounded-xl font-semibold text-sm text-white" style={{ background: "var(--primary)" }}>저장</button>
-      {doc.id && <div className="ios-danger mt-2" onClick={del}>세금계산서 삭제</div>}
-
-      <div id={printId.current} style={{ display: "none" }}>
-        <TaxPrintTemplate doc={buildDoc()} />
-      </div>
+      <div id={printId.current} style={{ display: "none" }}><TaxPrintTemplate doc={buildDoc()} /></div>
     </div>
   );
 }

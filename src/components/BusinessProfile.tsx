@@ -18,15 +18,30 @@ const EMPTY: BizProfile = {
   bizType: "", bizItem: "", phone: "", fax: "", stampUrl: "",
 };
 
+const DEFAULT_SAMPLE: BizProfile = {
+  companyName: "일프로 주식회사",
+  regNumber: "123-45-67890",
+  ceoName: "김사장",
+  address: "서울시 강남구 역삼로 123, 4층",
+  bizType: "서비스업",
+  bizItem: "소프트웨어 개발",
+  phone: "02-1234-5678",
+  fax: "02-1234-5679",
+  stampUrl: "",
+};
+
 const LS_KEY = "ilpro_biz_profile";
 
 export function loadBizProfile(): BizProfile {
-  if (typeof window === "undefined") return EMPTY;
+  if (typeof window === "undefined") return DEFAULT_SAMPLE;
   try {
     const raw = localStorage.getItem(LS_KEY);
-    return raw ? { ...EMPTY, ...JSON.parse(raw) } : EMPTY;
+    if (!raw) return DEFAULT_SAMPLE;
+    const parsed = { ...EMPTY, ...JSON.parse(raw) };
+    // If user cleared all fields, return default
+    return parsed.companyName ? parsed : DEFAULT_SAMPLE;
   } catch {
-    return EMPTY;
+    return DEFAULT_SAMPLE;
   }
 }
 

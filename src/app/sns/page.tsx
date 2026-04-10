@@ -519,14 +519,14 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
 
   const handleQuickPrompt = (text: string) => {
     setLastPrompt(text);
-    sendPrompt(`다음 업종/상황에 맞는 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${text}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`);
+    sendPrompt(`다음 내용으로 SNS 게시물을 만들어주세요:\n\n${text}${bizContext}\n\n자연스럽고 친근한 톤으로 작성하고, 해시태그도 포함해주세요.`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       setLastPrompt(input);
-      sendPrompt(`다음 내용으로 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${input}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`);
+      sendPrompt(`다음 내용으로 SNS 게시물을 만들어주세요:\n\n${input}${bizContext}\n\n자연스럽고 친근한 톤으로 작성하고, 해시태그도 포함해주세요.`);
       setInput('');
     }
   };
@@ -620,8 +620,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                     >
                       {/* 배경 이미지 */}
                       <div className="absolute inset-0">
-                        <img src={getPhoto(p.img)} alt="" className="w-full h-full object-cover opacity-30" />
-                        <div className="absolute inset-0" style={{ background: p.gradient, opacity: 0.6 }} />
+                        <img src={getPhoto(p.img)} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} />
                       </div>
                       <div className="relative p-4">
                         <span className="text-2xl">{p.icon}</span>
@@ -646,65 +646,35 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                     </div>
                   ) : (
                     <div>
-                      {/* 카드 템플릿 미리보기 */}
+                      {/* 이미지 미리보기 */}
                       {message.text.length > 100 && (
-                        <div className="mb-4">
-                          <h4 className="text-xs font-bold text-white/40 mb-3 uppercase tracking-wider">카드 템플릿 미리보기</h4>
-                          <div className="flex gap-3 overflow-x-auto pb-3">
-                            <SnsCard
-                              title={category.title}
-                              subtitle="지금 바로 확인하세요!"
-                              imageUrl={getPhoto(category.key, 0)}
-                              gradient={category.gradient}
-                              style="bold"
-                            />
-                            <SnsCard
-                              title={category.title}
-                              subtitle="특별한 혜택이 기다립니다"
-                              imageUrl={getPhoto(category.key, 1)}
-                              gradient={category.gradient}
-                              style="event"
-                            />
-                            <InstaPreview
-                              content={message.text}
-                              imageUrl={getPhoto(category.key, 2)}
-                              gradient={category.gradient}
-                            />
+                        <div className="mb-3">
+                          <div className="w-full aspect-[16/9] rounded-xl overflow-hidden relative max-w-md">
+                            <img src={getPhoto(category.key, 0)} alt="" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-end p-4">
+                              <div className="text-white font-bold text-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{category.title}</div>
+                            </div>
                           </div>
                         </div>
                       )}
 
-                      {/* 플랫폼별 콘텐츠 */}
-                      <div className="space-y-3">
-                        {(() => {
-                          const sections = parsePlatformContent(message.text);
-
-                          return sections.map((section, j) => (
-                            <div key={`${message.id}-${j}`} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                              {/* 플랫폼 헤더 */}
-                              <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-base">{section.icon}</span>
-                                  <span className="text-sm font-bold" style={{ color: section.color }}>{section.platform}</span>
-                                </div>
-                                <button
-                                  onClick={() => copyToClipboard(section.content, setCopied, `${message.id}-${j}`)}
-                                  className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all"
-                                  style={{
-                                    background: copied === `${message.id}-${j}` ? 'rgba(48,209,88,0.2)' : 'rgba(255,255,255,0.1)',
-                                    color: copied === `${message.id}-${j}` ? '#30D158' : 'rgba(255,255,255,0.6)',
-                                  }}
-                                >
-                                  {copied === `${message.id}-${j}` ? '✓ 복사됨' : '📋 복사'}
-                                </button>
-                              </div>
-                              {/* 콘텐츠 */}
-                              <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
-                                {section.content}
-                              </div>
-                            </div>
-                          ));
-                        })()}
+                      {/* 생성된 콘텐츠 */}
+                      <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                          <span className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>📝 생성된 게시물</span>
+                          <button
+                            onClick={() => copyToClipboard(message.text, setCopied, message.id)}
+                            className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                            style={{
+                              background: copied === message.id ? 'rgba(48,209,88,0.2)' : 'rgba(255,255,255,0.1)',
+                              color: copied === message.id ? '#30D158' : 'rgba(255,255,255,0.6)',
+                            }}>
+                            {copied === message.id ? '✓ 복사됨' : '📋 복사'}
+                          </button>
+                        </div>
+                        <div className="px-4 py-3 text-sm text-white/80 whitespace-pre-wrap leading-relaxed">
+                          {message.text}
+                        </div>
                       </div>
                     </div>
                   )}

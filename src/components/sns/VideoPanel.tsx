@@ -9,6 +9,7 @@ interface VideoTemplate {
   duration: string;
   aspect: '9:16' | '1:1' | '16:9';
   gradient: string;
+  image: string;
   scenes: { text: string; duration: number; bg?: string }[];
 }
 
@@ -20,6 +21,7 @@ const TEMPLATES: VideoTemplate[] = [
     duration: '15-30초',
     aspect: '9:16',
     gradient: 'linear-gradient(135deg, #FF6B35, #D62828)',
+    image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=400&fit=crop',
     scenes: [
       { text: '🍕 주말에 피자가\n두 판이라고?!', duration: 2500, bg: 'linear-gradient(135deg, #FF6B35, #FF8C42)' },
       { text: '화덕에서 갓 구운\n바삭한 모짜렐라 피자', duration: 3000, bg: 'linear-gradient(135deg, #D62828, #FF6B35)' },
@@ -34,6 +36,7 @@ const TEMPLATES: VideoTemplate[] = [
     duration: '15-45초',
     aspect: '9:16',
     gradient: 'linear-gradient(135deg, #6F4E37, #C08552)',
+    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop',
     scenes: [
       { text: '울산 카페\n봄 신메뉴 TOP 3 ☕', duration: 2500, bg: 'linear-gradient(135deg, #6F4E37, #A67C52)' },
       { text: '3️⃣\n피치 스파클링\n톡 쏘는 복숭아 에이드', duration: 3000, bg: 'linear-gradient(135deg, #FF9F7F, #C08552)' },
@@ -49,6 +52,7 @@ const TEMPLATES: VideoTemplate[] = [
     duration: '10-20초',
     aspect: '9:16',
     gradient: 'linear-gradient(135deg, #C77DFF, #7B2CBF)',
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=400&fit=crop',
     scenes: [
       { text: 'BEFORE 💇\n\n칙칙한 머리..', duration: 2500, bg: 'linear-gradient(135deg, #555, #333)' },
       { text: '✂️\n원장 직접 시술\n1:1 맞춤 상담', duration: 2500, bg: 'linear-gradient(135deg, #9C27B0, #7B2CBF)' },
@@ -63,6 +67,7 @@ const TEMPLATES: VideoTemplate[] = [
     duration: '8-15초',
     aspect: '1:1',
     gradient: 'linear-gradient(135deg, #0077B6, #00B4D8)',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop',
     scenes: [
       { text: '"여기 피자 진짜\n인생 피자예요..."', duration: 3000, bg: 'linear-gradient(135deg, #0077B6, #023E8A)' },
       { text: '⭐⭐⭐⭐⭐\n\n네이버 리뷰 4.9점', duration: 2500, bg: 'linear-gradient(135deg, #0096C7, #0077B6)' },
@@ -541,8 +546,11 @@ export default function VideoPanel() {
                     border: selectedTemplate === t.id ? '2px solid #0071E3' : '2px solid rgba(255,255,255,0.08)',
                   }}
                 >
-                  <div className="w-full aspect-[3/2] rounded-lg mb-2 flex items-center justify-center text-xs font-bold text-white/70" style={{ background: t.gradient }}>
-                    {t.name.split(' ')[0]}
+                  <div className="w-full aspect-[3/2] rounded-lg mb-2 overflow-hidden relative">
+                    <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center text-xs font-bold text-white">
+                      {t.name.split(' ')[0]}
+                    </div>
                   </div>
                   <div className="text-[11px] font-bold truncate">{t.name}</div>
                   <div className="text-[10px] text-white/40">{t.desc}</div>

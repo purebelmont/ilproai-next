@@ -324,135 +324,6 @@ function copyToClipboard(text: string, setCopied: (v: string) => void, id: strin
   setTimeout(() => setCopied(''), 2000);
 }
 
-// AI 응답에서 플랫폼별 콘텐츠 파싱
-function parsePlatformContent(text: string): { platform: string; icon: string; color: string; content: string }[] {
-  const sections: { platform: string; icon: string; color: string; content: string }[] = [];
-  const parts = text.split(/---\n*/);
-
-  for (const part of parts) {
-    const trimmed = part.trim();
-    if (!trimmed) continue;
-
-    if (trimmed.includes('인스타그램') || trimmed.includes('인스타')) {
-      sections.push({ platform: 'Instagram', icon: '📸', color: '#E1306C', content: trimmed });
-    } else if (trimmed.includes('블로그')) {
-      sections.push({ platform: 'Blog', icon: '📝', color: '#03C75A', content: trimmed });
-    } else if (trimmed.includes('페이스북')) {
-      sections.push({ platform: 'Facebook', icon: '👥', color: '#1877F2', content: trimmed });
-    } else if (trimmed.includes('트위터') || trimmed.includes('Twitter')) {
-      sections.push({ platform: 'Twitter/X', icon: '🐦', color: '#1DA1F2', content: trimmed });
-    } else if (sections.length > 0) {
-      // 플랫폼 구분이 안 되면 마지막 섹션에 추가
-      sections[sections.length - 1].content += '\n' + trimmed;
-    } else {
-      sections.push({ platform: 'Content', icon: '📄', color: '#8E8E93', content: trimmed });
-    }
-  }
-
-  return sections.length > 0 ? sections : [{ platform: 'Content', icon: '📄', color: '#8E8E93', content: text }];
-}
-
-// ──── Instagram 미리보기 컴포넌트 ────
-function InstaPreview({ content, imageUrl, gradient }: { content: string; imageUrl: string; gradient: string }) {
-  // 첫 줄을 제목으로, 해시태그 추출
-  const lines = content.split('\n').filter(l => l.trim());
-  const hashtags = lines.filter(l => l.includes('#')).join(' ');
-  const caption = lines.filter(l => !l.includes('## ') && !l.startsWith('---')).slice(0, 5).join('\n');
-
-  return (
-    <div className="rounded-xl overflow-hidden" style={{ background: '#000', maxWidth: 340 }}>
-      {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2">
-        <div className="w-8 h-8 rounded-full" style={{ background: gradient }} />
-        <div>
-          <div className="text-xs font-bold text-white">our_store</div>
-          <div className="text-[10px] text-white/40">울산 남구</div>
-        </div>
-      </div>
-      {/* Image */}
-      <div className="relative aspect-square" style={{ background: gradient }}>
-        <img
-          src={imageUrl}
-          alt="post"
-          className="w-full h-full object-cover"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-        {/* 텍스트 오버레이 */}
-        <div className="absolute inset-0 flex items-center justify-center p-6" style={{ background: 'rgba(0,0,0,0.3)' }}>
-          <div className="text-white text-center">
-            <div className="text-lg font-bold mb-2 drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-              {lines.find(l => l.includes('**'))?.replace(/\*\*/g, '').replace(/\[.*?\]/g, '').trim().slice(0, 30) || '우리 가게 소식'}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Actions */}
-      <div className="flex items-center gap-4 px-3 py-2">
-        <span className="text-lg">♡</span>
-        <span className="text-lg">💬</span>
-        <span className="text-lg">↗</span>
-        <span className="ml-auto text-lg">🔖</span>
-      </div>
-      {/* Caption */}
-      <div className="px-3 pb-3">
-        <div className="text-xs text-white/60 leading-relaxed line-clamp-3">
-          {caption.slice(0, 120)}...
-        </div>
-        {hashtags && (
-          <div className="text-xs mt-1" style={{ color: '#0095F6' }}>
-            {hashtags.slice(0, 100)}...
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ──── SNS 카드 템플릿 컴포넌트 ────
-function SnsCard({ title, subtitle, imageUrl, gradient, style }: {
-  title: string; subtitle: string; imageUrl: string; gradient: string;
-  style: 'bold' | 'minimal' | 'event';
-}) {
-  if (style === 'event') {
-    return (
-      <div className="relative rounded-xl overflow-hidden aspect-square" style={{ maxWidth: 300 }}>
-        <img src={imageUrl} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} />
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-          <div className="text-[10px] font-bold tracking-widest uppercase text-white/60 mb-2">EVENT</div>
-          <div className="text-xl font-black text-white mb-2 leading-tight" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{title}</div>
-          <div className="text-xs text-white/80">{subtitle}</div>
-          <div className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: gradient }}>자세히 보기</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (style === 'minimal') {
-    return (
-      <div className="rounded-xl overflow-hidden" style={{ background: '#111', maxWidth: 300 }}>
-        <div className="aspect-video relative">
-          <img src={imageUrl} alt="" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        </div>
-        <div className="p-4">
-          <div className="text-sm font-bold text-white mb-1">{title}</div>
-          <div className="text-xs text-white/50">{subtitle}</div>
-        </div>
-      </div>
-    );
-  }
-
-  // bold style
-  return (
-    <div className="relative rounded-xl overflow-hidden aspect-[4/5]" style={{ maxWidth: 300, background: gradient }}>
-      <div className="absolute inset-0 flex flex-col justify-end p-5">
-        <div className="text-2xl font-black text-white mb-2 leading-tight" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>{title}</div>
-        <div className="text-xs text-white/80">{subtitle}</div>
-      </div>
-    </div>
-  );
-}
-
 interface ChatMsg { id: string; role: 'user' | 'assistant'; text: string }
 
 export function SNSPanel({ embedded }: { embedded?: boolean }) {
@@ -565,44 +436,73 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const category = detectCategory(lastPrompt || input);
 
   return (
-    <div className={embedded ? "h-full overflow-y-auto" : "min-h-screen"} style={{ background: embedded ? 'var(--bg)' : '#0a0a1a', color: embedded ? 'var(--text)' : '#fff' }}>
-      {/* Header — only on standalone page */}
+    <div className={embedded ? "h-full overflow-y-auto" : "min-h-screen"} style={{ background: embedded ? 'var(--bg)' : '#000', color: embedded ? 'var(--text)' : '#fff' }}>
+      <style>{`
+        @keyframes igSpin { to { transform: rotate(360deg); } }
+        @keyframes igFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .ig-story-ring { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2.5px; border-radius: 50%; }
+        .ig-story-ring-used { background: #333; padding: 2.5px; border-radius: 50%; }
+      `}</style>
+
+      {/* ═══ Instagram-style Header ═══ */}
       {!embedded && (
-      <header style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }} className="px-4 py-3">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-white/50 hover:text-white text-sm">
-              ← 대시보드
+        <header className="sticky top-0 z-30 px-4 py-2.5" style={{ background: '#000', borderBottom: '1px solid #262626' }}>
+          <div className="max-w-[470px] mx-auto flex items-center justify-between">
+            <Link href="/dashboard" className="text-white/40 hover:text-white/70 transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </Link>
-            <span className="text-white/20">|</span>
-            <h1 className="text-lg font-bold">📣 AI SNS 자동화</h1>
+            <h1 className="text-base font-semibold tracking-tight" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>일프로 SNS</h1>
+            <div className="flex items-center gap-3">
+              {currentBiz && (
+                <button onClick={() => { setSetupDone(false); setSavedCategory(null); localStorage.removeItem('ilpro_sns_category'); }}
+                  className="text-[11px] px-2.5 py-1 rounded-full font-medium transition-opacity hover:opacity-70"
+                  style={{ background: '#262626', color: '#e0e0e0' }}>
+                  {currentBiz.icon} {currentBiz.label}
+                </button>
+              )}
+              <button onClick={() => setShowApiSettings(true)} className="text-white/50 hover:text-white/80">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              </button>
+            </div>
           </div>
-          {currentBiz && (
-            <button onClick={() => { setSetupDone(false); setSavedCategory(null); localStorage.removeItem('ilpro_sns_category'); }}
-              className="text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5 transition-colors hover:opacity-80"
-              style={{ background: 'rgba(125,42,231,0.2)', color: '#A78BFA' }}>
-              {currentBiz.icon} {currentBiz.label}
-              <span className="text-white/30 ml-1">변경</span>
-            </button>
-          )}
-        </div>
-      </header>
+        </header>
       )}
 
-      <div className={embedded ? "p-4" : "max-w-5xl mx-auto p-4"}>
-        {/* Business Setup Screen */}
+      {/* Embedded header */}
+      {embedded && (
+        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+          <h2 className="text-base font-semibold">SNS 콘텐츠</h2>
+          <div className="flex items-center gap-2">
+            {currentBiz && (
+              <button onClick={() => { setSetupDone(false); setSavedCategory(null); localStorage.removeItem('ilpro_sns_category'); }}
+                className="text-[11px] px-2.5 py-1 rounded-full font-medium"
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>
+                {currentBiz.icon} {currentBiz.label}
+              </button>
+            )}
+            <button onClick={() => setShowApiSettings(true)} className="text-[var(--text-muted)]">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={embedded ? "px-4 pb-4" : "max-w-[470px] mx-auto"}>
+        {/* ═══ Business Setup — Instagram onboarding style ═══ */}
         {!setupDone && (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="text-4xl mb-4">📣</div>
-            <h2 className="text-2xl font-bold mb-2">어떤 업종이세요?</h2>
-            <p className="text-sm text-white/50 mb-8">한번 설정하면 모든 콘텐츠가 맞춤 생성됩니다</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl w-full">
+          <div className="flex flex-col items-center justify-center py-12 px-4">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl mb-5 ig-story-ring">
+              <div className="w-full h-full rounded-full flex items-center justify-center" style={{ background: '#000' }}>📣</div>
+            </div>
+            <h2 className="text-xl font-bold mb-1">업종을 선택하세요</h2>
+            <p className="text-sm text-white/40 mb-8">맞춤 콘텐츠를 자동으로 만들어 드려요</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full max-w-lg">
               {BIZ_CATEGORIES.map(cat => (
                 <button key={cat.id} onClick={() => selectCategory(cat.id)}
-                  className="flex flex-col items-center gap-2 p-5 rounded-xl transition-all hover:scale-105 active:scale-95"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <span className="text-3xl">{cat.icon}</span>
-                  <span className="text-sm font-medium">{cat.label}</span>
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all hover:scale-[1.03] active:scale-95"
+                  style={{ background: '#1a1a1a', border: '1px solid #262626' }}>
+                  <span className="text-2xl">{cat.icon}</span>
+                  <span className="text-[11px] font-medium text-white/80">{cat.label}</span>
                 </button>
               ))}
             </div>
@@ -610,204 +510,213 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
         )}
 
         {setupDone && <>
-        {/* Tab Navigation */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl overflow-x-auto" style={{ background: 'rgba(255,255,255,0.05)' }}>
+        {/* ═══ Tab Navigation — Instagram-style segmented control ═══ */}
+        <div className="flex border-b mb-0" style={{ borderColor: '#262626' }}>
           {[
-            { id: 'generate' as const, label: 'SNS 이미지 생성', icon: '✨' },
-            { id: 'video' as const, label: '비디오', icon: '🎬' },
-            { id: 'calendar' as const, label: '캘린더', icon: '📅' },
-            { id: 'history' as const, label: '히스토리', icon: '📊' },
+            { id: 'generate' as const, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> },
+            { id: 'video' as const, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> },
+            { id: 'calendar' as const, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+            { id: 'history' as const, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg> },
           ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className="px-3 py-2.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap"
-              style={{
-                background: activeTab === t.id ? 'rgba(0,113,227,0.3)' : 'transparent',
-                color: activeTab === t.id ? '#fff' : 'rgba(255,255,255,0.5)',
-              }}
-            >
-              {t.icon} {t.label}
+            <button key={t.id} onClick={() => setActiveTab(t.id)}
+              className="flex-1 flex justify-center py-3 transition-all relative"
+              style={{ color: activeTab === t.id ? '#fff' : '#666' }}>
+              {t.icon}
+              {activeTab === t.id && <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white" />}
             </button>
           ))}
         </div>
 
-        {/* Generate Tab — Instagram phone-like preview */}
+        {/* ═══ Generate Tab — Instagram Feed Style ═══ */}
         {activeTab === 'generate' && (
-          <div className="flex justify-center">
-            <div className="w-full max-w-[420px]">
-              {/* Input */}
-              <div className="mb-4">
-                {messages.length === 0 && (
-                  <div className="text-center mb-4">
-                    <div className="text-2xl mb-1">{currentBiz?.icon || '📣'}</div>
-                    <h2 className="text-base font-bold">오늘 뭐 올릴까요?</h2>
-                    <p className="text-[11px] text-white/40 mt-1">한 줄만 적어주세요</p>
-                  </div>
-                )}
-                <form onSubmit={handleSubmit} className="flex gap-2">
-                  <input value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading}
-                    placeholder={currentBiz ? `예: ${quickPrompts[0]?.text || '이벤트 홍보'}` : '어떤 내용을 올릴까요?'}
-                    className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none disabled:opacity-50"
-                    style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff' }} />
-                  <button type="submit" disabled={isLoading || !input.trim()}
-                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
-                    style={{ background: '#0071E3' }}>
-                    {isLoading ? '...' : '생성'}
-                  </button>
-                </form>
-
-                {/* Quick suggestions */}
-                {messages.length === 0 && (
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {quickPrompts.slice(0, 3).map((p, i) => (
-                      <button key={i} onClick={() => handleQuickPrompt(p.text)} disabled={isLoading}
-                        className="px-2.5 py-1 rounded-full text-[11px] hover:scale-105 active:scale-95 disabled:opacity-50"
-                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
-                        {p.icon} {p.text}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* 상세 설정 (expandable) */}
-                {messages.length === 0 && (
-                  <details className="mt-3">
-                    <summary className="text-[11px] text-white/30 cursor-pointer hover:text-white/50 select-none">⚙️ 상세 설정</summary>
-                    <div className="mt-2 p-3 rounded-lg space-y-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <div>
-                        <label className="text-[10px] text-white/40 block mb-1">톤</label>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {['친근한', '전문적', '유머', '감성적'].map(t => (
-                            <button key={t} onClick={() => setTone(t)} className="px-2 py-1 rounded text-[10px] transition-all"
-                              style={{ background: tone === t ? 'rgba(0,113,227,0.3)' : 'rgba(255,255,255,0.08)', color: tone === t ? '#fff' : 'rgba(255,255,255,0.6)', border: tone === t ? '1px solid rgba(0,113,227,0.5)' : '1px solid transparent' }}>{t}</button>
-                          ))}
+          <div>
+            {/* Stories-style quick prompts */}
+            {messages.length === 0 && (
+              <div className="py-3 -mx-4 px-4" style={{ borderBottom: '1px solid #262626' }}>
+                <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                  {quickPrompts.slice(0, 6).map((p, i) => (
+                    <button key={i} onClick={() => handleQuickPrompt(p.text)} disabled={isLoading}
+                      className="flex flex-col items-center gap-1.5 shrink-0 disabled:opacity-40 active:scale-95 transition-transform"
+                      style={{ width: 68 }}>
+                      <div className="ig-story-ring">
+                        <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center text-xl"
+                          style={{ background: '#1a1a1a' }}>
+                          {p.icon}
                         </div>
                       </div>
-                      <div>
-                        <label className="text-[10px] text-white/40 block mb-1">길이</label>
-                        <div className="flex gap-1.5">
-                          {['짧게', '보통', '길게'].map(l => (
-                            <button key={l} onClick={() => setLength(l)} className="px-2 py-1 rounded text-[10px] transition-all"
-                              style={{ background: length === l ? 'rgba(0,113,227,0.3)' : 'rgba(255,255,255,0.08)', color: length === l ? '#fff' : 'rgba(255,255,255,0.6)', border: length === l ? '1px solid rgba(0,113,227,0.5)' : '1px solid transparent' }}>{l}</button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-white/40 block mb-1">플랫폼</label>
-                        <div className="flex gap-1.5">
-                          {['인스타그램', '블로그', '페이스북'].map(p => (
-                            <button key={p} onClick={() => setPlatform(p)} className="px-2 py-1 rounded text-[10px] transition-all"
-                              style={{ background: platform === p ? 'rgba(0,113,227,0.3)' : 'rgba(255,255,255,0.08)', color: platform === p ? '#fff' : 'rgba(255,255,255,0.6)', border: platform === p ? '1px solid rgba(0,113,227,0.5)' : '1px solid transparent' }}>{p}</button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </details>
-                )}
+                      <span className="text-[10px] text-white/60 truncate w-full text-center leading-tight">{p.text.length > 8 ? p.text.slice(0, 8) + '...' : p.text}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
 
-              {/* Loading */}
-              {isLoading && (
-                <div className="rounded-xl p-6 text-center mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                  <div className="w-6 h-6 rounded-full mx-auto mb-2" style={{ border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#0071E3', animation: 'spin 1s linear infinite' }} />
-                  <p className="text-xs text-white/50">게시물을 만들고 있어요...</p>
-                  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            {/* Create post area */}
+            <div className="py-4 px-4 -mx-4" style={{ borderBottom: messages.length > 0 ? '1px solid #262626' : 'none' }}>
+              {messages.length === 0 && (
+                <div className="text-center mb-4 pt-6">
+                  <div className="text-3xl mb-2">{currentBiz?.icon || '📣'}</div>
+                  <h2 className="text-lg font-bold mb-1">오늘 뭐 올릴까요?</h2>
+                  <p className="text-xs text-white/30">주제를 입력하면 AI가 게시물을 만들어 드려요</p>
                 </div>
               )}
+              <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-sm"
+                  style={{ background: 'linear-gradient(135deg, #833AB4, #E1306C, #F77737)' }}>
+                  {currentBiz?.icon || '✨'}
+                </div>
+                <input value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading}
+                  placeholder="게시물 주제를 입력하세요..."
+                  className="flex-1 px-3 py-2.5 rounded-full text-sm focus:outline-none disabled:opacity-50"
+                  style={{ background: '#262626', border: '1px solid #363636', color: '#fff' }} />
+                <button type="submit" disabled={isLoading || !input.trim()}
+                  className="px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-30 transition-opacity shrink-0"
+                  style={{ background: 'transparent', color: '#0095F6' }}>
+                  {isLoading ? '...' : '게시'}
+                </button>
+              </form>
 
-              {/* Instagram-style post cards */}
-              <div className="space-y-4">
-                {[...messages].reverse().filter(m => m.role === 'assistant' && m.text).map((message) => (
-                  <div key={message.id} className="rounded-2xl overflow-hidden" style={{ background: '#fff' }}>
-                    {/* Instagram header */}
-                    <div className="flex items-center gap-2 px-3 py-2.5">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: 'linear-gradient(135deg, #833AB4, #E1306C, #F77737)' }}>
-                        <span className="text-white text-xs font-bold">{currentBiz?.icon || '📣'}</span>
-                      </div>
-                      <div>
-                        <div className="text-xs font-semibold text-black">{currentBiz?.label || '내 가게'}</div>
-                        <div className="text-[10px] text-gray-400">Sponsored</div>
+              {/* Settings row */}
+              {messages.length === 0 && (
+                <div className="flex items-center gap-2 mt-3 ml-10 flex-wrap">
+                  <div className="flex items-center gap-1">
+                    {['친근한', '전문적', '유머', '감성적'].map(t => (
+                      <button key={t} onClick={() => setTone(t)} className="px-2.5 py-1 rounded-full text-[10px] transition-all"
+                        style={{ background: tone === t ? '#0095F6' : '#262626', color: tone === t ? '#fff' : '#999', border: '1px solid', borderColor: tone === t ? '#0095F6' : '#363636' }}>{t}</button>
+                    ))}
+                  </div>
+                  <div className="w-px h-4" style={{ background: '#363636' }} />
+                  <div className="flex items-center gap-1">
+                    {['짧게', '보통', '길게'].map(l => (
+                      <button key={l} onClick={() => setLength(l)} className="px-2.5 py-1 rounded-full text-[10px] transition-all"
+                        style={{ background: length === l ? '#0095F6' : '#262626', color: length === l ? '#fff' : '#999', border: '1px solid', borderColor: length === l ? '#0095F6' : '#363636' }}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Loading state */}
+            {isLoading && (
+              <div className="py-8 text-center" style={{ animation: 'igFadeIn 0.3s ease' }}>
+                <div className="w-8 h-8 rounded-full mx-auto mb-3"
+                  style={{ border: '2px solid #262626', borderTopColor: '#0095F6', animation: 'igSpin 0.8s linear infinite' }} />
+                <p className="text-xs text-white/40">게시물을 만들고 있어요...</p>
+              </div>
+            )}
+
+            {/* ═══ Instagram Feed — Post Cards ═══ */}
+            <div>
+              {[...messages].reverse().filter(m => m.role === 'assistant' && m.text).map((message, idx) => {
+                const msgCategory = detectCategory(
+                  [...messages].find(m => m.role === 'user' && Number(m.id) < Number(message.id))?.text || lastPrompt || ''
+                );
+                return (
+                <div key={message.id} style={{ borderBottom: '1px solid #262626', animation: 'igFadeIn 0.4s ease' }}>
+                  {/* Post header */}
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="ig-story-ring">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm" style={{ background: '#000' }}>
+                        {currentBiz?.icon || '📣'}
                       </div>
                     </div>
-                    {/* Square image */}
-                    <div className="aspect-square relative overflow-hidden">
-                      <img src={getPhoto(category.key, 0)} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <div className="text-white font-bold text-lg leading-tight" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.5)' }}>{category.title}</div>
-                      </div>
+                    <div className="flex-1">
+                      <div className="text-[13px] font-semibold">{currentBiz?.label || '내 가게'}</div>
+                      <div className="text-[11px] text-white/40">{currentBiz?.label || '내 가게'} 공식</div>
                     </div>
-                    {/* Instagram action icons */}
-                    <div className="flex items-center gap-4 px-3 py-2">
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </div>
-                    {/* Caption */}
-                    <div className="px-3 pb-3">
-                      <div className="text-xs text-black whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">
-                        <span className="font-semibold">{currentBiz?.label || '내 가게'}</span>{' '}
-                        {message.text}
-                      </div>
-                    </div>
-                    {/* Action buttons — outside the "phone" card */}
-                    <div className="flex items-center gap-2 px-3 py-2.5" style={{ background: 'rgba(0,0,0,0.03)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                      <button onClick={() => copyToClipboard(message.text, setCopied, message.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all"
-                        style={{ background: copied === message.id ? '#E8F5E9' : '#f5f5f5', color: copied === message.id ? '#2E7D32' : '#888' }}>
-                        {copied === message.id ? '✓ 복사됨' : '📋 복사'}
-                      </button>
-                      <button onClick={() => postToSns('instagram', message.text)} disabled={posting === 'instagram'}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium"
-                        style={{ background: apiKeys.instagram ? '#FCE4EC' : '#f5f5f5', color: apiKeys.instagram ? '#E1306C' : '#ccc' }}>
-                        📸 인스타 {!apiKeys.instagram && '🔒'}
-                      </button>
-                      <button onClick={() => postToSns('facebook', message.text)} disabled={posting === 'facebook'}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-medium"
-                        style={{ background: apiKeys.facebook ? '#E3F2FD' : '#f5f5f5', color: apiKeys.facebook ? '#1877F2' : '#ccc' }}>
-                        👥 페북 {!apiKeys.facebook && '🔒'}
-                      </button>
-                      <button onClick={() => setShowApiSettings(true)} className="ml-auto text-[11px] text-gray-300 hover:text-gray-500">⚙️</button>
+                    <button onClick={() => copyToClipboard(message.text, setCopied, message.id)} className="text-white/50 hover:text-white">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                    </button>
+                  </div>
+
+                  {/* Post image */}
+                  <div className="aspect-square relative overflow-hidden">
+                    <img src={getPhoto(msgCategory.key, idx)} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%)' }} />
+                    <div className="absolute bottom-5 left-5 right-5">
+                      <div className="text-white font-bold text-xl leading-tight drop-shadow-lg">{msgCategory.title}</div>
                     </div>
                   </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+
+                  {/* Action bar */}
+                  <div className="flex items-center px-4 py-3">
+                    <div className="flex items-center gap-4 flex-1">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" className="cursor-pointer hover:opacity-60 transition-opacity"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" className="cursor-pointer hover:opacity-60 transition-opacity"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" className="cursor-pointer hover:opacity-60 transition-opacity"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.5" className="cursor-pointer hover:opacity-60 transition-opacity"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+
+                  {/* Caption */}
+                  <div className="px-4 pb-1">
+                    <div className="text-[11px] font-semibold text-white/40 mb-1">좋아요 128개</div>
+                  </div>
+                  <div className="px-4 pb-3">
+                    <div className="text-[13px] text-white/90 whitespace-pre-wrap leading-relaxed max-h-[180px] overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+                      <span className="font-semibold text-white">{currentBiz?.label || '내 가게'}</span>{' '}
+                      {message.text}
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-2 px-4 pb-4">
+                    <button onClick={() => copyToClipboard(message.text, setCopied, message.id)}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                      style={{ background: copied === message.id ? '#262626' : '#0095F6', color: '#fff' }}>
+                      {copied === message.id ? '✓ 복사됨' : '텍스트 복사'}
+                    </button>
+                    <button onClick={() => postToSns('instagram', message.text)} disabled={posting === 'instagram'}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                      style={{ background: '#262626', color: apiKeys.instagram ? '#E1306C' : '#666' }}>
+                      인스타 포스팅 {!apiKeys.instagram && '🔒'}
+                    </button>
+                    <button onClick={() => postToSns('facebook', message.text)} disabled={posting === 'facebook'}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] font-semibold transition-all active:scale-95"
+                      style={{ background: '#262626', color: apiKeys.facebook ? '#1877F2' : '#666' }}>
+                      페북 {!apiKeys.facebook && '🔒'}
+                    </button>
+                  </div>
+                </div>
+                );
+              })}
+              <div ref={messagesEndRef} />
             </div>
           </div>
         )}
 
-        {/* API Settings Modal */}
+        {/* API Settings Modal — Instagram style */}
         {showApiSettings && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-            <div className="w-full max-w-md rounded-2xl p-6" style={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
+            <div className="w-full max-w-md rounded-2xl p-6" style={{ background: '#262626', border: '1px solid #363636' }}>
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-base font-bold">⚙️ 자동 포스팅 설정</h3>
-                <button onClick={() => setShowApiSettings(false)} className="text-white/40 hover:text-white text-lg">✕</button>
+                <h3 className="text-base font-semibold">자동 포스팅 설정</h3>
+                <button onClick={() => setShowApiSettings(false)} className="text-white/40 hover:text-white">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
               </div>
 
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="text-xs font-bold text-white/50 mb-1.5 block">📸 인스타그램 Access Token</label>
+                  <label className="text-xs font-semibold text-white/60 mb-1.5 block">인스타그램 Access Token</label>
                   <input value={apiKeys.instagram} onChange={e => setApiKeys(prev => ({ ...prev, instagram: e.target.value }))}
                     placeholder="Instagram Graph API 토큰 입력"
-                    className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                    className="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none" style={{ background: '#1a1a1a', border: '1px solid #363636', color: '#fff' }} />
                   <p className="text-[10px] text-white/30 mt-1">Meta Developer → 앱 만들기 → Instagram Graph API 활성화</p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-white/50 mb-1.5 block">👥 페이스북 Page Access Token</label>
+                  <label className="text-xs font-semibold text-white/60 mb-1.5 block">페이스북 Page Access Token</label>
                   <input value={apiKeys.facebook} onChange={e => setApiKeys(prev => ({ ...prev, facebook: e.target.value }))}
                     placeholder="Facebook Page 토큰 입력"
-                    className="w-full px-3 py-2.5 rounded-lg text-sm" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+                    className="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none" style={{ background: '#1a1a1a', border: '1px solid #363636', color: '#fff' }} />
                   <p className="text-[10px] text-white/30 mt-1">Meta Developer → 앱 만들기 → Pages API 활성화</p>
                 </div>
               </div>
 
-              <div className="rounded-lg p-3 mb-6" style={{ background: 'rgba(0,113,227,0.1)', border: '1px solid rgba(0,113,227,0.2)' }}>
+              <div className="rounded-xl p-3 mb-6" style={{ background: 'rgba(0,149,246,0.1)', border: '1px solid rgba(0,149,246,0.2)' }}>
                 <p className="text-xs text-white/60 leading-relaxed">
                   <strong className="text-white/80">설정 방법:</strong><br/>
-                  1. <a href="https://developers.facebook.com" target="_blank" rel="noopener" className="underline text-[#0071E3]">Meta Developer</a> 에서 앱을 만드세요<br/>
+                  1. <a href="https://developers.facebook.com" target="_blank" rel="noopener" className="underline" style={{ color: '#0095F6' }}>Meta Developer</a> 에서 앱을 만드세요<br/>
                   2. Instagram Graph API 또는 Pages API를 활성화하세요<br/>
                   3. Access Token을 복사해서 위에 붙여넣으세요<br/>
                   4. 게시물 생성 후 인스타/페이스북 버튼으로 바로 포스팅!
@@ -816,11 +725,11 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
 
               <div className="flex gap-2">
                 <button onClick={() => setShowApiSettings(false)}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium"
-                  style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>취소</button>
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium"
+                  style={{ background: '#1a1a1a', color: '#999' }}>취소</button>
                 <button onClick={saveApiKeys}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
-                  style={{ background: '#0071E3' }}>저장</button>
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: '#0095F6' }}>저장</button>
               </div>
             </div>
           </div>

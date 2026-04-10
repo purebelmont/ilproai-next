@@ -445,49 +445,32 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
       `}</style>
 
       {/* ═══ Instagram-style Header ═══ */}
-      {!embedded && (
-        <header className="sticky top-0 z-30 px-4 py-2.5" style={{ background: '#000', borderBottom: '1px solid #262626' }}>
-          <div className="max-w-[470px] mx-auto flex items-center justify-between">
+      <header className={embedded ? "sticky top-0 z-10 px-4 py-2.5" : "sticky top-0 z-30 px-4 py-2.5"} style={{ background: embedded ? 'var(--bg)' : '#000', borderBottom: embedded ? '1px solid var(--border)' : '1px solid #262626' }}>
+        <div className="max-w-[470px] mx-auto flex items-center justify-between">
+          {!embedded ? (
             <Link href="/dashboard" className="text-white/40 hover:text-white/70 transition-colors">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </Link>
-            <h1 className="text-base font-semibold tracking-tight" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>일프로 SNS</h1>
-            <div className="flex items-center gap-3">
-              {currentBiz && (
-                <button onClick={() => { setSetupDone(false); setSavedCategory(null); localStorage.removeItem('ilpro_sns_category'); }}
-                  className="text-[11px] px-2.5 py-1 rounded-full font-medium transition-opacity hover:opacity-70"
-                  style={{ background: '#262626', color: '#e0e0e0' }}>
-                  {currentBiz.icon} {currentBiz.label}
-                </button>
-              )}
-              <button onClick={() => setShowApiSettings(true)} className="text-white/50 hover:text-white/80">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
-      {/* Embedded header */}
-      {embedded && (
-        <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <h2 className="text-base font-semibold">SNS 콘텐츠</h2>
-          <div className="flex items-center gap-2">
+          ) : <div className="w-5" />}
+          <h1 className="text-base font-semibold tracking-tight" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+            {embedded ? 'SNS 콘텐츠' : '일프로 SNS'}
+          </h1>
+          <div className="flex items-center gap-3">
             {currentBiz && (
               <button onClick={() => { setSetupDone(false); setSavedCategory(null); localStorage.removeItem('ilpro_sns_category'); }}
-                className="text-[11px] px-2.5 py-1 rounded-full font-medium"
-                style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>
+                className="text-[11px] px-2.5 py-1 rounded-full font-medium transition-opacity hover:opacity-70"
+                style={{ background: embedded ? 'rgba(255,255,255,0.08)' : '#262626', color: embedded ? 'var(--text-secondary)' : '#e0e0e0' }}>
                 {currentBiz.icon} {currentBiz.label}
               </button>
             )}
-            <button onClick={() => setShowApiSettings(true)} className="text-[var(--text-muted)]">
+            <button onClick={() => setShowApiSettings(true)} className={embedded ? "text-[var(--text-muted)]" : "text-white/50 hover:text-white/80"}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             </button>
           </div>
         </div>
-      )}
+      </header>
 
-      <div className={embedded ? "px-4 pb-4" : "max-w-[470px] mx-auto"}>
+      <div className={embedded ? "max-w-[470px] mx-auto pb-4" : "max-w-[470px] mx-auto"}>
         {/* ═══ Business Setup — Instagram onboarding style ═══ */}
         {!setupDone && (
           <div className="flex flex-col items-center justify-center py-12 px-4">
@@ -551,15 +534,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
               </div>
             )}
 
-            {/* Create post area */}
-            <div className="py-4 px-4 -mx-4" style={{ borderBottom: messages.length > 0 ? '1px solid #262626' : 'none' }}>
-              {messages.length === 0 && (
-                <div className="text-center mb-4 pt-6">
-                  <div className="text-3xl mb-2">{currentBiz?.icon || '📣'}</div>
-                  <h2 className="text-lg font-bold mb-1">오늘 뭐 올릴까요?</h2>
-                  <p className="text-xs text-white/30">주제를 입력하면 AI가 게시물을 만들어 드려요</p>
-                </div>
-              )}
+            {/* Create post input — always visible like Instagram's search bar */}
+            <div className="px-4 py-3" style={{ borderBottom: '1px solid #262626' }}>
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-sm"
                   style={{ background: 'linear-gradient(135deg, #833AB4, #E1306C, #F77737)' }}>
@@ -567,34 +543,72 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                 </div>
                 <input value={input} onChange={(e) => setInput(e.target.value)} disabled={isLoading}
                   placeholder="게시물 주제를 입력하세요..."
-                  className="flex-1 px-3 py-2.5 rounded-full text-sm focus:outline-none disabled:opacity-50"
+                  className="flex-1 px-3 py-2 rounded-full text-sm focus:outline-none disabled:opacity-50"
                   style={{ background: '#262626', border: '1px solid #363636', color: '#fff' }} />
                 <button type="submit" disabled={isLoading || !input.trim()}
-                  className="px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-30 transition-opacity shrink-0"
-                  style={{ background: 'transparent', color: '#0095F6' }}>
+                  className="text-sm font-semibold disabled:opacity-30 transition-opacity shrink-0"
+                  style={{ color: '#0095F6' }}>
                   {isLoading ? '...' : '게시'}
                 </button>
               </form>
-
               {/* Settings row */}
               {messages.length === 0 && (
-                <div className="flex items-center gap-2 mt-3 ml-10 flex-wrap">
-                  <div className="flex items-center gap-1">
-                    {['친근한', '전문적', '유머', '감성적'].map(t => (
-                      <button key={t} onClick={() => setTone(t)} className="px-2.5 py-1 rounded-full text-[10px] transition-all"
-                        style={{ background: tone === t ? '#0095F6' : '#262626', color: tone === t ? '#fff' : '#999', border: '1px solid', borderColor: tone === t ? '#0095F6' : '#363636' }}>{t}</button>
-                    ))}
-                  </div>
-                  <div className="w-px h-4" style={{ background: '#363636' }} />
-                  <div className="flex items-center gap-1">
-                    {['짧게', '보통', '길게'].map(l => (
-                      <button key={l} onClick={() => setLength(l)} className="px-2.5 py-1 rounded-full text-[10px] transition-all"
-                        style={{ background: length === l ? '#0095F6' : '#262626', color: length === l ? '#fff' : '#999', border: '1px solid', borderColor: length === l ? '#0095F6' : '#363636' }}>{l}</button>
-                    ))}
-                  </div>
+                <div className="flex items-center gap-1.5 mt-2.5 ml-10 flex-wrap">
+                  {['친근한', '전문적', '유머', '감성적'].map(t => (
+                    <button key={t} onClick={() => setTone(t)} className="px-2.5 py-1 rounded-full text-[10px] transition-all"
+                      style={{ background: tone === t ? '#0095F6' : '#262626', color: tone === t ? '#fff' : '#999', border: '1px solid', borderColor: tone === t ? '#0095F6' : '#363636' }}>{t}</button>
+                  ))}
+                  <div className="w-px h-3.5 mx-0.5" style={{ background: '#363636' }} />
+                  {['짧게', '보통', '길게'].map(l => (
+                    <button key={l} onClick={() => setLength(l)} className="px-2.5 py-1 rounded-full text-[10px] transition-all"
+                      style={{ background: length === l ? '#0095F6' : '#262626', color: length === l ? '#fff' : '#999', border: '1px solid', borderColor: length === l ? '#0095F6' : '#363636' }}>{l}</button>
+                  ))}
                 </div>
               )}
             </div>
+
+            {/* Sample preview posts when empty — shows what AI can generate */}
+            {messages.length === 0 && (
+              <div>
+                {quickPrompts.slice(0, 3).map((p, i) => (
+                  <button key={i} onClick={() => handleQuickPrompt(p.text)} disabled={isLoading}
+                    className="w-full text-left disabled:opacity-40 active:opacity-70 transition-opacity"
+                    style={{ borderBottom: '1px solid #262626' }}>
+                    {/* Post header */}
+                    <div className="flex items-center gap-3 px-4 py-2.5">
+                      <div className="ig-story-ring">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm" style={{ background: '#000' }}>
+                          {p.icon}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-[13px] font-semibold">{p.text}</div>
+                        <div className="text-[11px] text-white/30">{p.desc}</div>
+                      </div>
+                      <div className="text-[11px] font-semibold" style={{ color: '#0095F6' }}>생성</div>
+                    </div>
+                    {/* Sample image */}
+                    <div className="aspect-[16/9] relative overflow-hidden">
+                      <img src={getPhoto(savedCategory ? (BIZ_CATEGORIES.find(c => c.id === savedCategory)?.keywords[0] || '기본') : '기본', i)}
+                        alt="" className="w-full h-full object-cover opacity-60" />
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                        <div className="text-center">
+                          <div className="text-white/80 text-xs font-medium">탭하여 AI 게시물 생성</div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Fake engagement */}
+                    <div className="flex items-center gap-4 px-4 py-2">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      <div className="flex-1" />
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Loading state */}
             {isLoading && (

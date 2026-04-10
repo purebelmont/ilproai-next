@@ -128,7 +128,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
       `}</style>
 
       {/* ═══ Outer wrapper — centers phone on desktop, full on mobile ═══ */}
-      <div className="flex-1 flex items-start justify-center overflow-y-auto ig-scroll py-4 px-4">
+      <div className="flex-1 flex items-center justify-center overflow-y-auto ig-scroll py-4 px-4">
         {/* Phone frame */}
         <div className={`w-full ${embedded ? '' : 'max-w-[390px]'} flex flex-col ${embedded ? '' : 'phone-frame'} overflow-hidden`}
           style={{ background: 'var(--bg)', maxHeight: embedded ? undefined : 'calc(100vh - 32px)' }}>

@@ -208,6 +208,61 @@ const PHOTO_DB: Record<string, string[]> = {
     'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=600&fit=crop',
     'https://images.unsplash.com/photo-1523050854058-8df90110c6f6?w=600&h=600&fit=crop',
   ],
+  매장: [
+    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=600&fit=crop',
+  ],
+  사무실: [
+    'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=600&fit=crop',
+  ],
+  병원: [
+    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=600&h=600&fit=crop',
+  ],
+  숙박: [
+    'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&h=600&fit=crop',
+  ],
+  수리: [
+    'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600&fit=crop',
+  ],
+  법률: [
+    'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&h=600&fit=crop',
+  ],
+  부동산: [
+    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&h=600&fit=crop',
+  ],
+  웨딩: [
+    'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&h=600&fit=crop',
+  ],
+  제조: [
+    'https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=600&h=600&fit=crop',
+  ],
+  물류: [
+    'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=600&h=600&fit=crop',
+  ],
+  프리랜서: [
+    'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=600&fit=crop',
+  ],
   기본: [
     'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=600&fit=crop',
     'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=600&fit=crop',
@@ -227,16 +282,38 @@ function detectCategory(text: string): { key: string; gradient: string; title: s
   const lower = text.toLowerCase();
   if (lower.includes('피자') || lower.includes('음식') || lower.includes('식당') || lower.includes('치킨') || lower.includes('맛집'))
     return { key: '피자', gradient: 'linear-gradient(135deg, #FF6B35, #D62828)', title: '맛있는 한 끼' };
-  if (lower.includes('미용') || lower.includes('헤어') || lower.includes('살롱'))
+  if (lower.includes('미용') || lower.includes('헤어') || lower.includes('살롱') || lower.includes('네일'))
     return { key: '미용', gradient: 'linear-gradient(135deg, #C77DFF, #7B2CBF)', title: '스타일 변신' };
   if (lower.includes('카페') || lower.includes('커피') || lower.includes('라떼'))
     return { key: '카페', gradient: 'linear-gradient(135deg, #6F4E37, #C08552)', title: '향기로운 한 잔' };
-  if (lower.includes('헬스') || lower.includes('운동') || lower.includes('피트'))
+  if (lower.includes('헬스') || lower.includes('운동') || lower.includes('피트') || lower.includes('요가'))
     return { key: '헬스', gradient: 'linear-gradient(135deg, #2D6A4F, #40916C)', title: '건강한 시작' };
-  if (lower.includes('반려') || lower.includes('펫') || lower.includes('강아지'))
+  if (lower.includes('반려') || lower.includes('펫') || lower.includes('강아지') || lower.includes('동물'))
     return { key: '반려동물', gradient: 'linear-gradient(135deg, #FF9F1C, #FFBF69)', title: '사랑스러운 우리 아이' };
   if (lower.includes('학원') || lower.includes('교육') || lower.includes('특강'))
     return { key: '학원', gradient: 'linear-gradient(135deg, #0077B6, #00B4D8)', title: '배움의 시작' };
+  if (lower.includes('매장') || lower.includes('쇼핑') || lower.includes('스토어'))
+    return { key: '매장', gradient: 'linear-gradient(135deg, #7209B7, #560BAD)', title: '특별한 쇼핑' };
+  if (lower.includes('사무실') || lower.includes('b2b') || lower.includes('컨설팅'))
+    return { key: '사무실', gradient: 'linear-gradient(135deg, #1E3A5F, #0071E3)', title: '비즈니스 파트너' };
+  if (lower.includes('병원') || lower.includes('의원') || lower.includes('치과'))
+    return { key: '병원', gradient: 'linear-gradient(135deg, #0891B2, #06D6A0)', title: '건강한 내일' };
+  if (lower.includes('숙박') || lower.includes('펜션') || lower.includes('호텔'))
+    return { key: '숙박', gradient: 'linear-gradient(135deg, #059669, #34D399)', title: '편안한 쉼' };
+  if (lower.includes('수리') || lower.includes('정비') || lower.includes('as'))
+    return { key: '수리', gradient: 'linear-gradient(135deg, #EA580C, #F97316)', title: '든든한 수리' };
+  if (lower.includes('법률') || lower.includes('변호사') || lower.includes('세무'))
+    return { key: '법률', gradient: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', title: '법률 파트너' };
+  if (lower.includes('부동산') || lower.includes('매물') || lower.includes('분양'))
+    return { key: '부동산', gradient: 'linear-gradient(135deg, #166534, #22C55E)', title: '내 집 찾기' };
+  if (lower.includes('웨딩') || lower.includes('결혼') || lower.includes('이벤트'))
+    return { key: '웨딩', gradient: 'linear-gradient(135deg, #BE185D, #EC4899)', title: '특별한 하루' };
+  if (lower.includes('제조') || lower.includes('공장') || lower.includes('생산'))
+    return { key: '제조', gradient: 'linear-gradient(135deg, #374151, #6B7280)', title: '제조 파트너' };
+  if (lower.includes('물류') || lower.includes('운송') || lower.includes('배송'))
+    return { key: '물류', gradient: 'linear-gradient(135deg, #0369A1, #38BDF8)', title: '빠른 배송' };
+  if (lower.includes('프리랜서') || lower.includes('디자인') || lower.includes('개발'))
+    return { key: '프리랜서', gradient: 'linear-gradient(135deg, #7C3AED, #A78BFA)', title: '크리에이티브' };
   return { key: '기본', gradient: 'linear-gradient(135deg, #0071E3, #5856D6)', title: '우리 가게 소식' };
 }
 

@@ -130,12 +130,11 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
       {/* ═══ Outer wrapper — centers phone on desktop, full on mobile ═══ */}
       <div className="flex-1 flex items-center justify-center overflow-y-auto ig-scroll py-4 px-4">
         {/* Phone frame */}
-        <div className={`w-full ${embedded ? '' : 'max-w-[390px]'} flex flex-col ${embedded ? '' : 'phone-frame'} overflow-hidden`}
-          style={{ background: 'var(--bg)', maxHeight: embedded ? undefined : 'calc(100vh - 32px)' }}>
+        <div className="w-full max-w-[390px] flex flex-col phone-frame overflow-hidden"
+          style={{ background: 'var(--bg)', maxHeight: embedded ? 'calc(100vh - 120px)' : 'calc(100vh - 32px)' }}>
 
-          {/* ═══ Status bar (standalone only) ═══ */}
-          {!embedded && (
-            <div className="shrink-0 flex items-center justify-between px-6 pt-3 pb-1">
+          {/* ═══ Status bar ═══ */}
+          <div className="shrink-0 flex items-center justify-between px-6 pt-3 pb-1">
               <span className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>9:41</span>
               <div className="w-[80px] h-[28px] rounded-full" style={{ background: '#000' }} />
               <div className="flex items-center gap-1">
@@ -143,7 +142,6 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-secondary)' }}><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
               </div>
             </div>
-          )}
 
           {/* ═══ App Header ═══ */}
           <div className="shrink-0 flex items-center justify-between px-4 py-2" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -401,18 +399,16 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
             <div className="h-16" />
           </div>
 
-          {/* ═══ Bottom nav (standalone only) ═══ */}
-          {!embedded && (
-            <div className="shrink-0 flex items-center justify-around py-2" style={{ borderTop: '1px solid var(--border)' }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text)' }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--text)' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </div>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-              <div className="w-6 h-6 rounded-full" style={{ background: 'var(--bg-hover)', border: '1px solid var(--text-muted)' }} />
+          {/* ═══ Bottom nav ═══ */}
+          <div className="shrink-0 flex items-center justify-around py-2" style={{ borderTop: '1px solid var(--border)' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text)' }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--text)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </div>
-          )}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            <div className="w-6 h-6 rounded-full" style={{ background: 'var(--bg-hover)', border: '1px solid var(--text-muted)' }} />
+          </div>
         </div>
       </div>
     </div>

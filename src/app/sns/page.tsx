@@ -467,6 +467,9 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const [showApiSettings, setShowApiSettings] = useState(false);
   const [apiKeys, setApiKeys] = useState({ instagram: '', facebook: '' });
   const [posting, setPosting] = useState('');
+  const [tone, setTone] = useState('친근한');
+  const [length, setLength] = useState('보통');
+  const [platform, setPlatform] = useState('인스타그램');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -504,7 +507,14 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const currentBiz = BIZ_CATEGORIES.find(c => c.id === savedCategory);
   const quickPrompts = savedCategory ? (PROMPTS_BY_CATEGORY[savedCategory] || DEFAULT_PROMPTS) : DEFAULT_PROMPTS;
 
-  const bizContext = currentBiz ? `\n\n[업종: ${currentBiz.label}]` : '';
+  const lengthGuide = length === '짧게' ? '3~5줄 이내로 짧게' : length === '길게' ? '10줄 이상 자세하게' : '5~8줄 정도로';
+  const buildPrompt = (text: string) => {
+    let p = `다음 내용으로 ${platform}용 SNS 게시물을 만들어주세요:\n\n${text}`;
+    if (currentBiz) p += `\n[업종: ${currentBiz.label}]`;
+    p += `\n[톤: ${tone}] [길이: ${lengthGuide}]`;
+    p += `\n해시태그도 포함해주세요.`;
+    return p;
+  };
 
   async function sendPrompt(prompt: string) {
     const userMsg: ChatMsg = { id: Date.now().toString(), role: 'user', text: prompt };
@@ -539,14 +549,14 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
 
   const handleQuickPrompt = (text: string) => {
     setLastPrompt(text);
-    sendPrompt(`다음 내용으로 SNS 게시물을 만들어주세요:\n\n${text}${bizContext}\n\n자연스럽고 친근한 톤으로 작성하고, 해시태그도 포함해주세요.`);
+    sendPrompt(buildPrompt(text));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       setLastPrompt(input);
-      sendPrompt(`다음 내용으로 SNS 게시물을 만들어주세요:\n\n${input}${bizContext}\n\n자연스럽고 친근한 톤으로 작성하고, 해시태그도 포함해주세요.`);
+      sendPrompt(buildPrompt(input));
       setInput('');
     }
   };
@@ -669,8 +679,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                         <label className="text-[10px] text-white/40 block mb-1">톤</label>
                         <div className="flex gap-1.5 flex-wrap">
                           {['친근한', '전문적', '유머', '감성적'].map(t => (
-                            <button key={t} className="px-2 py-1 rounded text-[10px]"
-                              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{t}</button>
+                            <button key={t} onClick={() => setTone(t)} className="px-2 py-1 rounded text-[10px] transition-all"
+                              style={{ background: tone === t ? 'rgba(0,113,227,0.3)' : 'rgba(255,255,255,0.08)', color: tone === t ? '#fff' : 'rgba(255,255,255,0.6)', border: tone === t ? '1px solid rgba(0,113,227,0.5)' : '1px solid transparent' }}>{t}</button>
                           ))}
                         </div>
                       </div>
@@ -678,8 +688,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                         <label className="text-[10px] text-white/40 block mb-1">길이</label>
                         <div className="flex gap-1.5">
                           {['짧게', '보통', '길게'].map(l => (
-                            <button key={l} className="px-2 py-1 rounded text-[10px]"
-                              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{l}</button>
+                            <button key={l} onClick={() => setLength(l)} className="px-2 py-1 rounded text-[10px] transition-all"
+                              style={{ background: length === l ? 'rgba(0,113,227,0.3)' : 'rgba(255,255,255,0.08)', color: length === l ? '#fff' : 'rgba(255,255,255,0.6)', border: length === l ? '1px solid rgba(0,113,227,0.5)' : '1px solid transparent' }}>{l}</button>
                           ))}
                         </div>
                       </div>
@@ -687,8 +697,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                         <label className="text-[10px] text-white/40 block mb-1">플랫폼</label>
                         <div className="flex gap-1.5">
                           {['인스타그램', '블로그', '페이스북'].map(p => (
-                            <button key={p} className="px-2 py-1 rounded text-[10px]"
-                              style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>{p}</button>
+                            <button key={p} onClick={() => setPlatform(p)} className="px-2 py-1 rounded text-[10px] transition-all"
+                              style={{ background: platform === p ? 'rgba(0,113,227,0.3)' : 'rgba(255,255,255,0.08)', color: platform === p ? '#fff' : 'rgba(255,255,255,0.6)', border: platform === p ? '1px solid rgba(0,113,227,0.5)' : '1px solid transparent' }}>{p}</button>
                           ))}
                         </div>
                       </div>

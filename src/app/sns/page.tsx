@@ -1,22 +1,27 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import HashtagPanel from '@/components/sns/HashtagPanel';
 import VideoPanel from '@/components/sns/VideoPanel';
 
-// 업종 카테고리 정의
+// 업종 카테고리 정의 (16개 — 웹사이트 빌더와 동일)
 const BIZ_CATEGORIES = [
-  { id: 'restaurant', icon: '🍕', label: '음식점/카페', keywords: ['피자', '음식', '식당', '치킨', '맛집', '카페', '커피', '라떼'] },
-  { id: 'beauty', icon: '💇', label: '미용/뷰티', keywords: ['미용', '헤어', '살롱', '네일', '뷰티'] },
-  { id: 'fitness', icon: '🏋️', label: '헬스/스포츠', keywords: ['헬스', '운동', '피트', '요가', '필라테스'] },
-  { id: 'pet', icon: '🐕', label: '반려동물', keywords: ['반려', '펫', '강아지', '고양이', '동물'] },
-  { id: 'education', icon: '📚', label: '학원/교육', keywords: ['학원', '교육', '특강', '과외'] },
+  { id: 'restaurant', icon: '🍽️', label: '음식점/카페', keywords: ['피자', '음식', '식당', '치킨', '맛집', '카페', '커피', '라떼'] },
+  { id: 'beauty', icon: '💇', label: '서비스/뷰티', keywords: ['미용', '헤어', '살롱', '네일', '뷰티'] },
   { id: 'retail', icon: '🛍️', label: '매장/쇼핑', keywords: ['매장', '쇼핑', '편집숍', '스토어'] },
+  { id: 'office', icon: '🏢', label: '사무실/B2B', keywords: ['사무실', 'B2B', '컨설팅', 'IT'] },
   { id: 'medical', icon: '🏥', label: '병원/의원', keywords: ['병원', '의원', '치과', '한의원'] },
+  { id: 'education', icon: '📚', label: '학원/교육', keywords: ['학원', '교육', '특강', '과외'] },
+  { id: 'fitness', icon: '💪', label: '헬스/스포츠', keywords: ['헬스', '운동', '피트', '요가', '필라테스'] },
   { id: 'lodging', icon: '🏨', label: '숙박/펜션', keywords: ['숙박', '펜션', '호텔', '민박'] },
+  { id: 'repair', icon: '🔧', label: '수리/정비', keywords: ['수리', '정비', '수선', 'AS'] },
+  { id: 'legal', icon: '⚖️', label: '법률/세무', keywords: ['법률', '변호사', '세무', '회계'] },
+  { id: 'realestate', icon: '🏠', label: '부동산', keywords: ['부동산', '매물', '임대', '분양'] },
+  { id: 'pet', icon: '🐾', label: '반려동물', keywords: ['반려', '펫', '강아지', '고양이', '동물'] },
+  { id: 'wedding', icon: '💐', label: '웨딩/이벤트', keywords: ['웨딩', '결혼', '이벤트', '파티'] },
+  { id: 'manufacturing', icon: '🏭', label: '제조/공장', keywords: ['제조', '공장', '생산', '부품'] },
+  { id: 'logistics', icon: '🚚', label: '물류/운송', keywords: ['물류', '운송', '배송', '택배'] },
+  { id: 'freelance', icon: '💻', label: '프리랜서', keywords: ['프리랜서', '디자인', '개발', '작가'] },
 ];
 
 // 업종별 퀵 프롬프트
@@ -84,6 +89,70 @@ const PROMPTS_BY_CATEGORY: Record<string, { icon: string; text: string; desc: st
     { icon: '📸', text: '투숙객 후기 이벤트', desc: '인스타 + 블로그', img: 'guest+review', gradient: 'linear-gradient(135deg, #0369A1, #0284C7)' },
     { icon: '🎉', text: '연말 패키지 안내', desc: '전체 플랫폼', img: 'holiday+celebration', gradient: 'linear-gradient(135deg, #BE185D, #EC4899)' },
     { icon: '🏊', text: '부대시설 소개', desc: '인스타 + 블로그', img: 'pool+resort', gradient: 'linear-gradient(135deg, #0E7490, #22D3EE)' },
+  ],
+  office: [
+    { icon: '🏢', text: '서비스 소개 포스팅', desc: '블로그 + 페이스북', img: 'office+business', gradient: 'linear-gradient(135deg, #1E3A5F, #0071E3)' },
+    { icon: '🤝', text: '성공 사례 공유', desc: '블로그 + 인스타', img: 'success+business', gradient: 'linear-gradient(135deg, #0F4C75, #3282B8)' },
+    { icon: '📊', text: '업계 인사이트 공유', desc: '블로그 + 페이스북', img: 'data+chart', gradient: 'linear-gradient(135deg, #1B262C, #3282B8)' },
+    { icon: '🎯', text: '무료 컨설팅 이벤트', desc: '전체 플랫폼', img: 'consulting+meeting', gradient: 'linear-gradient(135deg, #0F4C75, #1B262C)' },
+    { icon: '👥', text: '팀 소개 / 채용 공고', desc: '인스타 + 페이스북', img: 'team+office', gradient: 'linear-gradient(135deg, #3282B8, #BBE1FA)' },
+    { icon: '📝', text: '뉴스레터 홍보', desc: '블로그 + 페이스북', img: 'newsletter+email', gradient: 'linear-gradient(135deg, #1E3A5F, #3282B8)' },
+  ],
+  repair: [
+    { icon: '🔧', text: '수리 서비스 소개', desc: '블로그 + 페이스북', img: 'repair+service', gradient: 'linear-gradient(135deg, #EA580C, #F97316)' },
+    { icon: '⚡', text: '긴급 수리 안내', desc: '전체 플랫폼', img: 'emergency+repair', gradient: 'linear-gradient(135deg, #DC2626, #F97316)' },
+    { icon: '📸', text: '수리 전후 비교', desc: '인스타 + 블로그', img: 'before+after', gradient: 'linear-gradient(135deg, #9A3412, #EA580C)' },
+    { icon: '💰', text: '시즌 할인 이벤트', desc: '전체 플랫폼', img: 'discount+sale', gradient: 'linear-gradient(135deg, #C2410C, #FB923C)' },
+    { icon: '⭐', text: '고객 만족 후기', desc: '인스타 + 블로그', img: 'review+happy', gradient: 'linear-gradient(135deg, #EA580C, #FDBA74)' },
+    { icon: '📋', text: '정기 점검 안내', desc: '블로그 + 페이스북', img: 'maintenance+check', gradient: 'linear-gradient(135deg, #7C2D12, #EA580C)' },
+  ],
+  legal: [
+    { icon: '⚖️', text: '법률 상담 안내', desc: '블로그 + 페이스북', img: 'law+justice', gradient: 'linear-gradient(135deg, #1E3A8A, #3B82F6)' },
+    { icon: '📝', text: '법률 상식 시리즈', desc: '블로그', img: 'legal+document', gradient: 'linear-gradient(135deg, #1E40AF, #60A5FA)' },
+    { icon: '🏆', text: '승소 사례 소개', desc: '블로그 + 인스타', img: 'success+trophy', gradient: 'linear-gradient(135deg, #1E3A8A, #2563EB)' },
+    { icon: '💼', text: '세무 상담 이벤트', desc: '전체 플랫폼', img: 'tax+accounting', gradient: 'linear-gradient(135deg, #1D4ED8, #93C5FD)' },
+    { icon: '👨‍⚖️', text: '변호사 프로필 소개', desc: '인스타 + 블로그', img: 'lawyer+profile', gradient: 'linear-gradient(135deg, #1E3A8A, #1D4ED8)' },
+    { icon: '📰', text: '법률 뉴스 해설', desc: '블로그 + 페이스북', img: 'news+law', gradient: 'linear-gradient(135deg, #2563EB, #3B82F6)' },
+  ],
+  realestate: [
+    { icon: '🏠', text: '신규 매물 소개', desc: '인스타 + 블로그', img: 'house+property', gradient: 'linear-gradient(135deg, #166534, #22C55E)' },
+    { icon: '📍', text: '지역 시세 분석', desc: '블로그', img: 'map+location', gradient: 'linear-gradient(135deg, #15803D, #4ADE80)' },
+    { icon: '🏗️', text: '신축 분양 안내', desc: '전체 플랫폼', img: 'construction+building', gradient: 'linear-gradient(135deg, #14532D, #22C55E)' },
+    { icon: '🔑', text: '계약 성사 후기', desc: '인스타 + 블로그', img: 'key+house', gradient: 'linear-gradient(135deg, #166534, #86EFAC)' },
+    { icon: '📊', text: '부동산 투자 팁', desc: '블로그 + 페이스북', img: 'investment+chart', gradient: 'linear-gradient(135deg, #064E3B, #10B981)' },
+    { icon: '🏡', text: '인테리어 트렌드', desc: '인스타 + 블로그', img: 'interior+design', gradient: 'linear-gradient(135deg, #047857, #34D399)' },
+  ],
+  wedding: [
+    { icon: '💐', text: '웨딩 패키지 소개', desc: '인스타 + 블로그', img: 'wedding+bouquet', gradient: 'linear-gradient(135deg, #BE185D, #EC4899)' },
+    { icon: '💍', text: '실제 웨딩 후기', desc: '인스타 + 블로그', img: 'wedding+ceremony', gradient: 'linear-gradient(135deg, #9D174D, #F472B6)' },
+    { icon: '📸', text: '포토 갤러리 공개', desc: '인스타', img: 'wedding+photo', gradient: 'linear-gradient(135deg, #831843, #EC4899)' },
+    { icon: '🎉', text: '시즌 프로모션', desc: '전체 플랫폼', img: 'celebration+party', gradient: 'linear-gradient(135deg, #BE185D, #FB7185)' },
+    { icon: '🌸', text: '웨딩 트렌드 소개', desc: '블로그 + 인스타', img: 'wedding+trend', gradient: 'linear-gradient(135deg, #9D174D, #FBCFE8)' },
+    { icon: '✨', text: '이벤트 기획 사례', desc: '블로그 + 페이스북', img: 'event+planning', gradient: 'linear-gradient(135deg, #831843, #BE185D)' },
+  ],
+  manufacturing: [
+    { icon: '🏭', text: '생산 시설 소개', desc: '블로그 + 페이스북', img: 'factory+production', gradient: 'linear-gradient(135deg, #374151, #6B7280)' },
+    { icon: '🔩', text: '신제품 출시 알림', desc: '블로그 + 인스타', img: 'product+new', gradient: 'linear-gradient(135deg, #1F2937, #4B5563)' },
+    { icon: '📋', text: '품질 인증 획득', desc: '블로그 + 페이스북', img: 'quality+certificate', gradient: 'linear-gradient(135deg, #111827, #374151)' },
+    { icon: '🤝', text: '파트너십 소식', desc: '블로그 + 페이스북', img: 'partnership+business', gradient: 'linear-gradient(135deg, #374151, #9CA3AF)' },
+    { icon: '📊', text: '기술 블로그 포스팅', desc: '블로그', img: 'technology+innovation', gradient: 'linear-gradient(135deg, #1F2937, #6B7280)' },
+    { icon: '👷', text: '채용 공고', desc: '인스타 + 페이스북', img: 'hiring+team', gradient: 'linear-gradient(135deg, #111827, #4B5563)' },
+  ],
+  logistics: [
+    { icon: '🚚', text: '배송 서비스 소개', desc: '블로그 + 페이스북', img: 'delivery+truck', gradient: 'linear-gradient(135deg, #0369A1, #38BDF8)' },
+    { icon: '📦', text: '신규 노선 오픈', desc: '전체 플랫폼', img: 'shipping+route', gradient: 'linear-gradient(135deg, #075985, #0EA5E9)' },
+    { icon: '⏰', text: '당일 배송 프로모션', desc: '인스타 + 페이스북', img: 'fast+delivery', gradient: 'linear-gradient(135deg, #0C4A6E, #38BDF8)' },
+    { icon: '🌍', text: '해외 배송 안내', desc: '블로그 + 페이스북', img: 'international+shipping', gradient: 'linear-gradient(135deg, #0369A1, #7DD3FC)' },
+    { icon: '📊', text: '물류 인사이트', desc: '블로그', img: 'logistics+data', gradient: 'linear-gradient(135deg, #075985, #0369A1)' },
+    { icon: '⭐', text: '고객 후기', desc: '인스타 + 블로그', img: 'review+shipping', gradient: 'linear-gradient(135deg, #0C4A6E, #0EA5E9)' },
+  ],
+  freelance: [
+    { icon: '💻', text: '포트폴리오 공개', desc: '인스타 + 블로그', img: 'portfolio+design', gradient: 'linear-gradient(135deg, #7C3AED, #A78BFA)' },
+    { icon: '🎨', text: '작업 과정 공유', desc: '인스타 + 블로그', img: 'creative+process', gradient: 'linear-gradient(135deg, #6D28D9, #C4B5FD)' },
+    { icon: '📢', text: '프로젝트 모집', desc: '전체 플랫폼', img: 'project+work', gradient: 'linear-gradient(135deg, #5B21B6, #8B5CF6)' },
+    { icon: '💡', text: '업계 팁 공유', desc: '블로그 + 페이스북', img: 'tips+idea', gradient: 'linear-gradient(135deg, #4C1D95, #7C3AED)' },
+    { icon: '🏆', text: '수상 / 성과 소식', desc: '인스타 + 페이스북', img: 'award+trophy', gradient: 'linear-gradient(135deg, #6D28D9, #DDD6FE)' },
+    { icon: '🤝', text: '협업 파트너 모집', desc: '전체 플랫폼', img: 'collaboration+team', gradient: 'linear-gradient(135deg, #5B21B6, #A78BFA)' },
   ],
 };
 
@@ -307,20 +376,19 @@ function SnsCard({ title, subtitle, imageUrl, gradient, style }: {
   );
 }
 
-export default function SNSPage() {
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/sns/generate' }),
-  });
+interface ChatMsg { id: string; role: 'user' | 'assistant'; text: string }
 
+export default function SNSPage() {
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [input, setInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'generate' | 'hashtag' | 'video' | 'calendar' | 'history'>('generate');
+  const [activeTab, setActiveTab] = useState<'generate' | 'video' | 'calendar' | 'history'>('generate');
   const [copied, setCopied] = useState('');
   const [lastPrompt, setLastPrompt] = useState('');
   const [savedCategory, setSavedCategory] = useState<string | null>(null);
   const [setupDone, setSetupDone] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load saved category
   useEffect(() => {
     const saved = localStorage.getItem('ilpro_sns_category');
     if (saved) { setSavedCategory(saved); setSetupDone(true); }
@@ -339,24 +407,49 @@ export default function SNSPage() {
   const currentBiz = BIZ_CATEGORIES.find(c => c.id === savedCategory);
   const quickPrompts = savedCategory ? (PROMPTS_BY_CATEGORY[savedCategory] || DEFAULT_PROMPTS) : DEFAULT_PROMPTS;
 
-  const isLoading = status === 'submitted' || status === 'streaming';
-
   const bizContext = currentBiz ? `\n\n[업종: ${currentBiz.label}]` : '';
+
+  async function sendPrompt(prompt: string) {
+    const userMsg: ChatMsg = { id: Date.now().toString(), role: 'user', text: prompt };
+    const assistantId = (Date.now() + 1).toString();
+    setMessages(prev => [...prev, userMsg, { id: assistantId, role: 'assistant', text: '' }]);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch('/api/sns/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          full += decoder.decode(value, { stream: true });
+          const current = full;
+          setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, text: current } : m));
+        }
+      }
+    } catch {
+      setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, text: '생성 중 오류가 발생했어요.' } : m));
+    }
+    setIsLoading(false);
+  }
 
   const handleQuickPrompt = (text: string) => {
     setLastPrompt(text);
-    sendMessage({
-      text: `다음 업종/상황에 맞는 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${text}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`,
-    });
+    sendPrompt(`다음 업종/상황에 맞는 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${text}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
       setLastPrompt(input);
-      sendMessage({
-        text: `다음 내용으로 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${input}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`,
-      });
+      sendPrompt(`다음 내용으로 SNS 게시물을 인스타그램, 네이버 블로그, 페이스북용으로 각각 생성해주세요:\n\n${input}${bizContext}\n\n각 플랫폼별로 톤과 길이를 다르게 해주세요. 해시태그도 포함해주세요.`);
       setInput('');
     }
   };
@@ -394,7 +487,7 @@ export default function SNSPage() {
             <div className="text-4xl mb-4">📣</div>
             <h2 className="text-2xl font-bold mb-2">어떤 업종이세요?</h2>
             <p className="text-sm text-white/50 mb-8">한번 설정하면 모든 콘텐츠가 맞춤 생성됩니다</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl w-full">
               {BIZ_CATEGORIES.map(cat => (
                 <button key={cat.id} onClick={() => selectCategory(cat.id)}
                   className="flex flex-col items-center gap-2 p-5 rounded-xl transition-all hover:scale-105 active:scale-95"
@@ -413,7 +506,6 @@ export default function SNSPage() {
           {[
             { id: 'generate' as const, label: '생성', icon: '✨' },
             { id: 'video' as const, label: '비디오', icon: '🎬' },
-            { id: 'hashtag' as const, label: '해시태그', icon: '#️⃣' },
             { id: 'calendar' as const, label: '캘린더', icon: '📅' },
             { id: 'history' as const, label: '히스토리', icon: '📊' },
           ].map(t => (
@@ -470,15 +562,13 @@ export default function SNSPage() {
                   {message.role === 'user' ? (
                     <div className="flex justify-end">
                       <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm" style={{ background: '#0071E3' }}>
-                        {message.parts.map((part, i) =>
-                          part.type === 'text' ? <p key={i} className="whitespace-pre-wrap">{part.text}</p> : null
-                        )}
+                        <p className="whitespace-pre-wrap">{message.text}</p>
                       </div>
                     </div>
                   ) : (
                     <div>
                       {/* 카드 템플릿 미리보기 */}
-                      {message.parts.some(p => p.type === 'text' && (p as { text: string }).text.length > 100) && (
+                      {message.text.length > 100 && (
                         <div className="mb-4">
                           <h4 className="text-xs font-bold text-white/40 mb-3 uppercase tracking-wider">카드 템플릿 미리보기</h4>
                           <div className="flex gap-3 overflow-x-auto pb-3">
@@ -497,7 +587,7 @@ export default function SNSPage() {
                               style="event"
                             />
                             <InstaPreview
-                              content={message.parts.filter(p => p.type === 'text').map(p => (p as { text: string }).text).join('')}
+                              content={message.text}
                               imageUrl={getPhoto(category.key, 2)}
                               gradient={category.gradient}
                             />
@@ -507,12 +597,11 @@ export default function SNSPage() {
 
                       {/* 플랫폼별 콘텐츠 */}
                       <div className="space-y-3">
-                        {message.parts.filter(p => p.type === 'text').map((part, i) => {
-                          const textPart = part as { type: 'text'; text: string };
-                          const sections = parsePlatformContent(textPart.text);
+                        {(() => {
+                          const sections = parsePlatformContent(message.text);
 
                           return sections.map((section, j) => (
-                            <div key={`${i}-${j}`} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            <div key={`${message.id}-${j}`} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
                               {/* 플랫폼 헤더 */}
                               <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                                 <div className="flex items-center gap-2">
@@ -536,7 +625,7 @@ export default function SNSPage() {
                               </div>
                             </div>
                           ));
-                        })}
+                        })()}
                       </div>
                     </div>
                   )}
@@ -587,7 +676,6 @@ export default function SNSPage() {
 
 
         {/* Hashtag Tab */}
-        {activeTab === 'hashtag' && <HashtagPanel />}
 
         {/* Edit Tab */}
 

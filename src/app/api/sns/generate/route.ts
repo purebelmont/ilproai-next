@@ -359,49 +359,17 @@ function findContent(message: string): string {
 }
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { prompt } = await req.json();
+  const content = findContent(prompt || '');
 
-  // 마지막 사용자 메시지 추출
-  const lastMessage = messages[messages.length - 1];
-  const userText = lastMessage?.parts
-    ?.filter((p: { type: string }) => p.type === 'text')
-    .map((p: { text: string }) => p.text)
-    .join(' ') || lastMessage?.content || '';
-
-  const content = findContent(userText);
-  const msgId = `msg_demo_${Date.now()}`;
-
-  // SSE 스트리밍 (UI Message Stream Protocol v1)
+  // Stream plain text in chunks
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      function send(data: string) {
-        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+      for (let i = 0; i < content.length; i += 30) {
+        controller.enqueue(encoder.encode(content.slice(i, i + 30)));
+        await new Promise(r => setTimeout(r, 15));
       }
-
-      // Start message
-      send(JSON.stringify({ type: 'start', messageId: msgId }));
-
-      // Text start
-      send(JSON.stringify({ type: 'text-start', id: msgId }));
-
-      // Stream text in small chunks
-      const chunks: string[] = [];
-      for (let i = 0; i < content.length; i += 20) {
-        chunks.push(content.slice(i, i + 20));
-      }
-      for (const chunk of chunks) {
-        send(JSON.stringify({ type: 'text-delta', id: msgId, delta: chunk }));
-        await new Promise(r => setTimeout(r, 12));
-      }
-
-      // Text end
-      send(JSON.stringify({ type: 'text-end', id: msgId }));
-
-      // Finish
-      send(JSON.stringify({ type: 'finish' }));
-      send('[DONE]');
-
       controller.close();
     },
   });

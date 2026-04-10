@@ -124,24 +124,13 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
         @keyframes sceneFade { from{opacity:0;transform:scale(1.05)} to{opacity:1;transform:scale(1)} }
         .ig-ring{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);padding:2px;border-radius:50%}
         .ig-scroll::-webkit-scrollbar{display:none} .ig-scroll{scrollbar-width:none}
-        .phone-frame{border-radius:40px;box-shadow:0 0 0 3px #333,0 0 0 6px #1a1a1a,0 20px 60px rgba(0,0,0,0.5)}
       `}</style>
 
       {/* ═══ Outer wrapper — centers phone on desktop, full on mobile ═══ */}
       <div className="flex-1 flex items-center justify-center overflow-y-auto ig-scroll py-4 px-4">
         {/* Phone frame */}
-        <div className="w-full max-w-[390px] flex flex-col phone-frame overflow-hidden"
-          style={{ background: 'var(--bg)', maxHeight: embedded ? 'calc(100vh - 120px)' : 'calc(100vh - 32px)' }}>
-
-          {/* ═══ Status bar ═══ */}
-          <div className="shrink-0 flex items-center justify-between px-6 pt-3 pb-1">
-              <span className="text-[11px] font-semibold" style={{ color: 'var(--text-secondary)' }}>9:41</span>
-              <div className="w-[80px] h-[28px] rounded-full" style={{ background: '#000' }} />
-              <div className="flex items-center gap-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-secondary)' }}><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text-secondary)' }}><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-              </div>
-            </div>
+        <div className="w-full max-w-[420px] flex flex-col rounded-2xl overflow-hidden"
+          style={{ background: 'var(--bg)', border: '1px solid var(--border)', maxHeight: embedded ? 'calc(100vh - 120px)' : 'calc(100vh - 32px)' }}>
 
           {/* ═══ App Header ═══ */}
           <div className="shrink-0 flex items-center justify-between px-4 py-2" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -399,16 +388,6 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
             <div className="h-16" />
           </div>
 
-          {/* ═══ Bottom nav ═══ */}
-          <div className="shrink-0 flex items-center justify-around py-2" style={{ borderTop: '1px solid var(--border)' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: 'var(--text)' }}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--text)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg)" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)' }}><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-            <div className="w-6 h-6 rounded-full" style={{ background: 'var(--bg-hover)', border: '1px solid var(--text-muted)' }} />
-          </div>
         </div>
       </div>
     </div>

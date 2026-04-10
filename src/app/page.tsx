@@ -25,7 +25,7 @@ export default function Home() {
           <span className="text-sm font-bold text-white/80">일프로AI</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors" style={{ textDecoration: "none" }}>
+          <Link href="/blog" className="text-sm text-white/50 hover:text-white transition-colors px-4 py-2" style={{ textDecoration: "none" }}>
             블로그
           </Link>
           <Link href="/auth"

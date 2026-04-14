@@ -311,7 +311,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                     </div>
                     {/* Image */}
                     <div className="aspect-square relative overflow-hidden" style={{ background: 'var(--bg-card)' }}>
-                      <img src={getPhoto(post.prompt, idx)} alt="" className="w-full h-full object-cover" />
+                      <img src={getPhoto(post.prompt, idx)} alt="" className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = PHOTOS['기본'][0]; }} />
                       <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
                     </div>
                     {/* Actions */}
@@ -399,6 +400,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                   <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: '9/16', background: '#111' }}>
                     {/* Background image */}
                     <img src={getPhoto(videoInput || scenes[videoScene] || '', videoScene)} alt=""
+                      onError={(e) => { (e.target as HTMLImageElement).src = PHOTOS['기본'][0]; }}
                       className="absolute inset-0 w-full h-full object-cover opacity-40" />
                     {/* Scene content */}
                     <div className="absolute inset-0 flex items-center justify-center p-8"

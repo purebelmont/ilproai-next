@@ -47,9 +47,9 @@ export default function RecruitPage() {
             { icon: "💰", title: "매출·예약·고객 관리", desc: "엑셀 대신, 한 곳에서 매출/지출/예약/고객 관리" },
             { icon: "📸", title: "AI SNS 콘텐츠 생성", desc: "\"갈비탕 주말 이벤트\" 한 줄이면 AI가 게시물 작성" },
             { icon: "📄", title: "AI 사업계획서", desc: "사업 정보만 입력하면 6개 섹션 자동 생성" },
-            { icon: "🔍", title: "정부 지원사업 매칭", desc: "29개 지원사업 + 17개 혁신센터 중 내 사업에 맞는 것 추천" },
+            { icon: "🔍", title: "정부 지원사업 추천", desc: "내 사업에 알맞는 정부 지원사업을 추천해드립니다" },
             { icon: "🌐", title: "AI 홈페이지 빌더", desc: "5분 만에 내 가게 홈페이지 자동 생성" },
-            { icon: "📎", title: "AI 지원서 작성", desc: "지원서 PDF 업로드 → AI가 항목별 내용 자동 작성" },
+            { icon: "📎", title: "AI 지원서 작성", desc: "정부 지원사업을 AI가 지원서 작성을 도와드립니다" },
           ].map((f, i) => (
             <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 14, padding: 20, border: "1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ fontSize: 24, marginBottom: 8 }}>{f.icon}</div>

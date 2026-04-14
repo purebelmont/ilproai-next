@@ -244,8 +244,8 @@ export default function Dashboard() {
     ];
     await supabase.from("todos").insert(todos);
 
-    // Ledger
-    const ledger = [
+    // Ledger — 2025-01 ~ 현재까지 월별 히스토리 + 최근 상세
+    const ledger: any[] = [
       { user_id: uid, entry_date: today, entry_type: "income", description: "점심 영업", amount: 1250000, payment_method: "카드" },
       { user_id: uid, entry_date: today, entry_type: "income", description: "저녁 영업", amount: 1850000, payment_method: "카드+현금" },
       { user_id: uid, entry_date: today, entry_type: "expense", description: "식자재 납품", amount: 320000, payment_method: "계좌이체" },
@@ -256,6 +256,39 @@ export default function Dashboard() {
       { user_id: uid, entry_date: d(-3), entry_type: "income", description: "점심+저녁", amount: 1900000, payment_method: "카드" },
       { user_id: uid, entry_date: d(-3), entry_type: "expense", description: "임대료", amount: 2500000, payment_method: "계좌이체" },
     ];
+    // 월별 히스토리 (2025-01 ~ 2026-03)
+    const hist: { ym: string; inc: number; exps: [string, number][] }[] = [
+      { ym: "2025-01", inc: 18500000, exps: [["식자재", 5200000], ["임대료", 2500000], ["인건비", 4800000]] },
+      { ym: "2025-02", inc: 16200000, exps: [["식자재", 4800000], ["임대료", 2500000], ["인건비", 4800000]] },
+      { ym: "2025-03", inc: 21000000, exps: [["식자재", 6100000], ["임대료", 2500000], ["인건비", 4800000], ["설비수리", 800000]] },
+      { ym: "2025-04", inc: 19800000, exps: [["식자재", 5600000], ["임대료", 2500000], ["인건비", 4800000]] },
+      { ym: "2025-05", inc: 22500000, exps: [["식자재", 6500000], ["임대료", 2500000], ["인건비", 5200000]] },
+      { ym: "2025-06", inc: 20100000, exps: [["식자재", 5800000], ["임대료", 2500000], ["인건비", 5200000]] },
+      { ym: "2025-07", inc: 24300000, exps: [["식자재", 7100000], ["임대료", 2500000], ["인건비", 5200000], ["에어컨", 350000]] },
+      { ym: "2025-08", inc: 23100000, exps: [["식자재", 6700000], ["임대료", 2500000], ["인건비", 5200000]] },
+      { ym: "2025-09", inc: 21500000, exps: [["식자재", 6200000], ["임대료", 2500000], ["인건비", 5200000], ["추석보너스", 2000000]] },
+      { ym: "2025-10", inc: 22800000, exps: [["식자재", 6600000], ["임대료", 2500000], ["인건비", 5200000]] },
+      { ym: "2025-11", inc: 20500000, exps: [["식자재", 5900000], ["임대료", 2500000], ["인건비", 5200000]] },
+      { ym: "2025-12", inc: 26000000, exps: [["식자재", 7500000], ["임대료", 2500000], ["인건비", 5200000], ["연말보너스", 3000000]] },
+      { ym: "2026-01", inc: 19200000, exps: [["식자재", 5400000], ["임대료", 2700000], ["인건비", 5500000]] },
+      { ym: "2026-02", inc: 17800000, exps: [["식자재", 5100000], ["임대료", 2700000], ["인건비", 5500000]] },
+      { ym: "2026-03", inc: 23500000, exps: [["식자재", 6800000], ["임대료", 2700000], ["인건비", 5500000], ["인테리어", 1500000]] },
+    ];
+    const thisYM = today.substring(0, 7);
+    for (const m of hist) {
+      if (m.ym >= thisYM) continue;
+      const [y, mo] = m.ym.split("-").map(Number);
+      const lastDay = new Date(y, mo, 0).getDate();
+      // 매출: 5일, 15일, 25일에 분산
+      for (const day of [5, 15, 25]) {
+        ledger.push({ user_id: uid, entry_date: `${m.ym}-${String(Math.min(day, lastDay)).padStart(2, "0")}`, entry_type: "income", description: `${mo}월 매출`, amount: Math.round(m.inc / 3), payment_method: "카드" });
+      }
+      // 지출: 1일, 10일, 20일에 분산
+      m.exps.forEach(([desc, amt], i) => {
+        const expDay = [1, 10, 20][i % 3];
+        ledger.push({ user_id: uid, entry_date: `${m.ym}-${String(Math.min(expDay, lastDay)).padStart(2, "0")}`, entry_type: "expense", description: desc, amount: amt, payment_method: desc.includes("임대") || desc.includes("인건") ? "계좌이체" : "카드" });
+      });
+    }
     await supabase.from("ledger").insert(ledger);
 
     // Reservations

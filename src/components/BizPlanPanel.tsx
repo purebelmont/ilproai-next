@@ -354,61 +354,33 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
   function handleFileDrop(e: React.DragEvent) {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (file) void handleFile(file);
   }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) handleFile(file);
+    if (file) void handleFile(file);
   }
 
-  // HWP 바이너리에서 한글 텍스트 추출
-  function extractTextFromHwp(buffer: ArrayBuffer): string {
-    const bytes = new Uint8Array(buffer);
+  // PDF에서 텍스트 추출 (pdf.js)
+  async function extractTextFromPdf(buffer: ArrayBuffer): Promise<string> {
+    const pdfjsLib = await import("pdfjs-dist");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
     const textParts: string[] = [];
 
-    // HWP 파일은 OLE2 compound document — 텍스트는 UTF-16LE로 인코딩됨
-    // 한글 유니코드 범위: AC00-D7AF (가~힣), 기호/숫자/영문도 포함
-    const decoder = new TextDecoder("utf-16le");
-
-    // 바이너리에서 연속된 유효 텍스트 블록 추출
-    for (let i = 0; i < bytes.length - 1; i += 2) {
-      const code = bytes[i] | (bytes[i + 1] << 8);
-      // 유효한 문자 범위: 한글, 영문, 숫자, 기호, 공백
-      if (
-        (code >= 0xAC00 && code <= 0xD7AF) || // 한글
-        (code >= 0x3131 && code <= 0x318E) || // 자모
-        (code >= 0x0020 && code <= 0x007E) || // ASCII
-        (code >= 0x2000 && code <= 0x206F) || // 일반 구두점
-        (code >= 0x3000 && code <= 0x303F) || // CJK 기호
-        (code >= 0xFF01 && code <= 0xFF5E) || // 전각
-        code === 0x000A || code === 0x000D     // 줄바꿈
-      ) {
-        // 유효 문자
-      } else {
-        if (textParts.length > 0 && textParts[textParts.length - 1] !== "\n") {
-          textParts.push("\n");
-        }
-        continue;
-      }
-      const char = decoder.decode(bytes.slice(i, i + 2));
-      textParts.push(char);
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map((item: any) => item.str).join(" ");
+      textParts.push(pageText);
     }
 
-    // 정리: 연속 줄바꿈 제거, 빈 줄 정리, 의미 없는 짧은 줄 제거
-    const raw = textParts.join("");
-    const lines = raw.split(/\n+/).map(l => l.trim()).filter(l => l.length > 1);
-    // 중복 제거 (HWP 내부에 같은 텍스트가 여러번 나올 수 있음)
-    const seen = new Set<string>();
-    const unique = lines.filter(l => {
-      if (seen.has(l)) return false;
-      seen.add(l);
-      return true;
-    });
-    return unique.join("\n");
+    return textParts.join("\n");
   }
 
-  function handleFile(file: File) {
+  async function handleFile(file: File) {
     setUploadedFileName(file.name);
 
     if (file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
@@ -419,20 +391,24 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
         analyzeDocument(text);
       };
       reader.readAsText(file);
-    } else if (file.name.endsWith(".hwp")) {
-      // HWP: 바이너리에서 텍스트 추출
+    } else if (file.name.endsWith(".pdf") || file.type === "application/pdf") {
+      // PDF: pdf.js로 텍스트 추출
+      setApplyStep("analyzing");
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const buffer = e.target?.result as ArrayBuffer;
-        const text = extractTextFromHwp(buffer);
-        setUploadedText(text);
-        analyzeDocument(text);
+      reader.onload = async (e) => {
+        try {
+          const buffer = e.target?.result as ArrayBuffer;
+          const text = await extractTextFromPdf(buffer);
+          setUploadedText(text);
+          analyzeDocument(text);
+        } catch {
+          setUploadedText("[PDF 텍스트 추출 실패]");
+          analyzeDocument(file.name);
+        }
       };
       reader.readAsArrayBuffer(file);
     } else {
-      // PDF/DOCX 등 — 파일명 기반 분석
-      setUploadedText(`[업로드된 파일: ${file.name}]`);
-      analyzeDocument(file.name + " 사업개요 제품서비스 시장분석 마케팅전략 사업화전략 자금계획 팀구성 추진일정 기대효과");
+      alert("PDF 파일만 업로드 가능합니다. HWP 파일은 PDF로 변환 후 업로드해주세요.");
     }
   }
 
@@ -947,9 +923,9 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
                 style={{ border: "2px dashed var(--border)", background: "var(--bg-card)" }}
                 onClick={() => document.getElementById("apply-file-input")?.click()}>
                 <div className="text-4xl mb-3">📄</div>
-                <div className="text-sm font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>지원서 양식을 여기에 드래그하세요</div>
-                <div className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>또는 클릭하여 파일 선택 (PDF, HWP, DOCX, TXT)</div>
-                <input id="apply-file-input" type="file" className="hidden" accept=".pdf,.hwp,.docx,.doc,.txt,.md,.rtf" onChange={handleFileSelect} />
+                <div className="text-sm font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>지원서 양식(PDF)을 여기에 드래그하세요</div>
+                <div className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>PDF 파일만 지원 · HWP는 PDF로 변환 후 업로드</div>
+                <input id="apply-file-input" type="file" className="hidden" accept=".pdf,.txt,.md" onChange={handleFileSelect} />
                 <div className="inline-block px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: "var(--primary)" }}>파일 선택</div>
               </div>
 

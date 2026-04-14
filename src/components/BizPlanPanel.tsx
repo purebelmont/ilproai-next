@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { SUPPORT_PROGRAMS, type SupportProgram } from "@/data/support-programs";
 
 // ──── 간단한 마크다운 → HTML 변환 ────
@@ -142,6 +142,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
   const [currentGen, setCurrentGen] = useState("");
   const [copied, setCopied] = useState("");
   const [progress, setProgress] = useState(0);
+  const contentEndRef = useRef<HTMLDivElement>(null);
 
   // 지원사업 state
   const [supportResults, setSupportResults] = useState<SupportProgram[]>([]);
@@ -271,6 +272,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
           if (done) break;
           full += decoder.decode(value, { stream: true });
           setSections(prev => ({ ...prev, [sectionId]: full }));
+          contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         }
       }
       return full;
@@ -495,6 +497,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
           if (done) break;
           full += decoder.decode(value, { stream: true });
           setFieldContents(prev => ({ ...prev, [fieldId]: full }));
+          contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
         }
       }
     } catch {
@@ -819,8 +822,9 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
                           </div>
                         )}
                       </div>
-                      {sections[s.id] ? (
+                      {sections[s.id] ? (<>
                         <div className="bp-content rounded-xl p-5 text-sm leading-relaxed" style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} dangerouslySetInnerHTML={{ __html: md(sections[s.id]) }} />
+                        <div ref={contentEndRef} /></>
                       ) : (
                         <div className="rounded-xl p-8 text-center" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
                           {generating && currentGen === s.label ? (

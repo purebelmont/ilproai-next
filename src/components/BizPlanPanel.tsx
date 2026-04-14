@@ -327,6 +327,11 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
         );
       }
 
+      // 디버그: 추출된 텍스트와 감지된 항목 확인
+      console.log("=== 추출된 텍스트 (처음 2000자) ===");
+      console.log(text.substring(0, 2000));
+      console.log("=== 감지된 항목 ===", fields);
+
       setDetectedFields(fields);
       setActiveField(fields[0]?.id || "");
       setApplyStep("fields");

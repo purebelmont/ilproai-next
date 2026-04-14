@@ -209,6 +209,12 @@ export default function Dashboard() {
       { user_id: uid, customer_name: "이미영", customer_phone: "010-9876-5432", party_size: 2, reservation_date: today, reservation_time: "12:30", service: "점심특선", status: "confirmed", notes: "", source: "direct", reminder_sent: false },
       { user_id: uid, customer_name: "박지현", customer_phone: "010-5555-1234", party_size: 6, reservation_date: today, reservation_time: "18:00", service: "회식", status: "confirmed", notes: "2층 단체석", source: "direct", reminder_sent: false },
       { user_id: uid, customer_name: "정동현", customer_phone: "010-4444-8888", party_size: 8, reservation_date: d(1), reservation_time: "12:00", service: "회사점심", status: "confirmed", notes: "주차3대", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "최유진", customer_phone: "010-7777-2222", party_size: 3, reservation_date: today, reservation_time: "13:00", service: "생일파티", status: "confirmed", notes: "케이크 준비", source: "naver", reminder_sent: false },
+      { user_id: uid, customer_name: "한승민", customer_phone: "010-6666-3333", party_size: 2, reservation_date: today, reservation_time: "19:00", service: "디너", status: "confirmed", notes: "창가석 요청", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "윤서연", customer_phone: "010-8888-4444", party_size: 5, reservation_date: d(1), reservation_time: "18:30", service: "가족모임", status: "confirmed", notes: "어린이 2명", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "강민호", customer_phone: "010-2222-9999", party_size: 10, reservation_date: d(1), reservation_time: "19:00", service: "동창회", status: "confirmed", notes: "코스요리 10인분", source: "naver", reminder_sent: false },
+      { user_id: uid, customer_name: "오하늘", customer_phone: "010-3333-7777", party_size: 2, reservation_date: d(2), reservation_time: "12:00", service: "점심", status: "confirmed", notes: "", source: "direct", reminder_sent: false },
+      { user_id: uid, customer_name: "임채원", customer_phone: "010-1111-5555", party_size: 4, reservation_date: d(2), reservation_time: "18:00", service: "기념일", status: "confirmed", notes: "와인 1병 준비", source: "direct", reminder_sent: false },
     ];
     await supabase.from("reservations").insert(reservations);
 

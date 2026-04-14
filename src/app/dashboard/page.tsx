@@ -164,8 +164,8 @@ export default function Dashboard() {
       const { data: p } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
       if (p) {
         setProfile(p);
-        // Track last login
-        supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id).then(() => {});
+        // Track last login (ignore errors if column doesn't exist)
+        supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id).then(() => {}).catch(() => {});
       } else {
         // Auto-create profile
         const name = data.user.user_metadata?.name || data.user.email?.split("@")[0] || "";
@@ -373,7 +373,7 @@ export default function Dashboard() {
         {/* AI Button + Blog */}
         <div className="px-3 pb-3 shrink-0 space-y-1.5">
           <button onClick={() => setTab("ai")}
-            className="w-full flex items-center gap-2 py-2.5 px-3 rounded-xl text-[13px] font-bold text-white active:scale-[0.97] transition-all"
+            className="w-full flex items-center gap-2 py-1.5 px-3 rounded-lg text-[12px] font-bold text-white active:scale-[0.97] transition-all"
             style={{
               background: tab === "ai" ? "linear-gradient(135deg, #7D2AE7, #0071E3)" : "rgba(125,42,231,0.2)",
               boxShadow: tab === "ai" ? "0 4px 12px rgba(125,42,231,0.4)" : "none",
@@ -388,10 +388,10 @@ export default function Dashboard() {
         <div className="flex-1 overflow-y-auto px-2" style={{ scrollbarWidth: "none" }}>
           {NAV_SECTIONS.map((section, si) => (
               <div key={si}>
-                {si > 0 && <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />}
+                {si > 0 && <div className="h-px my-1 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />}
                 {section.label && (
-                  <div className="flex items-center gap-2 px-3 pt-2 pb-1">
-                    <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6B6B80" }}>{section.label}</span>
+                  <div className="flex items-center gap-2 px-3 pt-1 pb-0.5">
+                    <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#6B6B80" }}>{section.label}</span>
                     {section.pro && <span className="text-[8px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)", color: "white" }}>PRO</span>}
                   </div>
                 )}
@@ -400,9 +400,9 @@ export default function Dashboard() {
                   if (item.href) {
                     return (
                       <Link key={item.id} href={item.href}
-                        className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
+                        className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] transition-colors active:scale-[0.98]"
                         style={{ color: "#8E8EA0", textDecoration: "none" }}>
-                        <span className="text-[15px]">{item.icon}</span>
+                        <span className="text-[13px]">{item.icon}</span>
                         <span className="flex-1 text-left">{item.label}</span>
                         {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
                       </Link>
@@ -411,12 +411,12 @@ export default function Dashboard() {
                   return (
                     <button key={item.id + item.label}
                       onClick={() => setTab(item.id)}
-                      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg text-[13px] transition-colors active:scale-[0.98]"
+                      className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[12px] transition-colors active:scale-[0.98]"
                       style={{
                         background: isActive ? "rgba(125,42,231,0.15)" : "transparent",
                         color: isActive ? "#A78BFA" : "#8E8EA0",
                       }}>
-                      <span className="text-[15px]">{item.icon}</span>
+                      <span className="text-[13px]">{item.icon}</span>
                       <span className="flex-1 text-left">{item.label}</span>
                       {item.badge && <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">{item.badge}</span>}
                     </button>

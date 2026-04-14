@@ -233,6 +233,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
   }
 
   async function htmlToPdf(htmlContent: string, filename: string) {
+    if (typeof window === "undefined") return;
     const { default: jsPDF } = await import("jspdf");
     const { default: html2canvas } = await import("html2canvas");
 

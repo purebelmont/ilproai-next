@@ -31,5 +31,10 @@
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "safari >= 14",
+    "last 2 versions",
+    "> 1%"
+  ]
 }

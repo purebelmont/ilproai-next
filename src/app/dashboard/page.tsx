@@ -5,15 +5,15 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import HomePanel from "@/components/HomePanel";
-import FilesPanel from "@/components/FilesPanel";
-import QuotesPanel from "@/components/QuotesPanel";
-import PayrollPanel from "@/components/PayrollPanel";
-import ReportPanel from "@/components/ReportPanel";
-import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
-import AIRecommendPanel from "@/components/AIRecommendPanel";
-import { SNSPanel } from "@/app/sns/page";
 import dynamic from "next/dynamic";
-const BizPlanPanel = dynamic(() => import("@/components/BizPlanPanel"), { ssr: false, loading: () => <div className="p-5 text-center"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full mx-auto" /></div> });
+const FilesPanel = dynamic(() => import("@/components/FilesPanel"), { ssr: false });
+const QuotesPanel = dynamic(() => import("@/components/QuotesPanel"), { ssr: false });
+const PayrollPanel = dynamic(() => import("@/components/PayrollPanel"), { ssr: false });
+const ReportPanel = dynamic(() => import("@/components/ReportPanel"), { ssr: false });
+const WebsiteBuilderPanel = dynamic(() => import("@/components/WebsiteBuilderPanel"), { ssr: false });
+const AIRecommendPanel = dynamic(() => import("@/components/AIRecommendPanel"), { ssr: false });
+const SNSPanel = dynamic(() => import("@/app/sns/page").then(m => ({ default: m.SNSPanel })), { ssr: false });
+const BizPlanPanel = dynamic(() => import("@/components/BizPlanPanel"), { ssr: false });
 
 type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai" | "bizplan";
 

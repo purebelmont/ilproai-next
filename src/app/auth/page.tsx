@@ -5,7 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "reset">("login");
+  const [resetSent, setResetSent] = useState(false);
   const [email, setEmail] = useState("demo@ilpro.ai");
   const [password, setPassword] = useState("demo1234");
   const [name, setName] = useState("");
@@ -73,7 +74,7 @@ export default function AuthPage() {
           <div className="bg-[var(--danger)] text-white text-sm p-3 rounded-lg mb-4">{error}</div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: mode === "reset" ? "none" : "block" }}>
           {mode === "register" && (
             <div className="mb-4">
               <label className="block text-sm font-semibold text-[var(--gray-700)] mb-1">이름</label>
@@ -108,13 +109,49 @@ export default function AuthPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-[var(--gray-500)] mt-4">
-          {mode === "register" ? (
-            <>이미 계정이 있으신가요? <button onClick={() => setMode("login")} className="text-[var(--primary)]">로그인</button></>
-          ) : (
-            <>계정이 없으신가요? <button onClick={() => setMode("register")} className="text-[var(--primary)]">무료 가입</button></>
-          )}
-        </p>
+        {mode !== "reset" && (
+          <p className="text-center text-sm text-[var(--gray-500)] mt-4">
+            {mode === "register" ? (
+              <>이미 계정이 있으신가요? <button onClick={() => setMode("login")} className="text-[var(--primary)]">로그인</button></>
+            ) : (<>
+              계정이 없으신가요? <button onClick={() => setMode("register")} className="text-[var(--primary)]">무료 가입</button>
+              <span className="mx-2">·</span>
+              <button onClick={() => { setMode("reset"); setResetSent(false); }} className="text-[var(--gray-400)]">비밀번호 찾기</button>
+            </>)}
+          </p>
+        )}
+
+        {mode === "reset" && (
+          <div className="mt-4">
+            {resetSent ? (
+              <div className="text-center py-4">
+                <div className="text-2xl mb-2">📧</div>
+                <div className="text-sm font-semibold text-[var(--gray-700)] mb-1">이메일을 확인하세요</div>
+                <div className="text-xs text-[var(--gray-500)] mb-4">비밀번호 재설정 링크를 보냈습니다</div>
+                <button onClick={() => { setMode("login"); setResetSent(false); }} className="text-sm text-[var(--primary)]">로그인으로 돌아가기</button>
+              </div>
+            ) : (
+              <div>
+                <div className="text-sm text-[var(--gray-500)] mb-3">가입한 이메일을 입력하면 비밀번호 재설정 링크를 보내드립니다.</div>
+                <input
+                  type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="이메일 주소" required
+                  className="w-full p-3 border border-[var(--gray-300)] rounded-lg text-sm outline-none focus:border-[var(--primary)] mb-3"
+                />
+                <button onClick={async () => {
+                  setLoading(true);
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + "/auth" });
+                  setLoading(false);
+                  if (error) { setError(error.message); } else { setResetSent(true); }
+                }} disabled={loading || !email}
+                  className="w-full p-3 bg-[var(--primary)] text-white rounded-full font-semibold text-sm disabled:opacity-50 mb-3">
+                  {loading ? "..." : "재설정 링크 보내기"}
+                </button>
+                <button onClick={() => setMode("login")} className="w-full text-center text-sm text-[var(--gray-400)]">← 로그인으로 돌아가기</button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="flex items-center gap-4 my-6">
           <div className="flex-1 h-px bg-[var(--gray-200)]" />

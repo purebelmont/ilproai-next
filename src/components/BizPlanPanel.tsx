@@ -362,12 +362,12 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     if (file) void handleFile(file);
   }
 
-  // PDF에서 텍스트 추출 (pdf.js)
+  // PDF에서 텍스트 추출 (pdf.js — worker 비활성화로 즉시 실행)
   async function extractTextFromPdf(buffer: ArrayBuffer): Promise<string> {
     const pdfjsLib = await import("pdfjs-dist");
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "";
 
-    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: buffer, useWorkerFetch: false, isEvalSupported: false, useSystemFonts: true } as any).promise;
     const textParts: string[] = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {

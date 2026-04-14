@@ -16,28 +16,39 @@ const PROMPTS = [
   { icon: '🎁', text: '감사 이벤트' },
 ];
 
-// 키워드 → 영어 검색어 매핑 (Unsplash는 영어 검색이 더 정확)
-const KO_TO_EN: Record<string, string> = {
-  갈비: 'korean beef ribs soup', 탕: 'korean soup', 찜: 'korean stew', 국밥: 'korean rice soup',
-  피자: 'pizza', 치킨: 'fried chicken', 삼겹: 'korean pork belly', 불고기: 'bulgogi',
-  한식: 'korean food', 카페: 'coffee cafe', 커피: 'coffee latte', 라떼: 'latte art',
-  빵: 'bakery bread', 케이크: 'cake dessert', 디저트: 'dessert',
-  미용: 'hair salon', 헤어: 'hairstyle', 네일: 'nail art', 뷰티: 'beauty salon',
-  헬스: 'gym fitness', 운동: 'workout', 요가: 'yoga', 필라테스: 'pilates',
-  강아지: 'cute puppy', 고양이: 'cute cat', 반려: 'pet dog',
-  학원: 'classroom education', 교육: 'education study',
-  꽃: 'flowers bouquet', 인테리어: 'interior design', 사무실: 'modern office',
-  음식: 'korean food', 맛집: 'delicious food restaurant', 식당: 'restaurant interior',
+// 키워드별 이미지 (Unsplash CDN 직접 링크)
+const PHOTOS: Record<string, string[]> = {
+  갈비: ['https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=600&fit=crop'],
+  탕: ['https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=600&fit=crop'],
+  찌개: ['https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=600&fit=crop'],
+  고기: ['https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&h=600&fit=crop'],
+  삼겹: ['https://images.unsplash.com/photo-1590301157890-4810ed352733?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=600&fit=crop'],
+  치킨: ['https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=600&h=600&fit=crop'],
+  피자: ['https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&h=600&fit=crop'],
+  음식: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=600&fit=crop'],
+  맛집: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=600&fit=crop'],
+  밥: ['https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=600&fit=crop'],
+  카페: ['https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=600&fit=crop'],
+  커피: ['https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&h=600&fit=crop'],
+  빵: ['https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1549931319-a545753467c8?w=600&h=600&fit=crop'],
+  케이크: ['https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&h=600&fit=crop'],
+  미용: ['https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=600&fit=crop'],
+  헤어: ['https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=600&h=600&fit=crop'],
+  헬스: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=600&fit=crop'],
+  운동: ['https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=600&fit=crop'],
+  강아지: ['https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=600&h=600&fit=crop'],
+  고양이: ['https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600&h=600&fit=crop'],
+  반려: ['https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600&h=600&fit=crop'],
+  학원: ['https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=600&fit=crop'],
+  꽃: ['https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&h=600&fit=crop'],
+  할인: ['https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=600&fit=crop'],
+  이벤트: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=600&h=600&fit=crop'],
+  기본: ['https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=600&fit=crop', 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=600&fit=crop'],
 };
 
 function getPhoto(text: string, i = 0) {
-  // 키워드에서 영어 검색어 추출
-  let query = 'korean business';
-  for (const [ko, en] of Object.entries(KO_TO_EN)) {
-    if (text.includes(ko)) { query = en; break; }
-  }
-  // Unsplash Source — 검색어 기반 랜덤 이미지 (무료, API 키 불필요)
-  return `https://source.unsplash.com/600x600/?${encodeURIComponent(query)}&sig=${i + Date.now() % 100}`;
+  const k = Object.keys(PHOTOS).find(k => text.includes(k)) || '기본';
+  return PHOTOS[k][i % PHOTOS[k].length];
 }
 
 // Video template types (AI가 이 형식으로 장면 생성)

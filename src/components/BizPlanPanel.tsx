@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { SUPPORT_PROGRAMS, type SupportProgram } from "@/data/support-programs";
+// Lazy load to avoid Turbopack bundle initialization errors
+let _programs: any[] | null = null;
+function getSupportPrograms() {
+  if (!_programs) {
+    _programs = require("@/data/support-programs").SUPPORT_PROGRAMS;
+  }
+  return _programs!;
+}
+type SupportProgram = { id: string; name: string; org: string; amount: string; deadline: string; target: string; category: string; url: string; formUrl: string; formType: string; match: number; tags: string[] };
 
 // ──── 간단한 마크다운 → HTML 변환 ────
 
@@ -295,7 +303,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
   }
 
   function searchSupport() {
-    const results = SUPPORT_PROGRAMS.map(p => ({
+    const results = getSupportPrograms().map((p: SupportProgram) => ({
       ...p,
       match: calcMatch(p, info),
     })).sort((a, b) => b.match - a.match);
@@ -605,7 +613,7 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
   }
 
   const canStart = info.name.trim() && info.industry.trim() && info.description.trim();
-  const categories = ["all", ...Array.from(new Set(SUPPORT_PROGRAMS.map(p => p.category)))];
+  const categories = ["all", ...Array.from(new Set(getSupportPrograms().map((p: SupportProgram) => p.category)))];
   const filteredResults = supportFilter === "all" ? supportResults : supportResults.filter(p => p.category === supportFilter);
 
   return (

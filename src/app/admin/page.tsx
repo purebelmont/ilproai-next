@@ -7,7 +7,7 @@ import { SUPPORT_PROGRAMS } from "@/data/support-programs";
 import { BLOG_POSTS } from "@/app/blog/page";
 
 // Admin emails — add your email here
-const ADMIN_EMAILS = ["james@contavelo.com", "admin@ilpro.ai"];
+const ADMIN_EMAILS = ["james@contavelo.com", "admin@ilpro.ai", "purebelmont@gmail.com"];
 
 type AdminTab = "overview" | "users" | "feedback" | "programs" | "blog" | "settings";
 

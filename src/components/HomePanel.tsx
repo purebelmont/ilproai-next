@@ -138,7 +138,7 @@ export default function HomePanel({ userId, profile, setTab }: { userId: string;
       </div>
 
       {/* ═══ Quick Stats ═══ */}
-      <div className="grid grid-cols-4 gap-2 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5">
         <button onClick={() => setTab("reservations")} className="bg-[var(--bg-card)] rounded-xl px-3 py-3 border border-[var(--border)] active:scale-[0.97] transition-transform text-center">
           <div className="text-lg font-extrabold text-[var(--primary)]">{stats.todayReservations}</div>
           <div className="text-[9px] text-[var(--text-muted)]">오늘 예약</div>

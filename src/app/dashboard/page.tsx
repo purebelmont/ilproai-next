@@ -60,12 +60,13 @@ const NAV_SECTIONS: NavSection[] = [
 
 
 
-// Mobile bottom bar — 4 key tabs + menu
+// Mobile bottom bar — 5 key tabs + menu
 const MOBILE_TABS: { id: Tab; icon: string; label: string }[] = [
   { id: "home", icon: "🏠", label: "홈" },
-  { id: "calendar", icon: "📅", label: "일정" },
+  { id: "reservations", icon: "📋", label: "예약" },
   { id: "ledger", icon: "💰", label: "매출" },
-  { id: "report", icon: "📊", label: "리포트" },
+  { id: "automation", icon: "📸", label: "SNS" },
+  { id: "bizplan", icon: "📄", label: "사업계획" },
 ];
 
 export default function Dashboard() {
@@ -467,10 +468,10 @@ export default function Dashboard() {
         <div className="flex h-[var(--tab-h)]">
           {MOBILE_TABS.map((t) => (
             <button key={t.id} onClick={() => { setTab(t.id); setMobileMenuOpen(false); }}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[44px] transition-colors duration-200"
+              className="flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[40px] transition-colors duration-200"
               style={{ color: tab === t.id ? "#A78BFA" : "#5A5A6E" }}>
-              <span className="text-[20px] leading-none">{t.icon}</span>
-              <span className="text-[9px] font-medium">{t.label}</span>
+              <span className="text-[17px] leading-none">{t.icon}</span>
+              <span className="text-[8px] font-medium">{t.label}</span>
             </button>
           ))}
           {/* Hamburger menu button */}
@@ -572,12 +573,24 @@ export default function Dashboard() {
                   </button>
                 )}
               </div>
-              <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
-                className="flex items-center gap-2 w-full px-4 py-3 rounded-xl text-[13px] font-medium"
-                style={{ background: "rgba(255,255,255,0.05)", color: "#8E8EA0" }}>
-                <span>🚪</span>
-                <span>로그아웃</span>
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => {
+                  setMobileMenuOpen(false);
+                  const msg = prompt("피드백을 남겨주세요:");
+                  if (msg?.trim()) {
+                    supabase.from("feedbacks").insert({ user_id: user.id, user_name: profile?.name || "", content: msg.trim(), category: "general" }).then(() => alert("감사합니다!"));
+                  }
+                }}
+                  className="flex items-center gap-2 flex-1 px-4 py-3 rounded-xl text-[13px] font-medium"
+                  style={{ background: "rgba(125,42,231,0.1)", color: "#A78BFA" }}>
+                  <span>💬</span><span>피드백</span>
+                </button>
+                <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
+                  className="flex items-center gap-2 flex-1 px-4 py-3 rounded-xl text-[13px] font-medium"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "#8E8EA0" }}>
+                  <span>🚪</span><span>로그아웃</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -586,24 +599,22 @@ export default function Dashboard() {
       {/* ═══ MAIN CONTENT ═══ */}
       <div className="flex-1 md:ml-[220px] min-h-screen" style={{ background: "var(--bg)" }}>
         {/* Mobile header */}
-        <div className={`md:hidden sticky top-0 z-30 backdrop-blur-xl px-5 py-3 flex items-center justify-between ${tab === "website" ? "hidden" : ""}`}
-          style={{ background: dark ? "rgba(28,28,30,0.9)" : "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)" }}>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
+        <div className={`md:hidden sticky top-0 z-30 backdrop-blur-xl px-4 py-2.5 flex items-center justify-between ${tab === "website" ? "hidden" : ""}`}
+          style={{ background: dark ? "rgba(28,28,30,0.95)" : "rgba(255,255,255,0.95)", borderBottom: "1px solid var(--border)" }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold text-white"
               style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)" }}>일</div>
             <div>
-              <div className="text-sm font-bold">{bizName}</div>
-              <div className="text-[10px] text-[var(--text-muted)]">{dateLabel}</div>
+              <div className="text-[13px] font-bold leading-tight">{bizName}</div>
+              <div className="text-[9px] text-[var(--text-muted)]">{dateLabel}</div>
             </div>
           </div>
-          <div className="flex gap-2 items-center">
-            <button onClick={toggleDark} className="text-sm">{dark ? "☀️" : "🌙"}</button>
-            {hasSample ? (
-              <button onClick={clearSample} disabled={sampleLoading} className="text-xs text-[var(--text-muted)]">{sampleLoading ? "..." : "📦"}</button>
-            ) : (
-              <button onClick={generateSample} disabled={sampleLoading} className="text-xs" style={{ color: "#7D2AE7" }}>{sampleLoading ? "..." : "📦"}</button>
-            )}
-            <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }} className="text-xs text-[var(--text-muted)]">나가기</button>
+          <div className="flex gap-1.5 items-center">
+            <button onClick={toggleDark} className="w-8 h-8 flex items-center justify-center rounded-lg text-sm" style={{ background: "var(--bg-hover)" }}>{dark ? "☀️" : "🌙"}</button>
+            <button onClick={hasSample ? clearSample : generateSample} disabled={sampleLoading}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-sm" style={{ background: "var(--bg-hover)" }}>
+              {sampleLoading ? "⏳" : "📦"}
+            </button>
           </div>
         </div>
 

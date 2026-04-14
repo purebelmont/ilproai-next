@@ -402,12 +402,17 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
+          console.log("PDF 파싱 시작...");
           const buffer = e.target?.result as ArrayBuffer;
+          console.log("버퍼 크기:", buffer.byteLength);
           const text = await extractTextFromPdf(buffer);
+          console.log("추출된 텍스트 길이:", text.length);
+          console.log("추출된 텍스트 (처음 1000자):", text.substring(0, 1000));
           setUploadedText(text);
           analyzeDocument(text);
-        } catch {
-          setUploadedText("[PDF 텍스트 추출 실패]");
+        } catch (err: any) {
+          console.error("PDF 파싱 에러:", err);
+          setUploadedText("[PDF 텍스트 추출 실패: " + (err?.message || err) + "]");
           analyzeDocument(file.name);
         }
       };

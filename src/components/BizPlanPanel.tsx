@@ -323,18 +323,75 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     if (file) handleFile(file);
   }
 
+  // HWP 바이너리에서 한글 텍스트 추출
+  function extractTextFromHwp(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    const textParts: string[] = [];
+
+    // HWP 파일은 OLE2 compound document — 텍스트는 UTF-16LE로 인코딩됨
+    // 한글 유니코드 범위: AC00-D7AF (가~힣), 기호/숫자/영문도 포함
+    const decoder = new TextDecoder("utf-16le");
+
+    // 바이너리에서 연속된 유효 텍스트 블록 추출
+    for (let i = 0; i < bytes.length - 1; i += 2) {
+      const code = bytes[i] | (bytes[i + 1] << 8);
+      // 유효한 문자 범위: 한글, 영문, 숫자, 기호, 공백
+      if (
+        (code >= 0xAC00 && code <= 0xD7AF) || // 한글
+        (code >= 0x3131 && code <= 0x318E) || // 자모
+        (code >= 0x0020 && code <= 0x007E) || // ASCII
+        (code >= 0x2000 && code <= 0x206F) || // 일반 구두점
+        (code >= 0x3000 && code <= 0x303F) || // CJK 기호
+        (code >= 0xFF01 && code <= 0xFF5E) || // 전각
+        code === 0x000A || code === 0x000D     // 줄바꿈
+      ) {
+        // 유효 문자
+      } else {
+        if (textParts.length > 0 && textParts[textParts.length - 1] !== "\n") {
+          textParts.push("\n");
+        }
+        continue;
+      }
+      const char = decoder.decode(bytes.slice(i, i + 2));
+      textParts.push(char);
+    }
+
+    // 정리: 연속 줄바꿈 제거, 빈 줄 정리, 의미 없는 짧은 줄 제거
+    const raw = textParts.join("");
+    const lines = raw.split(/\n+/).map(l => l.trim()).filter(l => l.length > 1);
+    // 중복 제거 (HWP 내부에 같은 텍스트가 여러번 나올 수 있음)
+    const seen = new Set<string>();
+    const unique = lines.filter(l => {
+      if (seen.has(l)) return false;
+      seen.add(l);
+      return true;
+    });
+    return unique.join("\n");
+  }
+
   function handleFile(file: File) {
     setUploadedFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      setUploadedText(text);
-      analyzeDocument(text);
-    };
+
     if (file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        setUploadedText(text);
+        analyzeDocument(text);
+      };
       reader.readAsText(file);
+    } else if (file.name.endsWith(".hwp")) {
+      // HWP: 바이너리에서 텍스트 추출
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const buffer = e.target?.result as ArrayBuffer;
+        const text = extractTextFromHwp(buffer);
+        setUploadedText(text);
+        analyzeDocument(text);
+      };
+      reader.readAsArrayBuffer(file);
     } else {
-      // For PDF/HWP/DOCX — extract filename and use as context, simulate analysis
+      // PDF/DOCX 등 — 파일명 기반 분석
       setUploadedText(`[업로드된 파일: ${file.name}]`);
       analyzeDocument(file.name + " 사업개요 제품서비스 시장분석 마케팅전략 사업화전략 자금계획 팀구성 추진일정 기대효과");
     }

@@ -144,6 +144,15 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
   const [progress, setProgress] = useState(0);
   const contentEndRef = useRef<HTMLDivElement>(null);
 
+  // 콘텐츠가 업데이트될 때 자동 스크롤
+  useEffect(() => {
+    if (generating || applyGenerating) {
+      requestAnimationFrame(() => {
+        contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    }
+  }, [sections, fieldContents, generating, applyGenerating]);
+
   // 지원사업 state
   const [supportResults, setSupportResults] = useState<SupportProgram[]>([]);
   const [supportSearched, setSupportSearched] = useState(false);

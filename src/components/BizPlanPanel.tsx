@@ -367,25 +367,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     if (file) void handleFile(file);
   }
 
-  // PDF에서 텍스트 추출 (pdfjs-dist v3 — worker 비활성화)
-  async function extractTextFromPdf(buffer: ArrayBuffer): Promise<string> {
-    const pdfjsLib = await import("pdfjs-dist" as any);
-    pdfjsLib.GlobalWorkerOptions.workerSrc = "";
-
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(buffer) });
-    const pdf = await loadingTask.promise;
-    const textParts: string[] = [];
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items.map((item: any) => item.str).join(" ");
-      textParts.push(pageText);
-    }
-
-    return textParts.join("\n");
-  }
-
+  // PDF 텍스트 추출 — 서버 API로 전송
   async function handleFile(file: File) {
     setUploadedFileName(file.name);
 
@@ -398,26 +380,26 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
       };
       reader.readAsText(file);
     } else if (file.name.endsWith(".pdf") || file.type === "application/pdf") {
-      // PDF: pdf.js로 텍스트 추출
       setApplyStep("analyzing");
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          console.log("PDF 파싱 시작...");
-          const buffer = e.target?.result as ArrayBuffer;
-          console.log("버퍼 크기:", buffer.byteLength);
-          const text = await extractTextFromPdf(buffer);
-          console.log("추출된 텍스트 길이:", text.length);
-          console.log("추출된 텍스트 (처음 1000자):", text.substring(0, 1000));
-          setUploadedText(text);
-          analyzeDocument(text);
-        } catch (err: any) {
-          console.error("PDF 파싱 에러:", err);
-          setUploadedText("[PDF 텍스트 추출 실패: " + (err?.message || err) + "]");
-          analyzeDocument(file.name);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/parse-pdf", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.text) {
+          console.log("PDF 추출 성공:", data.text.substring(0, 500));
+          setUploadedText(data.text);
+          analyzeDocument(data.text);
+        } else {
+          console.error("PDF 추출 실패:", data.error);
+          alert("PDF 텍스트 추출에 실패했습니다: " + (data.error || "알 수 없는 오류"));
+          setApplyStep("upload");
         }
-      };
-      reader.readAsArrayBuffer(file);
+      } catch (err: any) {
+        console.error("PDF API 에러:", err);
+        alert("PDF 파싱 중 오류가 발생했습니다.");
+        setApplyStep("upload");
+      }
     } else {
       alert("PDF 파일만 업로드 가능합니다. HWP 파일은 PDF로 변환 후 업로드해주세요.");
     }

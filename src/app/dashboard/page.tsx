@@ -83,10 +83,28 @@ export default function Dashboard() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
-  // Dark mode
+  // Dark mode — auto-detect system preference, allow manual override
   useEffect(() => {
     const saved = localStorage.getItem("ilpro_dark");
-    if (saved === "true") { setDark(true); document.documentElement.classList.add("dark"); }
+    if (saved !== null) {
+      const isDark = saved === "true";
+      setDark(isDark);
+      document.documentElement.classList.toggle("dark", isDark);
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setDark(prefersDark);
+      document.documentElement.classList.toggle("dark", prefersDark);
+    }
+    // Listen for system changes
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => {
+      if (localStorage.getItem("ilpro_dark") === null) {
+        setDark(e.matches);
+        document.documentElement.classList.toggle("dark", e.matches);
+      }
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, []);
 
   const toggleDark = () => {
@@ -94,6 +112,43 @@ export default function Dashboard() {
     setDark(next);
     localStorage.setItem("ilpro_dark", String(next));
     document.documentElement.classList.toggle("dark", next);
+  };
+
+  // Data export — CSV download
+  const exportData = async () => {
+    if (!user) return;
+    const uid = user.id;
+    const [contacts, ledger, reservations, todos] = await Promise.all([
+      supabase.from("contacts").select("*").eq("user_id", uid),
+      supabase.from("ledger").select("*").eq("user_id", uid).order("entry_date", { ascending: false }),
+      supabase.from("reservations").select("*").eq("user_id", uid).order("reservation_date", { ascending: false }),
+      supabase.from("todos").select("*").eq("user_id", uid),
+    ]);
+    const toCsv = (headers: string[], rows: any[][]) => {
+      const bom = "\uFEFF";
+      return bom + [headers.join(","), ...rows.map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","))].join("\n");
+    };
+    const download = (name: string, csv: string) => {
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    };
+    // Contacts
+    if ((contacts.data || []).length > 0) {
+      download("연락처.csv", toCsv(["이름","전화","이메일","회사","그룹","메모"], (contacts.data || []).map((c: any) => [c.name, c.phone, c.email, c.company, c.group_name, c.notes])));
+    }
+    // Ledger
+    if ((ledger.data || []).length > 0) {
+      download("매출장부.csv", toCsv(["날짜","유형","설명","금액","결제방법"], (ledger.data || []).map((l: any) => [l.entry_date, l.entry_type === "income" ? "매출" : "지출", l.description, l.amount, l.payment_method])));
+    }
+    // Reservations
+    if ((reservations.data || []).length > 0) {
+      download("예약.csv", toCsv(["날짜","시간","고객명","인원","서비스","상태","메모"], (reservations.data || []).map((r: any) => [r.reservation_date, r.reservation_time, r.customer_name, r.party_size, r.service, r.status, r.notes])));
+    }
+    // Todos
+    if ((todos.data || []).length > 0) {
+      download("할일.csv", toCsv(["제목","완료여부"], (todos.data || []).map((t: any) => [t.title, t.completed ? "완료" : "미완료"])));
+    }
+    alert("CSV 파일이 다운로드되었습니다.");
   };
 
   const checkSampleFn = async (uid: string) => {
@@ -361,6 +416,12 @@ export default function Dashboard() {
               </button>
             )}
           </div>
+          <button onClick={exportData}
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
+            style={{ color: "#8E8EA0" }}>
+            <span className="text-[14px]">📥</span>
+            <span>데이터 내보내기</span>
+          </button>
           <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
             style={{ color: "#8E8EA0" }}>

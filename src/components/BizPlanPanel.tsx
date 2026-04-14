@@ -563,7 +563,12 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
                           <span>📅 {program.deadline}</span>
                           <span>👤 {program.target}</span>
                         </div>
-                        <div className="flex gap-1 mt-2 flex-wrap">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                          <a href={program.url} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-semibold px-3 py-1.5 rounded-lg active:scale-95 transition-all"
+                            style={{ background: "var(--primary)", color: "#fff" }}>
+                            지원서 바로가기 ↗
+                          </a>
                           {program.tags.map(tag => (
                             <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>#{tag}</span>
                           ))}

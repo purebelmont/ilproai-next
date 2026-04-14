@@ -18,6 +18,104 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "ulsan-free-test",
+    category: "공지",
+    title: "울산 소상공인·중소기업 대상 AI 경영 플랫폼 무료 테스트 참여자 모집",
+    subtitle: "PRO 전체 기능 3개월 무료 — 선착순 50개 업체 모집합니다.",
+    icon: "📢",
+    readTime: "5분",
+    date: "2026-04-14",
+    tags: ["모집", "울산", "무료", "소상공인", "테스트"],
+    image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80",
+    content: `## 울산 소상공인·중소기업 대상 무료 테스트 참여자를 모집합니다
+
+일프로 AI는 소상공인이 필요한 **모든 경영 도구**를 하나의 앱에서 제공하는 AI 플랫폼입니다.
+
+현재 정식 출시 전 **테스트 기간**으로, 울산 소재 소상공인·중소기업을 대상으로 **PRO 전체 기능을 3개월간 완전 무료**로 제공합니다.
+
+---
+
+### 📋 모집 개요
+
+| 항목 | 내용 |
+|------|------|
+| 대상 | 울산광역시 소재 소상공인 및 중소기업 |
+| 기간 | 2026년 4월 ~ 6월 (3개월) |
+| 비용 | **완전 무료** (PRO 포함, 월 ₩29,900 상당) |
+| 모집 인원 | **선착순 50개 업체** |
+
+---
+
+### 🎁 무료 테스트 혜택
+
+- **PRO 전체 기능 3개월 무료** — ₩89,700 상당
+- **1:1 온보딩 지원** — 담당자가 직접 사용법 안내
+- **맞춤 기능 개선** — 피드백 반영하여 우리 업종에 맞게 개선
+- **정식 출시 시 50% 평생 할인** — 테스트 참여자 한정 혜택
+
+---
+
+### 💡 일프로 AI에서 할 수 있는 것들
+
+**무료 기능:**
+- 💰 매출/지출 장부 (월별·연별 리포트)
+- 📋 예약 관리 (온라인 접수)
+- 👤 고객 관리 (CRM)
+- 📅 일정 관리
+- 💼 견적서 작성 (PDF 다운로드)
+- 👥 직원 급여 관리
+- 📊 매출 리포트 (일별·월별·연별)
+
+**PRO 기능 (AI 자동화):**
+- 📸 **AI SNS 콘텐츠 생성** — "갈비탕 주말 이벤트"만 입력하면 AI가 인스타 게시물 자동 작성
+- 🌐 **AI 홈페이지 빌더** — 5분 만에 내 가게 홈페이지 생성
+- 📄 **AI 사업계획서 작성** — 사업 정보만 입력하면 6개 섹션 자동 생성
+- 🔍 **정부 지원사업 추천** — 29개 지원사업 + 17개 창조경제혁신센터 중 내 사업에 맞는 것 추천
+- 📎 **AI 지원서 작성** — 지원서 양식 PDF 업로드 → AI가 항목별 내용 자동 작성
+
+---
+
+### ✅ 참여 조건
+
+- 울산광역시 소재 사업자등록증 보유
+- 월 1회 이상 간단한 피드백 제공 (5분 설문)
+- 업종 무관 — 음식점, 뷰티, 교육, 제조, 서비스 등 모두 환영
+- PC 또는 모바일에서 인터넷 사용 가능
+
+---
+
+### 😫 이런 사장님께 추천합니다
+
+- 매출을 엑셀로 정리하는데 매번 시간이 걸리시는 분
+- SNS에 뭘 올려야 할지 매번 고민이신 분
+- 정부 지원사업에 관심은 있지만 어디서 찾아야 할지 모르시는 분
+- 가게 홈페이지가 없어서 아쉬우신 분
+- 사업계획서 작성이 막막하신 분
+
+---
+
+### 📌 참여 방법
+
+1. **ilpro.ai** 접속 (PC 또는 모바일)
+2. 이메일로 **무료 가입** (30초)
+3. 가입 즉시 **PRO 기능 활성화**
+
+---
+
+### 🙏 사장님들의 목소리가 필요합니다
+
+일프로 AI는 현재 테스트 기간입니다. 정식 출시 전, **실제 사장님들의 경험과 피드백**을 반영하여 진짜 필요한 기능을 만들고 싶습니다.
+
+"이런 기능이 있으면 좋겠다", "이 부분은 불편하다" — 이런 솔직한 의견이 일프로 AI를 더 좋은 서비스로 만듭니다.
+
+**많은 참여 부탁드립니다!**
+
+---
+
+문의: contact@ilpro.ai
+참여 신청: [ilpro.ai](/auth)`,
+  },
+  {
     slug: "ai-review-reply",
     category: "리뷰",
     title: "리뷰 답글, 이제 AI가 대신 써줘요",
@@ -641,15 +739,15 @@ export default function BlogPage() {
 
         {/* Featured post */}
         {category === "전체" && (
-          <Link href={`/blog/${BLOG_POSTS[11].slug}`} className="block mb-10 group" style={{ textDecoration: "none" }}>
+          <Link href={`/blog/${BLOG_POSTS[0].slug}`} className="block mb-10 group" style={{ textDecoration: "none" }}>
             <div className="rounded-2xl overflow-hidden flex flex-col md:flex-row" style={{ background: "#111" }}>
               <div className="md:w-1/2 aspect-[16/9] md:aspect-auto relative overflow-hidden" style={{ minHeight: 280 }}>
-                <img src={BLOG_POSTS[11].image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" />
+                <img src={BLOG_POSTS[0].image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="md:w-1/2 p-8 md:p-10 flex flex-col justify-center">
-                <span className="text-xs text-[#666] mb-3 uppercase tracking-wider">{BLOG_POSTS[11].category} &middot; {BLOG_POSTS[11].readTime}</span>
-                <h2 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">{BLOG_POSTS[11].title}</h2>
-                <p className="text-sm text-[#999] mb-6">{BLOG_POSTS[11].subtitle}</p>
+                <span className="text-xs text-[#666] mb-3 uppercase tracking-wider">{BLOG_POSTS[0].category} &middot; {BLOG_POSTS[0].readTime}</span>
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight">{BLOG_POSTS[0].title}</h2>
+                <p className="text-sm text-[#999] mb-6">{BLOG_POSTS[0].subtitle}</p>
                 <span className="text-sm text-[#666] group-hover:text-white transition-colors">읽어보기 →</span>
               </div>
             </div>

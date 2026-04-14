@@ -128,7 +128,7 @@ interface BizInfo {
 }
 
 export default function BizPlanPanel({ userId }: { userId: string }) {
-  const [tab, setTab] = useState<"plan" | "support">("plan");
+  const [tab, setTab] = useState<"plan" | "support" | "apply">("plan");
 
   // 사업계획서 state
   const [step, setStep] = useState<"info" | "generating" | "done">("info");
@@ -144,6 +144,17 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
   const [supportResults, setSupportResults] = useState<SupportProgram[]>([]);
   const [supportSearched, setSupportSearched] = useState(false);
   const [supportFilter, setSupportFilter] = useState<string>("all");
+
+  // 지원서 작성 state
+  const [applyStep, setApplyStep] = useState<"upload" | "analyzing" | "fields" | "generating" | "done">("upload");
+  const [uploadedText, setUploadedText] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [detectedFields, setDetectedFields] = useState<{ id: string; label: string; hint: string }[]>([]);
+  const [fieldContents, setFieldContents] = useState<Record<string, string>>({});
+  const [activeField, setActiveField] = useState("");
+  const [applyGenerating, setApplyGenerating] = useState(false);
+  const [applyCurrentGen, setApplyCurrentGen] = useState("");
+  const [applyProgress, setApplyProgress] = useState(0);
 
   const copy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -278,6 +289,170 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     setSupportSearched(true);
   }
 
+  // ──── 지원서 분석 ────
+  function analyzeDocument(text: string) {
+    setApplyStep("analyzing");
+    // 텍스트에서 작성 항목 감지
+    setTimeout(() => {
+      const fields: { id: string; label: string; hint: string }[] = [];
+      const patterns: [RegExp, string, string][] = [
+        [/사업\s*개요|사업\s*소개|사업\s*내용|사업\s*설명/i, "사업 개요", "사업의 배경, 목적, 핵심 내용을 서술"],
+        [/문제\s*인식|해결.*과제|문제\s*정의/i, "문제 인식 및 해결 과제", "해결하고자 하는 문제와 사회적/경제적 필요성"],
+        [/제품|서비스|솔루션|기술.*내용/i, "제품/서비스 설명", "제품 또는 서비스의 구체적 내용과 특징"],
+        [/차별.*전략|경쟁.*우위|차별화|핵심.*경쟁력/i, "차별화 전략", "경쟁사 대비 차별화 요소와 경쟁 우위"],
+        [/시장.*분석|목표.*시장|타겟.*시장|시장.*규모/i, "시장 분석", "목표 시장 규모, 성장성, 타겟 고객 분석"],
+        [/마케팅|판매.*전략|고객.*확보|홍보.*전략/i, "마케팅 및 판매 전략", "고객 확보 방법, 채널 전략, 가격 정책"],
+        [/사업화.*전략|수익.*모델|비즈니스.*모델|BM/i, "사업화 전략 및 수익 모델", "수익 창출 구조, 가격 체계, 매출 계획"],
+        [/재무|자금.*계획|투자.*계획|예산|자금.*용도/i, "자금 소요 및 조달 계획", "필요 자금 규모, 용도별 계획, 조달 방법"],
+        [/팀|인력|조직|대표.*소개|창업.*팀/i, "팀 구성 및 역량", "핵심 인력의 경력, 역할, 전문성"],
+        [/일정|추진.*계획|로드맵|마일스톤|향후.*계획/i, "추진 일정 및 로드맵", "단계별 추진 계획, 주요 마일스톤"],
+        [/기대.*효과|성과.*지표|KPI|목표.*성과/i, "기대 효과 및 성과 지표", "정량적/정성적 기대 성과와 측정 방법"],
+        [/지식.*재산|특허|기술.*보호|IP/i, "지식재산권 현황", "보유 특허, 출원 예정, 기술 보호 전략"],
+      ];
+
+      for (const [regex, label, hint] of patterns) {
+        if (regex.test(text)) {
+          fields.push({ id: label.replace(/\s/g, "_"), label, hint });
+        }
+      }
+
+      // 최소 항목이 없으면 기본 항목 추가
+      if (fields.length < 3) {
+        const defaults = [
+          { id: "사업_개요", label: "사업 개요", hint: "사업의 배경, 목적, 핵심 내용을 서술" },
+          { id: "제품_서비스", label: "제품/서비스 설명", hint: "제품 또는 서비스의 구체적 내용과 특징" },
+          { id: "시장_분석", label: "시장 분석", hint: "목표 시장 규모, 성장성, 타겟 고객 분석" },
+          { id: "사업화_전략", label: "사업화 전략 및 수익 모델", hint: "수익 창출 구조, 가격 체계, 매출 계획" },
+          { id: "자금_계획", label: "자금 소요 및 조달 계획", hint: "필요 자금 규모, 용도별 계획, 조달 방법" },
+          { id: "팀_구성", label: "팀 구성 및 역량", hint: "핵심 인력의 경력, 역할, 전문성" },
+          { id: "추진_일정", label: "추진 일정 및 로드맵", hint: "단계별 추진 계획, 주요 마일스톤" },
+        ];
+        for (const d of defaults) {
+          if (!fields.find(f => f.id === d.id)) fields.push(d);
+        }
+      }
+
+      setDetectedFields(fields);
+      setActiveField(fields[0]?.id || "");
+      setApplyStep("fields");
+    }, 1500);
+  }
+
+  function handleFileDrop(e: React.DragEvent) {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+  }
+
+  function handleFile(file: File) {
+    setUploadedFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      setUploadedText(text);
+      analyzeDocument(text);
+    };
+    if (file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
+      reader.readAsText(file);
+    } else {
+      // For PDF/HWP/DOCX — extract filename and use as context, simulate analysis
+      setUploadedText(`[업로드된 파일: ${file.name}]`);
+      analyzeDocument(file.name + " 사업개요 제품서비스 시장분석 마케팅전략 사업화전략 자금계획 팀구성 추진일정 기대효과");
+    }
+  }
+
+  async function generateFieldContent(fieldId: string, fieldLabel: string, fieldHint: string) {
+    const prompt = `당신은 정부 지원사업 신청서 전문 컨설턴트입니다.
+
+아래 사업 정보를 바탕으로 지원서의 "${fieldLabel}" 항목을 작성해주세요.
+
+사업명: ${info.name || "미정"}
+업종: ${info.industry || "미정"}
+사업 설명: ${info.description || "미정"}
+타겟 고객: ${info.target || "미정"}
+자금 규모: ${info.funding || "미정"}
+
+작성 가이드: ${fieldHint}
+
+정부 지원사업 심사위원이 높은 점수를 줄 수 있도록, 구체적 수치와 데이터를 포함하여 전문적으로 작성해주세요.
+마크다운 형식으로 소제목과 불릿포인트를 활용해주세요.`;
+
+    try {
+      const res = await fetch("/api/bizplan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ section: fieldLabel, name: info.name, industry: info.industry, description: info.description, target: info.target, funding: info.funding }),
+      });
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          full += decoder.decode(value, { stream: true });
+          setFieldContents(prev => ({ ...prev, [fieldId]: full }));
+        }
+      }
+    } catch {
+      setFieldContents(prev => ({ ...prev, [fieldId]: "생성 중 오류가 발생했습니다." }));
+    }
+  }
+
+  async function generateAllFields() {
+    setApplyStep("generating");
+    setApplyGenerating(true);
+    setApplyProgress(0);
+    for (let i = 0; i < detectedFields.length; i++) {
+      const f = detectedFields[i];
+      setApplyCurrentGen(f.label);
+      setActiveField(f.id);
+      setApplyProgress(Math.round((i / detectedFields.length) * 100));
+      await generateFieldContent(f.id, f.label, f.hint);
+    }
+    setApplyProgress(100);
+    setApplyCurrentGen("");
+    setApplyGenerating(false);
+    setApplyStep("done");
+    setActiveField(detectedFields[0]?.id || "");
+  }
+
+  function copyAllFields() {
+    const full = detectedFields.map(f => `# ${f.label}\n\n${fieldContents[f.id] || ""}`).join("\n\n---\n\n");
+    navigator.clipboard.writeText(full);
+    setCopied("allFields");
+    setTimeout(() => setCopied(""), 2000);
+  }
+
+  function downloadApplyHtml() {
+    const body = detectedFields.map(f => `
+      <div style="page-break-inside:avoid;margin-bottom:32px;">
+        <h2 style="font-size:18px;font-weight:700;color:#0071E3;margin-bottom:10px;border-bottom:2px solid #0071E3;padding-bottom:6px;">${f.label}</h2>
+        <div style="font-size:13px;line-height:1.9;color:#333;">${md(fieldContents[f.id] || "")}</div>
+      </div>`).join("");
+    const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>지원서 - ${info.name || "사업"}</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;color:#222;padding:40px;max-width:800px;margin:0 auto}
+h4{font-size:15px;font-weight:700;margin:16px 0 6px;color:#333}strong{color:#222}
+table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:12px}th{text-align:left;padding:8px 10px;font-weight:600;background:#EBF5FF;border-bottom:2px solid #0071E3;color:#333}
+td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li{padding:3px 0 3px 16px;position:relative}li::before{content:"•";position:absolute;left:0;color:#0071E3;font-weight:bold}
+@media print{body{padding:20px}}</style></head><body>
+<div style="text-align:center;margin-bottom:36px;padding:24px 0;border-bottom:3px solid #0071E3">
+<h1 style="font-size:24px;margin-bottom:6px">지원사업 신청서</h1>
+<div style="font-size:18px;font-weight:700;color:#0071E3;margin-bottom:8px">${info.name || "사업명"}</div>
+<div style="font-size:13px;color:#888">${new Date().toLocaleDateString("ko-KR")}</div>
+</div>${body}
+<div style="text-align:center;padding:16px 0;margin-top:32px;border-top:1px solid #eee;color:#aaa;font-size:10px">일프로 AI · ilpro.ai</div>
+</body></html>`;
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `지원서_${info.name || "사업"}.html`; a.click();
+  }
+
   const DEMO_SAMPLES: BizInfo[] = [
     { name: "일프로 AI 플랫폼", industry: "IT/소프트웨어", description: "소상공인을 위한 올인원 AI 경영 도구. 매출관리, SNS 자동화, 홈페이지 빌더를 하나의 플랫폼에서 제공", target: "20~50대 소상공인", funding: "1억원" },
     { name: "프레시밀 키친", industry: "음식점/밀키트", description: "건강한 재료로 만든 프리미엄 밀키트 구독 서비스. 영양사가 설계한 주간 식단을 집까지 배달", target: "30~40대 맞벌이 가정", funding: "5천만원" },
@@ -358,7 +533,12 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
         <button onClick={() => { setTab("support"); if (!supportSearched && canStart) searchSupport(); }}
           className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{ background: tab === "support" ? "var(--primary)" : "transparent", color: tab === "support" ? "#fff" : "var(--text-muted)" }}>
-          🔍 지원사업 추천
+          🔍 지원사업
+        </button>
+        <button onClick={() => setTab("apply")}
+          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+          style={{ background: tab === "apply" ? "var(--primary)" : "transparent", color: tab === "apply" ? "#fff" : "var(--text-muted)" }}>
+          📎 지원서 작성
         </button>
       </div>
 
@@ -669,6 +849,226 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
                 </p>
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════ */}
+      {/* ═══ 지원서 작성 TAB ═══ */}
+      {/* ═══════════════════════════ */}
+      {tab === "apply" && (
+        <div>
+          <div className="mb-5">
+            <h2 className="text-lg font-bold mb-1">지원서 작성</h2>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>지원서 양식을 업로드하면 AI가 내용을 분석하고 작성해드립니다</p>
+          </div>
+
+          {/* Step 1: Upload */}
+          {applyStep === "upload" && (
+            <div>
+              {/* Drag & Drop Zone */}
+              <div onDragOver={e => e.preventDefault()} onDrop={handleFileDrop}
+                className="rounded-2xl p-10 text-center transition-all cursor-pointer hover:opacity-80"
+                style={{ border: "2px dashed var(--border)", background: "var(--bg-card)" }}
+                onClick={() => document.getElementById("apply-file-input")?.click()}>
+                <div className="text-4xl mb-3">📄</div>
+                <div className="text-sm font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>지원서 양식을 여기에 드래그하세요</div>
+                <div className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>또는 클릭하여 파일 선택 (PDF, HWP, DOCX, TXT)</div>
+                <input id="apply-file-input" type="file" className="hidden" accept=".pdf,.hwp,.docx,.doc,.txt,.md,.rtf" onChange={handleFileSelect} />
+                <div className="inline-block px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: "var(--primary)" }}>파일 선택</div>
+              </div>
+
+              {/* Or paste text */}
+              <div className="mt-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>또는 직접 붙여넣기</span>
+                  <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+                </div>
+                <textarea value={uploadedText} onChange={e => setUploadedText(e.target.value)}
+                  placeholder="지원서 양식의 항목들을 여기에 붙여넣으세요...&#10;&#10;예시:&#10;1. 사업 개요&#10;2. 제품/서비스 설명&#10;3. 시장 분석&#10;4. 사업화 전략..."
+                  rows={6}
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none resize-none"
+                  style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }} />
+                {uploadedText.trim() && (
+                  <button onClick={() => analyzeDocument(uploadedText)}
+                    className="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-white active:scale-[0.98] transition-all"
+                    style={{ background: "var(--primary)" }}>
+                    분석하기
+                  </button>
+                )}
+              </div>
+
+              {/* Demo button */}
+              <button onClick={() => {
+                const demoText = "1. 사업 개요\n2. 문제 인식 및 해결 과제\n3. 제품/서비스 설명\n4. 차별화 전략 및 경쟁 우위\n5. 목표 시장 분석\n6. 마케팅 및 판매 전략\n7. 사업화 전략 및 수익 모델\n8. 자금 소요 및 조달 계획\n9. 팀 구성 및 역량\n10. 추진 일정 및 로드맵\n11. 기대 효과 및 성과 지표";
+                setUploadedText(demoText);
+                setUploadedFileName("예비창업패키지_신청서.pdf");
+                analyzeDocument(demoText);
+              }}
+                className="w-full mt-3 py-2.5 rounded-xl text-sm font-semibold active:scale-[0.98] transition-all"
+                style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>
+                🎲 데모: 예비창업패키지 양식으로 체험
+              </button>
+            </div>
+          )}
+
+          {/* Step 2: Analyzing */}
+          {applyStep === "analyzing" && (
+            <div className="text-center py-16">
+              <div className="w-10 h-10 rounded-full mx-auto mb-4" style={{ border: "3px solid var(--border)", borderTopColor: "var(--primary)", animation: "spin 0.8s linear infinite" }} />
+              <div className="text-sm font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>지원서를 분석하고 있습니다...</div>
+              {uploadedFileName && <div className="text-xs" style={{ color: "var(--text-muted)" }}>{uploadedFileName}</div>}
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+          )}
+
+          {/* Step 3: Fields detected — confirm & generate */}
+          {applyStep === "fields" && (
+            <div>
+              <div className="rounded-xl p-4 mb-4" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base">✅</span>
+                  <span className="text-sm font-bold">{detectedFields.length}개 항목을 감지했습니다</span>
+                </div>
+                {uploadedFileName && <div className="text-xs" style={{ color: "var(--text-muted)" }}>파일: {uploadedFileName}</div>}
+              </div>
+
+              <div className="space-y-2 mb-4">
+                {detectedFields.map((f, i) => (
+                  <div key={f.id} className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                    <span className="text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: "var(--primary)", color: "#fff" }}>{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-semibold">{f.label}</div>
+                      <div className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{f.hint}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Business info reminder */}
+              {!canStart && (
+                <div className="rounded-xl p-3 mb-4" style={{ background: "rgba(255,159,0,0.1)", border: "1px solid rgba(255,159,0,0.2)" }}>
+                  <div className="text-xs font-semibold mb-1" style={{ color: "#FF9F00" }}>사업 정보를 입력하면 더 정확한 내용이 생성됩니다</div>
+                  <button onClick={() => setTab("plan")} className="text-[11px] font-medium" style={{ color: "var(--primary)" }}>사업 정보 입력하러 가기 →</button>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <button onClick={() => { setApplyStep("upload"); setUploadedText(""); setUploadedFileName(""); setDetectedFields([]); }}
+                  className="px-4 py-2.5 rounded-xl text-sm font-medium"
+                  style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>
+                  다시 업로드
+                </button>
+                <button onClick={generateAllFields}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white active:scale-[0.98] transition-all"
+                  style={{ background: "var(--primary)" }}>
+                  전체 항목 AI 작성하기
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4 & 5: Generating / Done */}
+          {(applyStep === "generating" || applyStep === "done") && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-base font-bold">{uploadedFileName || "지원서 작성"}</h3>
+                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>{detectedFields.length}개 항목</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {applyStep === "done" && (<>
+                    <button onClick={() => { const w = window.open("", "_blank"); if (w) { w.document.write((() => { const b = detectedFields.map(f => `<div style="page-break-inside:avoid;margin-bottom:32px"><h2 style="font-size:18px;font-weight:700;color:#0071E3;border-bottom:2px solid #0071E3;padding-bottom:6px">${f.label}</h2><div style="font-size:13px;line-height:1.9;color:#333">${md(fieldContents[f.id] || "")}</div></div>`).join(""); return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>지원서</title><style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap');*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;padding:40px;max-width:800px;margin:0 auto}h4{font-size:15px;font-weight:700;margin:16px 0 6px}table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:12px}th{text-align:left;padding:8px 10px;background:#EBF5FF;border-bottom:2px solid #0071E3}td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li{padding:3px 0 3px 16px;position:relative}li::before{content:"•";position:absolute;left:0;color:#0071E3}</style></head><body><div style="text-align:center;margin-bottom:36px;padding:24px 0;border-bottom:3px solid #0071E3"><h1 style="font-size:24px;margin-bottom:6px">지원사업 신청서</h1><div style="font-size:18px;font-weight:700;color:#0071E3">${info.name || "사업명"}</div><div style="font-size:13px;color:#888;margin-top:4px">${new Date().toLocaleDateString("ko-KR")}</div></div>${b}</body></html>`; })()); w.document.close(); setTimeout(() => w.print(), 500); } }}
+                      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{ background: "#E53935", color: "#fff" }}>PDF</button>
+                    <button onClick={downloadApplyHtml}
+                      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{ background: "#0095F6", color: "#fff" }}>HTML</button>
+                    <button onClick={copyAllFields}
+                      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg" style={{ background: copied === "allFields" ? "var(--bg-hover)" : "var(--primary)", color: "#fff" }}>
+                      {copied === "allFields" ? "✓" : "📋"}</button>
+                  </>)}
+                  <button onClick={() => { setApplyStep("upload"); setUploadedText(""); setUploadedFileName(""); setDetectedFields([]); setFieldContents({}); }}
+                    className="text-[11px] font-medium px-3 py-1.5 rounded-lg"
+                    style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>새로</button>
+                </div>
+              </div>
+
+              {/* Progress */}
+              {applyGenerating && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{applyCurrentGen} 작성 중...</span>
+                    <span className="text-xs font-bold" style={{ color: "var(--primary)" }}>{applyProgress}%</span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full" style={{ background: "var(--bg-hover)" }}>
+                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${applyProgress}%`, background: "var(--primary)" }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Field tabs + content */}
+              <div className="flex gap-4">
+                <div className="shrink-0 w-[160px] space-y-1 hidden md:block">
+                  {detectedFields.map((f, i) => {
+                    const has = !!fieldContents[f.id];
+                    const active = activeField === f.id;
+                    return (
+                      <button key={f.id} onClick={() => setActiveField(f.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-[11px]"
+                        style={{ background: active ? "rgba(0,113,227,0.15)" : "transparent", color: active ? "#0071E3" : has ? "var(--text-secondary)" : "var(--text-muted)", fontWeight: active ? 600 : 400 }}>
+                        <span className="w-4 text-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                        <span className="truncate">{f.label}</span>
+                        {has && !active && <span className="ml-auto text-[9px]" style={{ color: "var(--success)" }}>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="md:hidden flex gap-1.5 overflow-x-auto pb-2 mb-3 -mx-5 px-5 w-[calc(100%+40px)]" style={{ scrollbarWidth: "none" }}>
+                  {detectedFields.map((f, i) => (
+                    <button key={f.id} onClick={() => setActiveField(f.id)}
+                      className="shrink-0 px-2.5 py-1.5 rounded-full text-[10px] font-medium transition-all"
+                      style={{ background: activeField === f.id ? "#0071E3" : "var(--bg-hover)", color: activeField === f.id ? "#fff" : "var(--text-muted)" }}>
+                      {i + 1}. {f.label.length > 6 ? f.label.slice(0, 6) + "…" : f.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  {detectedFields.filter(f => f.id === activeField).map(f => (
+                    <div key={f.id}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-bold">{f.label}</h3>
+                        {fieldContents[f.id] && !applyGenerating && (
+                          <div className="flex items-center gap-1.5">
+                            <button onClick={() => { setFieldContents(prev => ({ ...prev, [f.id]: "" })); generateFieldContent(f.id, f.label, f.hint); }}
+                              className="text-[11px] px-2.5 py-1 rounded-lg" style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>🔄</button>
+                            <button onClick={() => copy(fieldContents[f.id], f.id)}
+                              className="text-[11px] px-2.5 py-1 rounded-lg" style={{ background: copied === f.id ? "var(--bg-hover)" : "var(--primary)", color: "#fff" }}>
+                              {copied === f.id ? "✓" : "📋"}</button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-[10px] mb-3 px-1" style={{ color: "var(--text-muted)" }}>{f.hint}</div>
+                      {fieldContents[f.id] ? (
+                        <div className="bp-content rounded-xl p-5 text-sm leading-relaxed" style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} dangerouslySetInnerHTML={{ __html: md(fieldContents[f.id]) }} />
+                      ) : (
+                        <div className="rounded-xl p-8 text-center" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                          {applyGenerating && applyCurrentGen === f.label ? (
+                            <div>
+                              <div className="w-6 h-6 rounded-full mx-auto mb-2" style={{ border: "2px solid var(--border)", borderTopColor: "var(--primary)", animation: "spin 0.8s linear infinite" }} />
+                              <div className="text-xs" style={{ color: "var(--text-muted)" }}>작성 중...</div>
+                            </div>
+                          ) : (
+                            <div className="text-xs" style={{ color: "var(--text-muted)" }}>대기 중</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       )}

@@ -220,6 +220,57 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     setSupportSearched(true);
   }
 
+  const DEMO_SAMPLES: BizInfo[] = [
+    { name: "일프로 AI 플랫폼", industry: "IT/소프트웨어", description: "소상공인을 위한 올인원 AI 경영 도구. 매출관리, SNS 자동화, 홈페이지 빌더를 하나의 플랫폼에서 제공", target: "20~50대 소상공인", funding: "1억원" },
+    { name: "프레시밀 키친", industry: "음식점/밀키트", description: "건강한 재료로 만든 프리미엄 밀키트 구독 서비스. 영양사가 설계한 주간 식단을 집까지 배달", target: "30~40대 맞벌이 가정", funding: "5천만원" },
+    { name: "펫케어 플러스", industry: "반려동물 서비스", description: "AI 기반 반려동물 건강관리 앱. 증상 체크, 병원 예약, 사료 추천까지 한 번에", target: "20~40대 반려인", funding: "8천만원" },
+    { name: "그린팩토리", industry: "제조/친환경", description: "재생 플라스틱을 활용한 친환경 포장재 제조. ESG 경영을 실천하는 기업에게 지속가능한 패키징 솔루션 제공", target: "친환경 포장이 필요한 중소기업", funding: "3억원" },
+    { name: "에듀브릿지", industry: "교육/에듀테크", description: "AI 튜터가 학생 수준에 맞춰 문제를 출제하고 약점을 분석해주는 맞춤형 학습 플랫폼", target: "중·고등학생 및 학부모", funding: "2억원" },
+  ];
+
+  function startDemo() {
+    const sample = DEMO_SAMPLES[Math.floor(Math.random() * DEMO_SAMPLES.length)];
+    setInfo(sample);
+    // 바로 생성 시작 (setTimeout으로 state 업데이트 후 실행)
+    setTimeout(() => {
+      setStep("generating");
+      setGenerating(true);
+      setProgress(0);
+      (async () => {
+        for (let i = 0; i < PLAN_SECTIONS.length; i++) {
+          const s = PLAN_SECTIONS[i];
+          setCurrentGen(s.label);
+          setActiveSection(s.id);
+          setProgress(Math.round((i / PLAN_SECTIONS.length) * 100));
+          // generateSection uses info from closure, so we need to call API with sample directly
+          try {
+            const res = await fetch("/api/bizplan", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ section: s.label, name: sample.name, industry: sample.industry, description: sample.description, target: sample.target, funding: sample.funding }),
+            });
+            const reader = res.body?.getReader();
+            const decoder = new TextDecoder();
+            let full = "";
+            if (reader) {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                full += decoder.decode(value, { stream: true });
+                setSections(prev => ({ ...prev, [s.id]: full }));
+              }
+            }
+          } catch { /* ignore */ }
+        }
+        setProgress(100);
+        setCurrentGen("");
+        setGenerating(false);
+        setStep("done");
+        setActiveSection("overview");
+      })();
+    }, 0);
+  }
+
   const canStart = info.name.trim() && info.industry.trim() && info.description.trim();
   const categories = ["all", ...Array.from(new Set(SUPPORT_PROGRAMS.map(p => p.category)))];
   const filteredResults = supportFilter === "all" ? supportResults : supportResults.filter(p => p.category === supportFilter);
@@ -316,11 +367,20 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
                 ))}
               </div>
 
-              <button onClick={generateAll} disabled={!canStart}
-                className="w-full py-3 rounded-xl text-sm font-bold text-white disabled:opacity-40 active:scale-[0.98] transition-all"
-                style={{ background: "var(--primary)" }}>
-                AI 사업계획서 생성하기
-              </button>
+              <div className="flex gap-2">
+                <button onClick={generateAll} disabled={!canStart}
+                  className="flex-1 py-3 rounded-xl text-sm font-bold text-white disabled:opacity-40 active:scale-[0.98] transition-all"
+                  style={{ background: "var(--primary)" }}>
+                  AI 사업계획서 생성하기
+                </button>
+                {!canStart && (
+                  <button onClick={startDemo}
+                    className="px-5 py-3 rounded-xl text-sm font-bold active:scale-[0.98] transition-all"
+                    style={{ background: "var(--bg-hover)", color: "var(--text-secondary)" }}>
+                    🎲 데모
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

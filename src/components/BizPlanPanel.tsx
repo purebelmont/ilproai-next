@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SUPPORT_PROGRAMS, type SupportProgram } from "@/data/support-programs";
 
 // ──── 간단한 마크다운 → HTML 변환 ────
@@ -232,38 +232,13 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     URL.revokeObjectURL(url);
   }
 
-  async function htmlToPdf(htmlContent: string, filename: string) {
-    if (typeof window === "undefined") return;
-    const { default: jsPDF } = await import("jspdf");
-    const { default: html2canvas } = await import("html2canvas");
-
-    const iframe = document.createElement("iframe");
-    iframe.style.cssText = "position:fixed;left:-9999px;width:800px;height:auto";
-    document.body.appendChild(iframe);
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!iframeDoc) return;
-    iframeDoc.open(); iframeDoc.write(htmlContent); iframeDoc.close();
-    await new Promise(r => setTimeout(r, 800));
-
-    const canvas = await html2canvas(iframeDoc.body, { scale: 2, useCORS: true, width: 800 });
-    document.body.removeChild(iframe);
-
-    const doc = new jsPDF("p", "mm", "a4");
-    const margin = 15;
-    const imgW = doc.internal.pageSize.getWidth() - margin * 2;
-    const imgH = (canvas.height * imgW) / canvas.width;
-    const pageH = doc.internal.pageSize.getHeight() - margin * 2;
-    let pos = 0;
-    while (pos < imgH) {
-      if (pos > 0) doc.addPage();
-      doc.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", margin, margin - pos, imgW, imgH);
-      pos += pageH;
-    }
-    doc.save(filename);
-  }
-
   function downloadPdf() {
-    htmlToPdf(buildHtml(), `사업계획서_${info.name || "문서"}.pdf`);
+    const html = buildHtml();
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
   }
 
   async function generateSection(sectionId: string, sectionLabel: string): Promise<string> {
@@ -540,14 +515,18 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     setTimeout(() => setCopied(""), 2000);
   }
 
-  async function downloadApplyPdf() {
+  function downloadApplyPdf() {
     const body = detectedFields.map(f => `
       <div style="page-break-inside:avoid;margin-bottom:32px;">
         <h2 style="font-size:18px;font-weight:700;color:#0071E3;border-bottom:2px solid #0071E3;padding-bottom:6px;">${f.label}</h2>
         <div style="font-size:13px;line-height:1.9;color:#333;">${md(fieldContents[f.id] || "")}</div>
       </div>`).join("");
     const applyHtml = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap');*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;padding:40px;max-width:800px;margin:0 auto}h4{font-size:15px;font-weight:700;margin:16px 0 6px}table{width:100%;border-collapse:collapse;margin:10px 0 16px;font-size:12px}th{text-align:left;padding:8px 10px;background:#EBF5FF;border-bottom:2px solid #0071E3}td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li{padding:3px 0 3px 16px;position:relative}li::before{content:"•";position:absolute;left:0;color:#0071E3}</style></head><body><div style="text-align:center;margin-bottom:36px;padding:24px 0;border-bottom:3px solid #0071E3"><h1 style="font-size:24px;margin-bottom:6px">지원사업 신청서</h1><div style="font-size:18px;font-weight:700;color:#0071E3">${info.name || "사업명"}</div><div style="font-size:13px;color:#888;margin-top:4px">${new Date().toLocaleDateString("ko-KR")}</div></div>${body}</body></html>`;
-    await htmlToPdf(applyHtml, `지원서_${info.name || "문서"}.pdf`);
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(applyHtml);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
   }
 
   function downloadApplyHtml() {

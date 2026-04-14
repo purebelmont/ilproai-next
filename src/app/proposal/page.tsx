@@ -5,24 +5,8 @@ import { useState } from "react";
 export default function ProposalPage() {
   const [lang, setLang] = useState<"ko" | "en">("ko");
 
-  const downloadPdf = async () => {
-    const { default: jsPDF } = await import("jspdf");
-    const { default: html2canvas } = await import("html2canvas");
-    const el = document.getElementById("proposal-content");
-    if (!el) return;
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, width: 800 });
-    const doc = new jsPDF("p", "mm", "a4");
-    const margin = 10;
-    const imgW = doc.internal.pageSize.getWidth() - margin * 2;
-    const imgH = (canvas.height * imgW) / canvas.width;
-    const pageH = doc.internal.pageSize.getHeight() - margin * 2;
-    let pos = 0;
-    while (pos < imgH) {
-      if (pos > 0) doc.addPage();
-      doc.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", margin, margin - pos, imgW, imgH);
-      pos += pageH;
-    }
-    doc.save("일프로AI_제안서.pdf");
+  const downloadPdf = () => {
+    window.print();
   };
 
   return (

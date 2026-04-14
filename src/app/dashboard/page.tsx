@@ -164,8 +164,8 @@ export default function Dashboard() {
       const { data: p } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
       if (p) {
         setProfile(p);
-        // Track last login (ignore errors if column doesn't exist)
-        supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id).then(() => {}).catch(() => {});
+        // Track last login (safe — ignore if column doesn't exist)
+        try { supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id); } catch {};
       } else {
         // Auto-create profile
         const name = data.user.user_metadata?.name || data.user.email?.split("@")[0] || "";

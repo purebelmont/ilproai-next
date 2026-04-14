@@ -348,14 +348,14 @@ const DEMO_CONTENT: Record<string, string> = {
 // 키워드 매칭으로 적절한 데모 콘텐츠 찾기
 function findContent(message: string): string {
   const lower = message.toLowerCase();
-  if (lower.includes('피자') || lower.includes('음식') || lower.includes('식당') || lower.includes('치킨')) return DEMO_CONTENT['피자'];
-  if (lower.includes('미용') || lower.includes('헤어') || lower.includes('살롱') || lower.includes('오픈')) return DEMO_CONTENT['미용'];
-  if (lower.includes('카페') || lower.includes('커피') || lower.includes('시즌') || lower.includes('메뉴')) return DEMO_CONTENT['카페'];
-  if (lower.includes('헬스') || lower.includes('운동') || lower.includes('피트니스') || lower.includes('gym')) return DEMO_CONTENT['헬스'];
-  if (lower.includes('반려') || lower.includes('펫') || lower.includes('강아지') || lower.includes('미용샵')) return DEMO_CONTENT['반려동물'];
-  if (lower.includes('학원') || lower.includes('특강') || lower.includes('교육') || lower.includes('방학')) return DEMO_CONTENT['학원'];
-  // 기본값
-  return DEMO_CONTENT['카페'];
+  if (/피자|음식|식당|치킨|갈비|탕|찜|국밥|맛집|고기|삼겹|불고기|한식|중식|일식|양식|분식|밥|면|찌개|구이|회|초밥|돈까스|냉면|비빔|볶음|김치|메뉴|점심|저녁|배달|맛|홍보|이벤트|할인|특가|1\+1|오픈/.test(lower)) return DEMO_CONTENT['피자'];
+  if (/미용|헤어|살롱|네일|뷰티|펌|염색|커트|두피|속눈썹/.test(lower)) return DEMO_CONTENT['미용'];
+  if (/카페|커피|라떼|아메|디저트|케이크|빵|베이커리|브런치|티|차/.test(lower)) return DEMO_CONTENT['카페'];
+  if (/헬스|운동|피트니스|gym|pt|요가|필라테스|다이어트|체육|스포츠/.test(lower)) return DEMO_CONTENT['헬스'];
+  if (/반려|펫|강아지|고양이|동물|미용샵|애견/.test(lower)) return DEMO_CONTENT['반려동물'];
+  if (/학원|특강|교육|방학|과외|수업|강의|입시|공부/.test(lower)) return DEMO_CONTENT['학원'];
+  // 기본값 — 음식점 (가장 범용적)
+  return DEMO_CONTENT['피자'];
 }
 
 export async function POST(req: Request) {

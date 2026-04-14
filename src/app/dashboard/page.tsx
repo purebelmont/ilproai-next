@@ -12,7 +12,8 @@ import ReportPanel from "@/components/ReportPanel";
 import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
 import AIRecommendPanel from "@/components/AIRecommendPanel";
 import { SNSPanel } from "@/app/sns/page";
-import BizPlanPanel from "@/components/BizPlanPanel";
+import dynamic from "next/dynamic";
+const BizPlanPanel = dynamic(() => import("@/components/BizPlanPanel"), { ssr: false, loading: () => <div className="p-5 text-center"><div className="animate-spin w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full mx-auto" /></div> });
 
 type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai" | "bizplan";
 

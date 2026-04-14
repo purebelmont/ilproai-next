@@ -452,23 +452,6 @@ export default function Dashboard() {
               </button>
             )}
           </div>
-          <button onClick={() => {
-              const msg = prompt("피드백을 남겨주세요 (불편한 점, 개선 아이디어 등):");
-              if (msg?.trim()) {
-                supabase.from("feedbacks").insert({ user_id: user.id, user_name: profile?.name || "", content: msg.trim(), category: "general" }).then(() => alert("피드백이 전달되었습니다. 감사합니다!"));
-              }
-            }}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
-            style={{ color: "#A78BFA" }}>
-            <span className="text-[14px]">💬</span>
-            <span>피드백</span>
-          </button>
-          <Link href="/admin"
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
-            style={{ color: "#8E8EA0", textDecoration: "none" }}>
-            <span className="text-[14px]">🛡️</span>
-            <span>관리자</span>
-          </Link>
           <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
             style={{ color: "#8E8EA0" }}>

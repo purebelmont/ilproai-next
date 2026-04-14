@@ -263,54 +263,99 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     setSupportSearched(true);
   }
 
-  // ──── 지원서 분석 — 키워드 기반으로 정확한 항목만 추출 ────
+  // ──── 지원서 분석 — PDF 텍스트에서 번호+제목+질문을 추출 ────
   function analyzeDocument(text: string) {
     setApplyStep("analyzing");
     setTimeout(() => {
       const fields: { id: string; label: string; hint: string }[] = [];
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
 
-      // 키워드 매칭으로 정확한 항목만 추출
-      // 각 항목에 대해: [검색 키워드, 표시할 라벨, API 매칭 키, 힌트]
-      const fieldDefs: [RegExp, string, string][] = [
-        [/필요성/, "필요성", "아이디어를 개발하게 된 배경, 내용 및 용도, 관련성"],
-        [/혁신성/, "혁신성", "제품의 기술력, 우수성, 기존 유사 기술과 차이점"],
-        [/안전성|안전문제\s*해결/, "안전성", "산업·재난현장에서 안전문제를 해결할 수 있는지"],
-        [/수익성|비즈니스\s*모델/, "수익성", "비즈니스 모델 유형, 수익모델, 마케팅 전략"],
-        [/시장성/, "시장성", "국내외 시장 현황, 수요처, 경쟁사 비교, 매출 가능성"],
-        [/확장성/, "확장성", "다수 산업분야 활용 가능 여부, 현장적용 가능성"],
-        [/계획\s*구체성/, "계획 구체성", "개발 목표, 기간의 타당성, 목표달성 전략"],
-        [/기술개발\s*역량|팀\s*역량/, "기술개발 역량", "기술개발 능력, 사업화 의지 및 계획"],
-        [/사업\s*개요|사업\s*소개|사업\s*내용/, "사업 개요", "사업의 배경, 목적, 핵심 내용"],
-        [/제품.*서비스\s*설명|서비스\s*소개/, "제품/서비스", "제품 또는 서비스의 구체적 내용"],
-        [/시장\s*분석|목표\s*시장/, "시장 분석", "목표 시장 규모, 타겟 고객 분석"],
-        [/마케팅.*전략|판매\s*전략/, "마케팅 전략", "고객 확보 방법, 채널 전략"],
-        [/사업화\s*전략/, "사업화 전략", "수익 창출 구조, 매출 계획"],
-        [/자금\s*소요|자금\s*계획|자금\s*용도/, "자금 계획", "필요 자금 규모, 용도별 계획"],
-        [/팀\s*구성|팀\s*소개|인력\s*구성/, "팀 구성", "핵심 인력의 경력, 역할, 전문성"],
-        [/추진\s*일정|로드맵|마일스톤/, "추진 일정", "단계별 추진 계획, 마일스톤"],
-        [/기대\s*효과|성과\s*지표/, "기대 효과", "정량적/정성적 기대 성과"],
-        [/특허|지식\s*재산|지적\s*재산/, "지식재산권", "보유 특허, 출원 예정, 기술 보호"],
-      ];
+      // 1단계: "X-Y. 제목" 패턴으로 섹션 찾고, 바로 다음 ○ 줄을 힌트로 수집
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // "1-1. 필요성" or "2-1. 수익성( 비즈니스 모델)" 패턴
+        const m = line.match(/^(\d+-\d+)\.\s*(.+)$/);
+        if (m) {
+          const num = m[1]; // "1-1"
+          const title = m[2].trim(); // "필요성" or "안전성( 안전문제 해결수준)"
 
-      for (const [regex, label, hint] of fieldDefs) {
-        if (regex.test(text)) {
-          fields.push({ id: label.replace(/[\s/()]/g, "_"), label, hint });
+          // 제목에서 불필요한 괄호 정리
+          const cleanTitle = title.replace(/\(\s*/g, "(").replace(/\s*\)/g, ")");
+
+          // 다음 줄들에서 질문/가이드 수집
+          // PDF 추출 시 "○" 와 설명이 별도 줄로 올 수 있음
+          const hints: string[] = [];
+          let afterCircle = false;
+          for (let j = i + 1; j < Math.min(i + 12, lines.length); j++) {
+            const next = lines[j];
+            if (next.match(/^\d+-\d+\./)) break; // 다음 섹션이면 중단
+            if (next === "○" || next === "◯") {
+              afterCircle = true;
+              continue;
+            }
+            if (next.startsWith("○") || next.startsWith("◯")) {
+              const desc = next.replace(/^[○◯]\s*/, "").trim();
+              if (desc) hints.push(desc);
+              afterCircle = false;
+              continue;
+            }
+            // ○ 바로 다음 줄 = 실제 설명
+            if (afterCircle && next.length > 3 && !next.startsWith("–") && !next.startsWith("∙")) {
+              hints.push(next);
+              afterCircle = false;
+              continue;
+            }
+            // 이전 힌트의 연속 줄 (긴 설명이 줄바꿈된 경우)
+            if (hints.length > 0 && !next.startsWith("–") && !next.startsWith("∙") && !/^[○◯□※*]/.test(next) && !next.match(/^\d/) && next.length > 5) {
+              hints[hints.length - 1] += " " + next;
+            }
+            afterCircle = false;
+          }
+
+          const label = `${num}. ${cleanTitle}`;
+          const hint = hints.length > 0 ? hints.join(" / ") : `${cleanTitle}에 대한 구체적인 내용을 서술`;
+
+          // 중복 제거
+          if (!fields.find(f => f.label === label)) {
+            fields.push({ id: num.replace(/-/g, "_"), label, hint });
+          }
         }
       }
 
-      // 아무것도 못 찾았으면 기본
+      // 2단계: X-Y 패턴이 없으면 키워드 폴백
+      if (fields.length === 0) {
+        const kwDefs: [RegExp, string, string][] = [
+          [/필요성/, "필요성", "아이디어를 개발하게 된 배경, 내용 및 용도"],
+          [/혁신성/, "혁신성", "제품의 기술력, 우수성, 기존 유사 기술과 차이점"],
+          [/안전성/, "안전성", "안전문제를 해결할 수 있는지"],
+          [/수익성/, "수익성", "비즈니스 모델 유형, 수익모델, 마케팅 전략"],
+          [/시장성/, "시장성", "국내외 시장 현황, 수요처, 경쟁사 비교"],
+          [/확장성/, "확장성", "다수 산업분야 활용 가능 여부, 현장적용 가능성"],
+          [/계획\s*구체성/, "계획 구체성", "개발 목표, 기간의 타당성"],
+          [/기술개발\s*역량/, "기술개발 역량", "기술개발 능력, 사업화 의지"],
+          [/사업\s*개요/, "사업 개요", "사업의 배경, 목적, 핵심 내용"],
+          [/시장\s*분석/, "시장 분석", "시장 규모, 타겟 고객 분석"],
+          [/마케팅/, "마케팅 전략", "고객 확보 방법, 채널 전략"],
+          [/자금/, "자금 계획", "필요 자금 규모, 용도별 계획"],
+          [/팀\s*구성/, "팀 구성", "핵심 인력의 경력과 역할"],
+        ];
+        for (const [regex, label, hint] of kwDefs) {
+          if (regex.test(text) && !fields.find(f => f.label === label)) {
+            fields.push({ id: label.replace(/[\s/]/g, "_"), label, hint });
+          }
+        }
+      }
+
+      // 3단계: 아무것도 없으면 기본
       if (fields.length === 0) {
         fields.push(
           { id: "사업_개요", label: "사업 개요", hint: "사업의 배경과 목적" },
           { id: "제품_서비스", label: "제품/서비스", hint: "제품의 내용과 특징" },
           { id: "시장_분석", label: "시장 분석", hint: "시장 규모와 타겟 고객" },
-          { id: "사업화_전략", label: "사업화 전략", hint: "수익 모델과 매출 계획" },
-          { id: "팀_구성", label: "팀 구성", hint: "핵심 인력과 역할" },
         );
       }
 
-      console.log("=== 감지된 항목 ===", fields.map(f => f.label));
-
+      console.log("=== 감지된 항목 ===", fields);
       setDetectedFields(fields);
       setActiveField(fields[0]?.id || "");
       setApplyStep("fields");

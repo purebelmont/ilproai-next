@@ -28,8 +28,8 @@ function md(text: string): string {
 
   for (const line of lines) {
     const trimmed = line.trim();
-    // 테이블 구분선 (|---|---| 또는 |:---|:---|) — 무시
-    if (/^\|[\s:_-|]+\|$/.test(trimmed)) {
+    // 테이블 구분선 — 다양한 형태 감지
+    if (/^[|\s:-]+$/.test(trimmed) && trimmed.includes("-") && (trimmed.includes("|") || inTable)) {
       inTable = true;
       continue;
     }

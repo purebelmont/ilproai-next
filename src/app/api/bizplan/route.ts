@@ -1,11 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@supabase/supabase-js";
 
 export const maxDuration = 60;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export async function POST(req: Request) {
-  const { section, name, industry, description, target, funding } = await req.json();
+  const { section, name, industry, description, target, funding, userId } = await req.json();
 
   const prompt = `사업명: ${name || "미정"}
 업종: ${industry || "미정"}
@@ -23,15 +25,18 @@ export async function POST(req: Request) {
     system: "당신은 정부 지원사업 신청서 및 사업계획서 전문 컨설턴트입니다. 심사위원이 높은 점수를 줄 수 있도록 전문적이면서 읽기 쉽게 작성합니다. 한국어로 작성하세요.",
   });
 
+  let totalTokens = 0;
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
       for await (const event of stream) {
         if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
           controller.enqueue(encoder.encode(event.delta.text));
+          totalTokens += event.delta.text.length;
         }
       }
       controller.close();
+      supabase.from("api_logs").insert({ user_id: userId || null, endpoint: "bizplan", tokens_used: totalTokens, cost: totalTokens * 0.00001 }).then(() => {});
     },
   });
 

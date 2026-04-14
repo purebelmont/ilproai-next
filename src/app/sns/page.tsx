@@ -40,12 +40,12 @@ function getPhoto(text: string, i = 0) {
   return `https://source.unsplash.com/600x600/?${encodeURIComponent(query)}&sig=${i + Date.now() % 100}`;
 }
 
-// Video scene templates
-const VIDEO_TEMPLATES = [
-  { id: 'hook', name: '후크→CTA', icon: '⚡', scenes: ['🍕 주말에 피자 두 판?!', '화덕에서 갓 구운 바삭한 모짜렐라', '금~일 라지 주문 시 1판 무료!', '📍 지금 주문하세요!'] },
-  { id: 'list', name: 'TOP 리스트', icon: '📊', scenes: ['☕ 봄 신메뉴 TOP 3', '3️⃣ 피치 스파클링', '2️⃣ 그린티 블로썸', '1️⃣ 딸기 로즈 라떼'] },
-  { id: 'before', name: '비포/애프터', icon: '✨', scenes: ['BEFORE 💇 칙칙한 머리..', '✂️ 원장 직접 시술', 'AFTER ✨ 완전 다른 사람!', '오픈 기념 30% OFF'] },
-  { id: 'review', name: '고객 후기', icon: '⭐', scenes: ['"진짜 인생 맛집..."', '⭐⭐⭐⭐⭐ 네이버 4.9점', '직접 경험해보세요!'] },
+// Video template types (AI가 이 형식으로 장면 생성)
+const VIDEO_STYLES = [
+  { id: 'hook', name: '후크→CTA', icon: '⚡', desc: '관심 끌기 → 핵심 내용 → 행동 유도 (4컷)' },
+  { id: 'list', name: 'TOP 리스트', icon: '📊', desc: '순위형 콘텐츠 (4컷)' },
+  { id: 'before', name: '비포/애프터', icon: '✨', desc: '변화 전후 비교 (4컷)' },
+  { id: 'review', name: '고객 후기', icon: '⭐', desc: '리뷰 하이라이트 (3~4컷)' },
 ];
 
 // ──── Component ────
@@ -60,20 +60,63 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const [copied, setCopied] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   // Video state
-  const [videoTemplate, setVideoTemplate] = useState(0);
+  const [videoStyle, setVideoStyle] = useState(0);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [videoScene, setVideoScene] = useState(0);
   const [videoGenerated, setVideoGenerated] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
+  const [videoScenes, setVideoScenes] = useState<string[]>([]);
+  const [videoInput, setVideoInput] = useState('');
   const feedRef = useRef<HTMLDivElement>(null);
 
   // Video auto-play
   useEffect(() => {
-    if (!videoPlaying) return;
-    const scenes = VIDEO_TEMPLATES[videoTemplate].scenes;
-    const iv = setInterval(() => setVideoScene(p => (p + 1) % scenes.length), 2500);
+    if (!videoPlaying || videoScenes.length === 0) return;
+    const iv = setInterval(() => setVideoScene(p => (p + 1) % videoScenes.length), 2500);
     return () => clearInterval(iv);
-  }, [videoPlaying, videoTemplate]);
+  }, [videoPlaying, videoScenes]);
+
+  async function generateVideo(topic: string) {
+    setVideoLoading(true);
+    setVideoGenerated(false);
+    setVideoPlaying(false);
+    setVideoScene(0);
+
+    const style = VIDEO_STYLES[videoStyle];
+    const prompt = `숏폼 동영상(릴스/숏츠) 장면을 만들어줘.
+
+주제: ${topic}
+스타일: ${style.name} — ${style.desc}
+
+정확히 4개의 장면을 만들어줘. 각 장면은 한 줄로, 이모지를 포함해서 짧고 임팩트 있게.
+형식: 각 장면을 줄바꿈으로 구분. 번호나 다른 텍스트 없이 장면 내용만.`;
+
+    try {
+      const res = await fetch('/api/sns/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          full += decoder.decode(value, { stream: true });
+        }
+      }
+      const scenes = full.split('\n').map(s => s.trim()).filter(s => s.length > 2).slice(0, 4);
+      setVideoScenes(scenes.length > 0 ? scenes : ['장면 생성에 실패했어요']);
+      setVideoGenerated(true);
+      setVideoPlaying(true);
+    } catch {
+      setVideoScenes(['장면 생성 중 오류 발생']);
+      setVideoGenerated(true);
+    }
+    setVideoLoading(false);
+  }
 
   const copy = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -126,7 +169,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
     });
   };
 
-  const scenes = VIDEO_TEMPLATES[videoTemplate].scenes;
+  const scenes = videoScenes;
 
   return (
     <div className={embedded ? "h-full flex flex-col" : "min-h-screen flex flex-col"} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
@@ -299,18 +342,27 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
             {/* ══════════════════════════════════════ */}
             {mode === 'video' && (
               <>
-                {/* Template selector */}
-                <div className="px-4 py-3 flex gap-2 overflow-x-auto ig-scroll" style={{ borderBottom: '1px solid var(--border)' }}>
-                  {VIDEO_TEMPLATES.map((t, i) => (
-                    <button key={t.id} onClick={() => { setVideoTemplate(i); setVideoPlaying(false); setVideoScene(0); }}
-                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-semibold transition-all active:scale-95"
-                      style={{
-                        background: videoTemplate === i ? '#0095F6' : 'var(--bg-hover)',
-                        color: videoTemplate === i ? '#fff' : 'var(--text-secondary)',
-                      }}>
-                      <span>{t.icon}</span> {t.name}
-                    </button>
-                  ))}
+                {/* Input + Style selector */}
+                <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <input value={videoInput} onChange={e => setVideoInput(e.target.value)} disabled={videoLoading}
+                      placeholder="무엇을 홍보할까요? (예: 갈비탕 주말 이벤트)"
+                      className="flex-1 bg-transparent text-sm focus:outline-none disabled:opacity-40"
+                      style={{ color: 'var(--text)' }}
+                      onKeyDown={e => { if (e.key === 'Enter' && videoInput.trim()) generateVideo(videoInput.trim()); }} />
+                  </div>
+                  <div className="flex gap-1.5 overflow-x-auto ig-scroll">
+                    {VIDEO_STYLES.map((t, i) => (
+                      <button key={t.id} onClick={() => setVideoStyle(i)}
+                        className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-semibold transition-all active:scale-95"
+                        style={{
+                          background: videoStyle === i ? '#0095F6' : 'var(--bg-hover)',
+                          color: videoStyle === i ? '#fff' : 'var(--text-secondary)',
+                        }}>
+                        <span>{t.icon}</span> {t.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Loading state */}
@@ -326,7 +378,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                 {!videoGenerated && !videoLoading && (
                   <div className="px-8 py-12 text-center">
                     <div className="text-4xl mb-3">🎬</div>
-                    <div className="text-sm font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>템플릿을 선택하고</div>
+                    <div className="text-sm font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>홍보할 내용을 입력하고</div>
                     <div className="text-xs" style={{ color: 'var(--text-muted)' }}>아래 "동영상 만들기" 버튼을 눌러주세요</div>
                   </div>
                 )}
@@ -335,7 +387,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                 {videoGenerated && !videoLoading && <div className="px-8 py-6">
                   <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: '9/16', background: '#111' }}>
                     {/* Background image */}
-                    <img src={getPhoto(scenes[videoScene] || '', videoScene)} alt=""
+                    <img src={getPhoto(videoInput || scenes[videoScene] || '', videoScene)} alt=""
                       className="absolute inset-0 w-full h-full object-cover opacity-40" />
                     {/* Scene content */}
                     <div className="absolute inset-0 flex items-center justify-center p-8"
@@ -380,7 +432,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                     </div>
                     <div className="absolute bottom-4 left-3 right-14">
                       <div className="text-white text-[11px] font-semibold">@our_store</div>
-                      <div className="text-white/60 text-[10px] mt-0.5 truncate">{VIDEO_TEMPLATES[videoTemplate].name} 템플릿</div>
+                      <div className="text-white/60 text-[10px] mt-0.5 truncate">{videoInput || VIDEO_STYLES[videoStyle].name}</div>
                     </div>
                   </div>
                 </div>}
@@ -408,19 +460,11 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                   </div>
                 </>)}
                   {/* Generate button */}
-                  <button onClick={() => {
-                    setVideoLoading(true);
-                    setVideoGenerated(false);
-                    setVideoPlaying(false);
-                    const tmpl = Math.floor(Math.random() * VIDEO_TEMPLATES.length);
-                    setVideoTemplate(tmpl);
-                    setVideoScene(0);
-                    setTimeout(() => { setVideoLoading(false); setVideoGenerated(true); setVideoPlaying(true); }, 2000);
-                  }}
+                  <button onClick={() => generateVideo(videoInput.trim() || '우리 가게 홍보')}
                     disabled={videoLoading}
                     className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-transform disabled:opacity-50"
                     style={{ background: '#0095F6' }}>
-                    {videoLoading ? '생성 중...' : '🎬 동영상 만들기'}
+                    {videoLoading ? 'AI가 장면을 만들고 있어요...' : '🎬 동영상 만들기'}
                   </button>
                 </div>
               </>

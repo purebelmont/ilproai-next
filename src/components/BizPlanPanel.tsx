@@ -159,6 +159,64 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
     setTimeout(() => setCopied(""), 2000);
   };
 
+  function buildHtml() {
+    const body = PLAN_SECTIONS.map(s => `
+      <div style="page-break-inside:avoid;margin-bottom:32px;">
+        <h2 style="font-size:20px;font-weight:700;color:#7D2AE7;margin-bottom:12px;border-bottom:2px solid #7D2AE7;padding-bottom:6px;">${s.icon} ${s.label}</h2>
+        <div style="font-size:14px;line-height:1.8;color:#333;">${md(sections[s.id] || "")}</div>
+      </div>`).join("");
+
+    return `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>사업계획서 - ${info.name}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',sans-serif; color:#222; padding:40px; max-width:800px; margin:0 auto; }
+  h4 { font-size:16px; font-weight:700; margin:18px 0 8px; color:#333; }
+  strong { color:#222; }
+  table { width:100%; border-collapse:collapse; margin:12px 0 20px; font-size:13px; }
+  th { text-align:left; padding:10px 12px; font-weight:600; background:#f4f0ff; border-bottom:2px solid #7D2AE7; color:#333; }
+  td { padding:8px 12px; border-bottom:1px solid #eee; }
+  tr:hover td { background:#faf8ff; }
+  ul { list-style:none; padding:0; margin:8px 0; }
+  li { padding:4px 0 4px 18px; position:relative; }
+  li::before { content:"•"; position:absolute; left:0; color:#7D2AE7; font-weight:bold; }
+  @media print { body { padding:20px; } }
+</style></head><body>
+  <div style="text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:3px solid #7D2AE7;">
+    <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">사업계획서</h1>
+    <div style="font-size:22px;font-weight:700;color:#7D2AE7;margin-bottom:12px;">${info.name}</div>
+    <div style="font-size:14px;color:#888;">업종: ${info.industry} | 타겟: ${info.target || "-"} | 자금: ${info.funding || "-"}</div>
+    <div style="font-size:12px;color:#aaa;margin-top:8px;">${new Date().toLocaleDateString("ko-KR")}</div>
+  </div>
+  ${body}
+  <div style="text-align:center;padding:20px 0;margin-top:40px;border-top:1px solid #eee;color:#aaa;font-size:11px;">
+    일프로 AI · ilpro.ai
+  </div>
+</body></html>`;
+  }
+
+  function downloadHtml() {
+    const html = buildHtml();
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `사업계획서_${info.name}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadPdf() {
+    const html = buildHtml();
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => { win.print(); }, 500);
+  }
+
   async function generateSection(sectionId: string, sectionLabel: string): Promise<string> {
     try {
       const res = await fetch("/api/bizplan", {
@@ -393,13 +451,23 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
                   <p className="text-xs" style={{ color: "var(--text-muted)" }}>{info.industry}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {step === "done" && (
+                  {step === "done" && (<>
+                    <button onClick={downloadPdf}
+                      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg active:scale-95 transition-all"
+                      style={{ background: "#E53935", color: "#fff" }}>
+                      PDF 다운로드
+                    </button>
+                    <button onClick={downloadHtml}
+                      className="text-[11px] font-semibold px-3 py-1.5 rounded-lg active:scale-95 transition-all"
+                      style={{ background: "#0095F6", color: "#fff" }}>
+                      HTML 다운로드
+                    </button>
                     <button onClick={copyAll}
                       className="text-[11px] font-semibold px-3 py-1.5 rounded-lg active:scale-95 transition-all"
                       style={{ background: copied === "all" ? "var(--bg-hover)" : "var(--primary)", color: "#fff" }}>
-                      {copied === "all" ? "✓ 복사됨" : "📋 전체 복사"}
+                      {copied === "all" ? "✓ 복사됨" : "📋 복사"}
                     </button>
-                  )}
+                  </>)}
                   <button onClick={() => { setStep("info"); setSections({}); }}
                     className="text-[11px] font-medium px-3 py-1.5 rounded-lg"
                     style={{ background: "var(--bg-hover)", color: "var(--text-muted)" }}>

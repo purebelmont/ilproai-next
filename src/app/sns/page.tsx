@@ -72,7 +72,7 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   async function generate(promptText: string) {
     setLoading(true);
     const id = Date.now().toString();
-    setPosts(prev => [{ id, prompt: promptText, text: '' }, ...prev]);
+    setPosts([{ id, prompt: promptText, text: '' }]);
 
     const fullPrompt = `다음 내용으로 인스타그램용 SNS 게시물을 만들어주세요:\n\n${promptText}\n[톤: 친근한] [길이: 5~8줄 정도로]\n해시태그도 포함해주세요.`;
     try {

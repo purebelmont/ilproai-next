@@ -44,7 +44,6 @@ const NAV_SECTIONS: NavSection[] = [
       { id: "notes", icon: "📝", label: "메모" },
       { id: "todos", icon: "✅", label: "할일" },
       { id: "files", icon: "📎", label: "문서함" },
-      { id: "bizplan", icon: "📄", label: "사업계획서" },
     ],
   },
   {
@@ -52,7 +51,8 @@ const NAV_SECTIONS: NavSection[] = [
     pro: true,
     items: [
       { id: "website", icon: "🌐", label: "홈페이지" },
-      { id: "automation", icon: "📸", label: "SNS 콘텐츠", badge: "NEW" },
+      { id: "automation", icon: "📸", label: "SNS 콘텐츠" },
+      { id: "bizplan", icon: "📄", label: "사업계획서", badge: "NEW" },
     ],
   },
 ];

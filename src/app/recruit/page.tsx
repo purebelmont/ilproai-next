@@ -66,7 +66,7 @@ export default function RecruitPage() {
             { icon: "💎", title: "PRO 전체 기능 3개월 무료", desc: "₩89,700 상당의 PRO 기능을 무료로 사용" },
             { icon: "🤝", title: "1:1 온보딩 지원", desc: "담당자가 직접 사용법 안내 및 데이터 입력 도움" },
             { icon: "🛠️", title: "맞춤 기능 개선", desc: "피드백을 반영하여 우리 업종에 맞게 기능 개선" },
-            { icon: "🏷️", title: "정식 출시 시 50% 할인", desc: "테스트 참여자 한정, 평생 50% 할인 혜택" },
+            { icon: "🏷️", title: "정식 출시 시 우선 안내", desc: "테스트 참여자에게 정식 출시 소식을 가장 먼저 안내" },
           ].map((b, i) => (
             <div key={i} style={{ background: "linear-gradient(135deg, rgba(125,42,231,0.1), rgba(0,113,227,0.1))", borderRadius: 14, padding: 20, border: "1px solid rgba(125,42,231,0.2)" }}>
               <div style={{ fontSize: 24, marginBottom: 8 }}>{b.icon}</div>

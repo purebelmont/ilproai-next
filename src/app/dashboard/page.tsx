@@ -12,8 +12,9 @@ import ReportPanel from "@/components/ReportPanel";
 import WebsiteBuilderPanel from "@/components/WebsiteBuilderPanel";
 import AIRecommendPanel from "@/components/AIRecommendPanel";
 import { SNSPanel } from "@/app/sns/page";
+import BizPlanPanel from "@/components/BizPlanPanel";
 
-type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai";
+type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai" | "bizplan";
 
 /* ─── Vercel-style grouped sidebar navigation ─── */
 type NavItem = { id: Tab; icon: string; label: string; badge?: string; href?: string };
@@ -43,6 +44,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: "notes", icon: "📝", label: "메모" },
       { id: "todos", icon: "✅", label: "할일" },
       { id: "files", icon: "📎", label: "문서함" },
+      { id: "bizplan", icon: "📄", label: "사업계획서" },
     ],
   },
   {
@@ -528,6 +530,7 @@ export default function Dashboard() {
           {tab === "payroll" && <PayrollPanel userId={user.id} openModal={openModal} closeModal={closeModal} />}
           {tab === "report" && <ReportPanel userId={user.id} />}
           {tab === "automation" && <SNSPanel embedded />}
+          {tab === "bizplan" && <BizPlanPanel userId={user.id} />}
           {tab === "ai" && <AIRecommendPanel userId={user.id} setTab={setTab} />}
         </div>
       </div>

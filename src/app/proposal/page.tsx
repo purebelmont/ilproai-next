@@ -48,7 +48,7 @@ export default function ProposalPage() {
           <div style={{ fontSize: 14, fontWeight: 600, color: "#7D2AE7", letterSpacing: 3, marginBottom: 16 }}>BUSINESS PROPOSAL</div>
           <h1 style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.2, marginBottom: 16 }}>
             {lang === "ko" ? "소상공인을 위한" : "All-in-One AI Platform"}<br />
-            {lang === "ko" ? "올인원 AI 경영 플랫폼" : "for Small Businesses"}
+            {lang === "ko" ? "올인원 AI 경영 자동화 플랫폼" : "for Small Businesses"}
           </h1>
           <div style={{ width: 60, height: 4, background: "linear-gradient(90deg, #7D2AE7, #0071E3)", margin: "24px auto", borderRadius: 2 }} />
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", maxWidth: 500, margin: "0 auto" }}>

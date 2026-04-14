@@ -20,7 +20,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "ulsan-free-test",
     category: "공지",
-    title: "울산 소상공인·중소기업 대상 AI 경영 플랫폼 무료 테스트 참여자 모집",
+    title: "울산 소상공인·중소기업 대상 AI 경영 자동화 플랫폼 무료 테스트 참여자 모집",
     subtitle: "PRO 전체 기능 3개월 무료 — 선착순 50개 업체 모집합니다.",
     icon: "📢",
     readTime: "5분",

@@ -7,7 +7,7 @@ export default function RecruitPage() {
       <header style={{ background: "linear-gradient(135deg, #7D2AE7, #0071E3)", padding: "60px 24px 50px", textAlign: "center" }}>
         <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 3, color: "rgba(255,255,255,0.7)", marginBottom: 12 }}>울산 소상공인 · 중소기업 대상</div>
         <h1 style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.3, marginBottom: 12, maxWidth: 600, margin: "0 auto 12px" }}>
-          AI 경영 플랫폼<br />무료 테스트 참여자 모집
+          AI 경영 자동화 플랫폼<br />무료 테스트 참여자 모집
         </h1>
         <p style={{ fontSize: 15, color: "rgba(255,255,255,0.8)", marginBottom: 24 }}>
           PRO 전체 기능 3개월 무료 · 선착순 50개 업체

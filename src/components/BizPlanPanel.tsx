@@ -6,24 +6,53 @@ import { SUPPORT_PROGRAMS, type SupportProgram } from "@/data/support-programs";
 // ──── 간단한 마크다운 → HTML 변환 ────
 
 function md(text: string): string {
-  return text
+  // 테이블을 먼저 처리 (줄 단위)
+  const lines = text.split("\n");
+  const out: string[] = [];
+  let inTable = false;
+  let tableRows: string[][] = [];
+
+  const flushTable = () => {
+    if (tableRows.length === 0) return;
+    const header = tableRows[0];
+    const body = tableRows.slice(1);
+    let html = '<table class="bp-table"><thead><tr>' + header.map(c => `<th>${c}</th>`).join("") + "</tr></thead><tbody>";
+    for (const row of body) {
+      html += "<tr>" + row.map(c => `<td>${c}</td>`).join("") + "</tr>";
+    }
+    html += "</tbody></table>";
+    out.push(html);
+    tableRows = [];
+    inTable = false;
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // 테이블 구분선 (|---|---| 또는 |:---|:---|) — 무시
+    if (/^\|[\s:_-|]+\|$/.test(trimmed)) {
+      inTable = true;
+      continue;
+    }
+    // 테이블 행 (| a | b | c |)
+    if (/^\|.+\|$/.test(trimmed)) {
+      const cells = trimmed.slice(1, -1).split("|").map(c => c.trim());
+      tableRows.push(cells);
+      inTable = true;
+      continue;
+    }
+    // 테이블 끝
+    if (inTable) flushTable();
+    out.push(trimmed);
+  }
+  if (inTable) flushTable();
+
+  // 나머지 마크다운 변환
+  return out.join("\n")
     .replace(/^### (.+)$/gm, '<h4 class="bp-h4">$1</h4>')
     .replace(/^## (.+)$/gm, '<h3 class="bp-h3">$1</h3>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^\| (.+) \|$/gm, (match) => {
-      const cells = match.slice(1, -1).split('|').map(c => c.trim());
-      return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
-    })
-    .replace(/(<tr>.*<\/tr>\n?)+/g, (match) => {
-      const rows = match.trim().split('\n').filter(r => !r.match(/^\|[\s-|]+\|$/));
-      if (rows.length === 0) return '';
-      const first = rows[0];
-      const rest = rows.slice(1).join('\n');
-      return `<table class="bp-table"><thead>${first.replace(/<td>/g, '<th>').replace(/<\/td>/g, '</th>')}</thead><tbody>${rest}</tbody></table>`;
-    })
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul class="bp-ul">${m}</ul>`)
-    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
     .replace(/\n\n/g, '<br/>')
     .replace(/\n/g, ' ');
 }

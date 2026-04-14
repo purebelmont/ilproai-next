@@ -53,6 +53,8 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
   const [videoTemplate, setVideoTemplate] = useState(0);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [videoScene, setVideoScene] = useState(0);
+  const [videoGenerated, setVideoGenerated] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
   // Video auto-play
@@ -301,8 +303,26 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                   ))}
                 </div>
 
+                {/* Loading state */}
+                {videoLoading && (
+                  <div className="px-8 py-12 text-center">
+                    <div className="w-10 h-10 rounded-full mx-auto mb-3" style={{ border: '3px solid var(--bg-hover)', borderTopColor: '#0095F6', animation: 'igSpin 0.8s linear infinite' }} />
+                    <div className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>동영상을 만들고 있어요...</div>
+                    <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>잠시만 기다려주세요</div>
+                  </div>
+                )}
+
+                {/* Empty state — before generation */}
+                {!videoGenerated && !videoLoading && (
+                  <div className="px-8 py-12 text-center">
+                    <div className="text-4xl mb-3">🎬</div>
+                    <div className="text-sm font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>템플릿을 선택하고</div>
+                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>아래 "동영상 만들기" 버튼을 눌러주세요</div>
+                  </div>
+                )}
+
                 {/* Phone preview — 9:16 vertical video */}
-                <div className="px-8 py-6">
+                {videoGenerated && !videoLoading && <div className="px-8 py-6">
                   <div className="relative rounded-3xl overflow-hidden" style={{ aspectRatio: '9/16', background: '#111' }}>
                     {/* Background image */}
                     <img src={getPhoto(scenes[videoScene] || '', videoScene)} alt=""
@@ -353,10 +373,11 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                       <div className="text-white/60 text-[10px] mt-0.5 truncate">{VIDEO_TEMPLATES[videoTemplate].name} 템플릿</div>
                     </div>
                   </div>
-                </div>
+                </div>}
 
-                {/* Scene editor */}
+                {/* Scene editor — only after generation */}
                 <div className="px-4 pb-6">
+                {videoGenerated && (<>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-semibold">장면 편집</span>
                     <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{scenes.length}컷</span>
@@ -375,11 +396,21 @@ export function SNSPanel({ embedded }: { embedded?: boolean }) {
                       </div>
                     ))}
                   </div>
-                  {/* Auto generate button */}
-                  <button onClick={() => { setVideoTemplate(Math.floor(Math.random() * VIDEO_TEMPLATES.length)); setVideoPlaying(true); setVideoScene(0); }}
-                    className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-transform"
+                </>)}
+                  {/* Generate button */}
+                  <button onClick={() => {
+                    setVideoLoading(true);
+                    setVideoGenerated(false);
+                    setVideoPlaying(false);
+                    const tmpl = Math.floor(Math.random() * VIDEO_TEMPLATES.length);
+                    setVideoTemplate(tmpl);
+                    setVideoScene(0);
+                    setTimeout(() => { setVideoLoading(false); setVideoGenerated(true); setVideoPlaying(true); }, 2000);
+                  }}
+                    disabled={videoLoading}
+                    className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold text-white active:scale-[0.98] transition-transform disabled:opacity-50"
                     style={{ background: '#0095F6' }}>
-                    🎬 자동 생성
+                    {videoLoading ? '생성 중...' : '🎬 동영상 만들기'}
                   </button>
                 </div>
               </>

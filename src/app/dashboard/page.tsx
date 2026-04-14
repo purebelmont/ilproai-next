@@ -416,12 +416,6 @@ export default function Dashboard() {
               </button>
             )}
           </div>
-          <button onClick={exportData}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
-            style={{ color: "#8E8EA0" }}>
-            <span className="text-[14px]">📥</span>
-            <span>데이터 내보내기</span>
-          </button>
           <button onClick={async () => { await supabase.auth.signOut(); router.push("/auth"); }}
             className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] transition-colors hover:bg-white/5"
             style={{ color: "#8E8EA0" }}>

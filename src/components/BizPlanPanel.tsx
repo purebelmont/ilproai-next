@@ -1167,8 +1167,9 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
                         )}
                       </div>
                       <div className="text-[10px] mb-3 px-1" style={{ color: "var(--text-muted)" }}>{f.hint}</div>
-                      {fieldContents[f.id] ? (
+                      {fieldContents[f.id] ? (<>
                         <div className="bp-content rounded-xl p-5 text-sm leading-relaxed" style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} dangerouslySetInnerHTML={{ __html: md(fieldContents[f.id]) }} />
+                        <div ref={contentEndRef} /></>
                       ) : (
                         <div className="rounded-xl p-8 text-center" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
                           {applyGenerating && applyCurrentGen === f.label ? (

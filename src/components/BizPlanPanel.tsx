@@ -272,7 +272,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
           if (done) break;
           full += decoder.decode(value, { stream: true });
           setSections(prev => ({ ...prev, [sectionId]: full }));
-          contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+          requestAnimationFrame(() => contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
         }
       }
       return full;
@@ -497,7 +497,7 @@ export default function BizPlanPanel({ userId }: { userId: string }) {
           if (done) break;
           full += decoder.decode(value, { stream: true });
           setFieldContents(prev => ({ ...prev, [fieldId]: full }));
-          contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+          requestAnimationFrame(() => contentEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }));
         }
       }
     } catch {

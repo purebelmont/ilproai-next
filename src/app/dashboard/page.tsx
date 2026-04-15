@@ -537,15 +537,6 @@ export default function Dashboard() {
                 </div>
               ))}
 
-              {/* SNS in mobile menu */}
-              <div className="h-px my-2 mx-2" style={{ background: "rgba(255,255,255,0.06)" }} />
-              <button onClick={() => { setTab("automation"); setMobileMenuOpen(false); }}
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-[14px] transition-colors active:scale-[0.98]"
-                style={{ color: tab === "automation" ? "#A78BFA" : "#C0C0CC" }}>
-                <span className="text-[18px]">📸</span>
-                <span className="flex-1 text-left font-medium">SNS 콘텐츠</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-[#7D2AE7] text-white">NEW</span>
-              </button>
             </div>
 
             {/* Mobile menu bottom actions */}

@@ -483,7 +483,7 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
   const filteredResults = supportFilter === "all" ? supportResults : supportResults.filter(p => p.category === supportFilter);
 
   return (
-    <div className="p-5 max-w-4xl mx-auto">
+    <div className="p-3 md:p-5 max-w-4xl mx-auto">
       <style>{`
         .bp-content .bp-h3 { font-size: 15px; font-weight: 700; margin: 20px 0 8px; color: var(--text); }
         .bp-content .bp-h4 { font-size: 13px; font-weight: 700; margin: 16px 0 6px; color: var(--primary); }
@@ -498,21 +498,21 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
         .bp-content strong { color: var(--text); }
       `}</style>
       {/* ═══ Top Tabs ═══ */}
-      <div className="flex gap-1 mb-5 p-1 rounded-xl" style={{ background: "var(--bg-hover)" }}>
+      <div className="flex gap-1 mb-4 p-0.5 md:p-1 rounded-xl" style={{ background: "var(--bg-hover)" }}>
         <button onClick={() => setTab("plan")}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+          className="flex-1 py-1.5 md:py-2 rounded-lg text-[11px] md:text-sm font-semibold transition-all"
           style={{ background: tab === "plan" ? "var(--primary)" : "transparent", color: tab === "plan" ? "#fff" : "var(--text-muted)" }}>
           📄 사업계획서
         </button>
         <button onClick={() => { setTab("support"); if (!supportSearched && canStart) searchSupport(); }}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+          className="flex-1 py-1.5 md:py-2 rounded-lg text-[11px] md:text-sm font-semibold transition-all"
           style={{ background: tab === "support" ? "var(--primary)" : "transparent", color: tab === "support" ? "#fff" : "var(--text-muted)" }}>
           🔍 지원사업
         </button>
         <button onClick={() => setTab("apply")}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+          className="flex-1 py-1.5 md:py-2 rounded-lg text-[11px] md:text-sm font-semibold transition-all"
           style={{ background: tab === "apply" ? "var(--primary)" : "transparent", color: tab === "apply" ? "#fff" : "var(--text-muted)" }}>
-          📎 지원서 작성
+          📎 지원서
         </button>
       </div>
 
@@ -552,7 +552,7 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
                     className="w-full px-3 py-2.5 rounded-xl text-sm focus:outline-none resize-none"
                     style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text)" }} />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold mb-1 block" style={{ color: "var(--text-secondary)" }}>타겟 고객</label>
                     <input value={info.target} onChange={e => setInfo(p => ({ ...p, target: e.target.value }))}
@@ -570,7 +570,7 @@ td{padding:7px 10px;border-bottom:1px solid #eee}ul{list-style:none;padding:0}li
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2 mb-4">
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
                 {PLAN_SECTIONS.map(s => (
                   <div key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
                     <span className="text-sm">{s.icon}</span>

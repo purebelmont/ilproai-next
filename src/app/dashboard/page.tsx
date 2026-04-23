@@ -14,8 +14,9 @@ const WebsiteBuilderPanel = dynamic(() => import("@/components/WebsiteBuilderPan
 const AIRecommendPanel = dynamic(() => import("@/components/AIRecommendPanel"), { ssr: false });
 const SNSPanel = dynamic(() => import("@/app/sns/page").then(m => ({ default: m.SNSPanel })), { ssr: false });
 const BizPlanPanel = dynamic(() => import("@/components/BizPlanPanel"), { ssr: false });
+const AttendancePanel = dynamic(() => import("@/components/AttendancePanel"), { ssr: false });
 
-type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai" | "bizplan";
+type Tab = "home" | "contacts" | "calendar" | "notes" | "todos" | "files" | "ledger" | "reservations" | "quotes" | "payroll" | "report" | "website" | "automation" | "ai" | "bizplan" | "attendance";
 
 /* ─── Vercel-style grouped sidebar navigation ─── */
 type NavItem = { id: Tab; icon: string; label: string; badge?: string; href?: string };
@@ -54,6 +55,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: "website", icon: "🌐", label: "홈페이지" },
       { id: "automation", icon: "📸", label: "SNS 콘텐츠" },
       { id: "bizplan", icon: "📄", label: "사업계획서", badge: "NEW" },
+      { id: "attendance", icon: "📋", label: "출석체크", badge: "NEW" },
     ],
   },
 ];
@@ -165,6 +167,8 @@ export default function Dashboard() {
       // Get or create profile
       const { data: p } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
       if (p) {
+        // Redirect to onboarding if not completed
+        if (!p.onboarding_completed) { router.push("/onboarding"); return; }
         setProfile(p);
         // Track last login (safe — ignore if column doesn't exist)
         try { supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id); } catch {};
@@ -630,6 +634,7 @@ export default function Dashboard() {
           {tab === "report" && <ReportPanel userId={user.id} />}
           {tab === "automation" && <SNSPanel embedded />}
           {tab === "bizplan" && <BizPlanPanel userId={user.id} />}
+          {tab === "attendance" && <AttendancePanel userId={user.id} />}
           {tab === "ai" && <AIRecommendPanel userId={user.id} setTab={setTab} />}
         </div>
       </div>

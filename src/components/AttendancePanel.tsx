@@ -136,6 +136,27 @@ export default function AttendancePanel({ userId }: { userId: string }) {
     }
   };
 
+  const addSampleStudents = async () => {
+    const samples = [
+      { name: "김민준", parent_email: "minjun.parent@test.com" },
+      { name: "이서윤", parent_email: "seoyun.parent@test.com" },
+      { name: "박지호", parent_email: "jiho.parent@test.com" },
+      { name: "최수아", parent_email: "sua.parent@test.com" },
+      { name: "정하은", parent_email: "haeun.parent@test.com" },
+      { name: "강도윤", parent_email: "doyun.parent@test.com" },
+      { name: "조예린", parent_email: "yerin.parent@test.com" },
+      { name: "윤시우", parent_email: "siwoo.parent@test.com" },
+      { name: "장하린", parent_email: "harin.parent@test.com" },
+      { name: "임건우", parent_email: "gunwoo.parent@test.com" },
+      { name: "한소율", parent_email: "soyul.parent@test.com" },
+      { name: "오주원", parent_email: "juwon.parent@test.com" },
+    ];
+    const classN = className || "1반";
+    const rows = samples.map((s) => ({ user_id: userId, name: s.name, parent_email: s.parent_email, class_name: classN }));
+    const { error } = await supabase.from("students").insert(rows);
+    if (!error) loadStudents();
+  };
+
   const removeStudent = async (id: string) => {
     if (!confirm("이 학생을 삭제하시겠습니까?")) return;
     await supabase.from("students").delete().eq("id", id);
@@ -210,6 +231,11 @@ export default function AttendancePanel({ userId }: { userId: string }) {
             <button onClick={addStudent} style={addBtnStyle}>
               + 학생 추가
             </button>
+            {students.length === 0 && (
+              <button onClick={addSampleStudents} style={{ ...addBtnStyle, borderColor: "rgba(34,197,94,0.4)", background: "rgba(34,197,94,0.1)", color: "#22c55e" }}>
+                샘플 데이터 12명 추가
+              </button>
+            )}
           </div>
 
           {students.length > 0 && (

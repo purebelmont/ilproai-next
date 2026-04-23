@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-function getResend() {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error("RESEND_API_KEY 환경변수가 설정되지 않았습니다");
-  return new Resend(key);
+function getTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "mail.ilpro.ai",
+    port: Number(process.env.SMTP_PORT || 465),
+    secure: true,
+    auth: {
+      user: process.env.SMTP_USER || "",
+      pass: process.env.SMTP_PASS || "",
+    },
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -27,6 +33,9 @@ export async function POST(req: NextRequest) {
       weekday: "long",
     });
 
+    const transporter = getTransporter();
+    const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER || "noreply@ilpro.ai";
+
     let sent = 0;
     const errors: string[] = [];
 
@@ -36,8 +45,8 @@ export async function POST(req: NextRequest) {
       const status = student.status || "present";
 
       try {
-        await getResend().emails.send({
-          from: "ilpro.ai 출석알림 <attendance@ilpro.ai>",
+        await transporter.sendMail({
+          from: `"ilpro.ai 출석알림" <${fromAddress}>`,
           to: student.parentEmail,
           subject: `[출석알림] ${student.name} 학생 ${dateFormatted} ${statusKo(status)}`,
           html: `

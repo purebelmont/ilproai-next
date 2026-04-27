@@ -157,8 +157,28 @@ export default function AttendancePanel({ userId }: { userId: string }) {
     if (!error) loadStudents();
   };
 
+  const SAMPLE_EMAILS = [
+    "minjun.parent@test.com", "seoyun.parent@test.com", "jiho.parent@test.com",
+    "sua.parent@test.com", "haeun.parent@test.com", "doyun.parent@test.com",
+    "yerin.parent@test.com", "siwoo.parent@test.com", "harin.parent@test.com",
+    "gunwoo.parent@test.com", "soyul.parent@test.com", "juwon.parent@test.com",
+  ];
+
+  const hasSampleStudents = students.some((s) => SAMPLE_EMAILS.includes(s.parent_email));
+
+  const removeSampleStudents = async () => {
+    if (!confirm("샘플 데이터 12명을 삭제하시겠습니까? 직접 추가한 학생은 유지됩니다.")) return;
+    const sampleIds = students.filter((s) => SAMPLE_EMAILS.includes(s.parent_email)).map((s) => s.id);
+    for (const id of sampleIds) {
+      await supabase.from("attendance").delete().eq("student_id", id);
+      await supabase.from("students").delete().eq("id", id);
+    }
+    loadStudents();
+  };
+
   const removeStudent = async (id: string) => {
     if (!confirm("이 학생을 삭제하시겠습니까?")) return;
+    await supabase.from("attendance").delete().eq("student_id", id);
     await supabase.from("students").delete().eq("id", id);
     loadStudents();
   };
@@ -234,6 +254,11 @@ export default function AttendancePanel({ userId }: { userId: string }) {
             {students.length === 0 && (
               <button onClick={addSampleStudents} style={{ ...addBtnStyle, borderColor: "rgba(34,197,94,0.4)", background: "rgba(34,197,94,0.1)", color: "#22c55e" }}>
                 샘플 데이터 12명 추가
+              </button>
+            )}
+            {hasSampleStudents && (
+              <button onClick={removeSampleStudents} style={{ ...addBtnStyle, borderColor: "rgba(239,68,68,0.4)", background: "rgba(239,68,68,0.1)", color: "#ef4444" }}>
+                샘플 데이터만 삭제
               </button>
             )}
           </div>
